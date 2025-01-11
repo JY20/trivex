@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Box, Typography, TextField, MenuItem, Button, Slider} from '@mui/material';
+import { Box, Typography, TextField, MenuItem, Button, Slider, Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper, Autocomplete} from '@mui/material';
 
 const TradePage = () => {
   const [sector, setSector] = useState('');
@@ -14,7 +20,13 @@ const TradePage = () => {
   const [symbolLeverages, setSymbolLeverages] = useState({});
   const [selectedPercentage, setSelectedPercentage] = useState(100); 
   const [position, setPosition] = useState({}); 
+  const [price, setPrice] = useState(null);
 
+  const positions = [
+    { address: "0x123...abc", symbol: "BTC", quantity: 1.23456789, average_price: 30000.12345678 },
+    { address: "0x456...def", symbol: "ETH", quantity: 2.3456789, average_price: 2000.5678 },
+  ];
+  
 
   const handleSymbols = async (selectedSector) => {
     try {
@@ -143,7 +155,7 @@ const TradePage = () => {
   return (
     <Box sx={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#D1C4E9', minHeight: '100vh', padding: '20px' }}>
 
-      <Box sx={{ maxWidth: '600px', margin: '0 auto', background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+      <Box sx={{ maxWidth: '50%', margin: '0 auto', background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
         <TextField
           select
           label="Sector"
@@ -158,22 +170,27 @@ const TradePage = () => {
           <MenuItem value="sp500">SP500 Stocks</MenuItem>
         </TextField>
 
-        <TextField
-          select
-          label="Symbol"
+        <Autocomplete
+          options={symbolList}
           value={symbol}
-          onChange={(e) => setSymbol(e.target.value)}
-          fullWidth
-          required
-          sx={{ marginBottom: '20px' }}
+          onChange={(event, newValue) => setSymbol(newValue)}
           disabled={!sector}
-        >
-          {symbolList.map((token) => (
-            <MenuItem key={token} value={token}>
-              {token}
-            </MenuItem>
-          ))}
-        </TextField>
+          fullWidth
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Symbol"
+              placeholder="Search or select a symbol"
+              required
+              sx={{ marginBottom: '20px' }}
+            />
+          )}
+        />
+
+        
+        <Typography variant="h6" sx={{ marginTop: '10px', marginBottom: '20px'}}>
+          Current Price: {price ? `$${price}` : 'N/A'}
+        </Typography>
 
         {symbol && (
           <>
@@ -268,22 +285,56 @@ const TradePage = () => {
         </Button>
       </Box>
 
-      {sector === 'crypto' && position && symbol && (
-          <Box sx={{ maxWidth: '600px', marginTop: '30px',  padding: '20px', backgroundColor: '#f1f1f1', borderRadius: '8px', margin: '20px auto'}}>
-            <Typography variant="h5" sx={{ marginBottom: '10px' }}>
-              Position Details
-            </Typography>
-            {/* <Typography variant="body1">{position}</Typography> */}
-            <Button
-              variant="contained"
-              color="error"
-              fullWidth
-              sx={{ marginTop: '10px' }}
-              onClick={handleCloseOrder}
-            >
-              Close Order
-            </Button>
-          </Box>
+      {position && (
+          <Box
+          sx={{
+            maxWidth: '50%',
+            marginTop: '30px',
+            padding: '20px',
+            backgroundColor: '#f1f1f1',
+            borderRadius: '8px',
+            margin: '20px auto',
+          }}
+        >
+          <Typography variant="h5" sx={{ marginBottom: '20px' }}>
+            Positions
+          </Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell><strong>Symbol</strong></TableCell>
+                  <TableCell align="right"><strong>Quantity</strong></TableCell>
+                  <TableCell align="right"><strong>Average Price</strong></TableCell>
+                  <TableCell align="center"><strong>Action</strong></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {positions.map((position, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{position.symbol}</TableCell>
+                    <TableCell align="right">{position.quantity}</TableCell>
+                    <TableCell align="right">{position.average_price}</TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: '#fa7070',
+                          '&:hover': {
+                            backgroundColor: '#e65e5e',
+                          },
+                        }}
+                        onClick={() => handleCloseOrder(position)}
+                      >
+                        Close
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
         )}
     </Box>
 
