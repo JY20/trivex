@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Container, CssBaseline, ThemeProvider, createTheme, Button, Box } from '@mui/material';
 import logo from '../assets/logo.png';
+import SettingsIcon from '@mui/icons-material/Settings'
 
 const theme = createTheme({
     palette: {
@@ -76,30 +77,63 @@ const Navbar = () => {
                             alignItems: 'center', // Align buttons in the center
                         }}
                     >
-                        <Typography variant="h6" sx={{ color: '#7E57C2', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                            <img
-                                src={logo}
-                                alt="Trivex Logo"
-                                style={{
-                                    width: '30px',
-                                    height: '30px',
-                                    borderRadius: '50%',
-                                    marginRight: '10px',
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <Typography
+                                variant="h6"
+                                component={Link}
+                                to="/"
+                                sx={{textDecoration: 'none', color: '#7E57C2', fontWeight: 'bold', display: 'flex', alignItems: 'center',
+                                    transition: 'transform 0.3s ease', // Smooth transition
+                                    '&:hover': {
+                                    transform: 'scale(1.1)', // Slightly enlarge on hover}} 
+                                    },}}
+                                >
+                                <img
+                                    src={logo}
+                                    alt="Trivex Logo"
+                                    style={{
+                                        width: '30px',
+                                        height: '30px',
+                                        borderRadius: '50%',
+                                        marginRight: '10px',
+                                    }}
+                                />
+                                Trivex
+                            </Typography>
+                            <Typography
+                                variant="h6"
+                                component={Link}
+                                to="/trade"
+                                sx={{
+                                    textDecoration: 'none',
+                                    color: '#7E57C2',
+                                    fontWeight: 'bold',
+                                    transition: 'transform 0.3s ease',
+                                    '&:hover': {
+                                        transform: 'scale(1.1)',
+                                    },
                                 }}
-                            />
-                            Trivex
-                        </Typography>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '30%' }}>
-                            <Button color="inherit" component={Link} to="/" sx={{ color: '#7E57C2', fontWeight: 'bold' }}>
-                                Home
-                            </Button>
-                            <Button color="inherit" component={Link} to="/trade" sx={{ color: '#7E57C2', fontWeight: 'bold' }}>
+                            >
                                 Trade
-                            </Button>
-                            <Button color="inherit" component={Link} to="/algo" sx={{ color: '#7E57C2', fontWeight: 'bold' }}>
+                            </Typography>
+                            <Typography
+                                variant="h6"
+                                component={Link}
+                                to="/algo"
+                                sx={{
+                                    textDecoration: 'none',
+                                    color: '#7E57C2',
+                                    fontWeight: 'bold',
+                                    transition: 'transform 0.3s ease',
+                                    '&:hover': {
+                                        transform: 'scale(1.1)',
+                                    },
+                                }}
+                            >
                                 Algo
-                            </Button>
+                            </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                             <Button
                                 variant="contained"
                                 sx={{
@@ -114,6 +148,18 @@ const Navbar = () => {
                             >
                                 {connected}
                             </Button>
+                            <SettingsIcon
+                                component={Link}
+                                to="/setting"
+                                sx={{
+                                    color: '#7E57C2',
+                                    cursor: 'pointer',
+                                    transition: 'color 0.3s ease',
+                                    '&:hover': {
+                                    color: '#6A4BA1', // Changes color on hover
+                                    },
+                                }}
+                            />
                         </Box>
                     </Box>
                 </Toolbar>
