@@ -20,6 +20,8 @@ const AlgoPage = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  const host = "localhost:8082";
+
   const strategies = [
     { label: 'AverageRebalance', value: 'averageRebalance' },
     { label: 'Momentum', value: 'momentum' },
@@ -64,7 +66,7 @@ const AlgoPage = () => {
   const standardDeviation = async (symbol, openSd, closeSd, isBuy) => {
 
     try {
-      const res = await axios.post("http://localhost/standardDeviation", {
+      const res = await axios.post(`http://${host}/standardDeviation`, {
         symbol,
         openSd,
         closeSd,
@@ -82,7 +84,7 @@ const AlgoPage = () => {
   const coVariance= async (symbol1, symbol2, startDate, endDate) => {
 
     try {
-      const res = await axios.post("http://localhost/coVariance", {
+      const res = await axios.post(`http://${host}/coVariance`, {
         symbol1,
         symbol2,
         start_date: new Date(startDate),
@@ -100,7 +102,7 @@ const AlgoPage = () => {
   const averageRebalance = async (list, email) => {
 
     try {
-      const res = await axios.post("http://localhost/averageRebalance", {
+      const res = await axios.post(`http://${host}/averageRebalance`, {
         list, 
         email
       });
@@ -115,7 +117,7 @@ const AlgoPage = () => {
   const momentum = async (list, email) => {
 
     try {
-      const res = await axios.post("http://localhost/momentum", {
+      const res = await axios.post(`http://${host}/momentum`, {
         list, 
         email
       });

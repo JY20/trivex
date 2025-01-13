@@ -13,14 +13,16 @@ const TradePage = () => {
   const [symbolList, setSymbolList] = useState([]);
   const [symbolLeverages, setSymbolLeverages] = useState({});
   const [position, setPosition] = useState([]); 
+  const [price, setPrice] = useState(0); 
 
   const userWalletAddress = '0x123abc456def789ghi';
+  const host = "localhost:8080";
 
 
   const handleSymbols = async (selectedSector) => {
     try {
       console.log(`Fetching symbols for sector: ${selectedSector}...`);
-      const response = await axios.get(`http://localhost:8080/symbols/${selectedSector}`);
+      const response = await axios.get(`http://${host}/symbols/${selectedSector}`);
 
       const symbols = Object.keys(response.data); 
       const symbolLeverages = response.data; 
@@ -41,7 +43,7 @@ const TradePage = () => {
   const handleBalance = async (address) => {
     try {
       console.log("Fetching balance...");
-      const response = await axios.get(`http://localhost:8080/wallets/${address}/balances`);
+      const response = await axios.get(`http://${host}/wallets/${address}/balances`);
 
       const balances = response.data; 
       const accountValue = parseFloat(balances[0].amount || 0);
@@ -54,7 +56,7 @@ const TradePage = () => {
   const handlePositions = async (address) => {
     try {
       console.log("Fetching portfolio...");
-      const response = await axios.get(`http://localhost:8080/wallets/${address}/portfolio`);
+      const response = await axios.get(`http://${host}/wallets/${address}/portfolio`);
   
       const portfolio = response.data; 
       const current_positions = portfolio.map(item => ({
@@ -79,6 +81,30 @@ const TradePage = () => {
     }
   };
 
+  const handlePrice = async (symbol, sector) => {
+    try {
+      console.log(`Fetching ${symbol} for sector: ${sector}...`);
+      const response = await axios.post(`http://${host}/price`, {
+        symbol,
+        sector
+      });
+
+      const current_price = parseFloat(response.data.price);
+      setPrice(current_price);
+      if (isNaN(current_price)) {
+        alert("Failed to fetch the current price. Please try again.");
+      }
+    } catch (error) {
+      console.error('Error fetching price:', error);
+    }
+  };
+
+  const symbolChange = (e) => {
+    setSymbol(e.target.value);
+    handlePrice(e.target.value, sector);
+  };
+
+
   const handleSectorChange = (e) => {
     const selectedSector = e.target.value;
     setSector(selectedSector);
@@ -95,7 +121,7 @@ const TradePage = () => {
     try {
       let is_buy = action === "Buy";
   
-      const priceResponse = await axios.post("http://localhost:8080/price", {
+      const priceResponse = await axios.post(`http://${host}/price`, {
         symbol,
         sector
       });
@@ -116,7 +142,7 @@ const TradePage = () => {
         sector,
       };
     
-      const res = await axios.post("http://localhost:8080/open", data);
+      const res = await axios.post(`http://${host}/open`, data);
     
       const result = res.data.status;
     
@@ -138,7 +164,7 @@ const TradePage = () => {
     try {
       alert(`Closing position for ${position.coin}`);
   
-      const res = await axios.post("http://localhost:8080/close", {
+      const res = await axios.post(`http://${host}/close`, {
         symbol,
         sector
       });
@@ -162,7 +188,7 @@ const TradePage = () => {
         sector={sector}
         handleSectorChange={handleSectorChange}
         symbol={symbol}
-        setSymbol={setSymbol}
+        handleSymbol={symbolChange}
         symbolList={symbolList}
         symbolLeverages={symbolLeverages}
         leverage={leverage}
@@ -171,6 +197,7 @@ const TradePage = () => {
         setSize={setSize}
         available={balance}
         handleTrade={handleOpenOrder}
+        price={price}
       />
       <CloseOrder positions={position} handleCloseOrder={handleCloseOrder} />
     </Box>

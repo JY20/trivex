@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, TextField, MenuItem, Button, Slider, Autocomplete } from '@mui/material';
 
-const OpenOrder = ({ sector, handleSectorChange, symbol, setSymbol, symbolList, symbolLeverages, leverage, setLeverage, size, setSize, available, handleTrade, price}) => {
+const OpenOrder = ({ sector, handleSectorChange, symbol, handleSymbol, symbolList, symbolLeverages, leverage, setLeverage, size, setSize, available, handleTrade, price}) => {
 
   return (
     <Box sx={{ maxWidth: '50%', margin: '0 auto', background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
@@ -21,7 +21,7 @@ const OpenOrder = ({ sector, handleSectorChange, symbol, setSymbol, symbolList, 
       <Autocomplete
         options={symbolList}
         value={symbol}
-        onChange={(event, newValue) => setSymbol(newValue)}
+        onChange={(e) => handleSymbol(e)}
         disabled={!sector}
         fullWidth
         renderInput={(params) => (
