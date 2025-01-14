@@ -69,7 +69,7 @@ const Navbar = () => {
                         sx={{
                             display: 'flex',
                             justifyContent: 'space-between',
-                            width: '66%', // Two-thirds width
+                            width: '80%', // Two-thirds width
                             backgroundColor: 'white',
                             borderRadius: '30px',
                             padding: '8px 20px',
@@ -77,89 +77,111 @@ const Navbar = () => {
                             alignItems: 'center', // Align buttons in the center
                         }}
                     >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '16px',
+                        }}
+                    >
+                        <Typography
+                            variant="h6"
+                            component={Link}
+                            to="/"
+                            sx={{
+                                textDecoration: 'none',
+                                color: '#7E57C2',
+                                fontWeight: 'bold',
+                                display: 'flex',
+                                alignItems: 'center',
+                                transition: 'transform 0.3s ease',
+                                '&:hover': { color: '#6A4BA1' },
+                            }}
+                        >
+                            <img
+                                src={logo}
+                                alt="Trivex Logo"
+                                style={{
+                                    width: '30px',
+                                    height: '30px',
+                                    borderRadius: '50%',
+                                    marginRight: '10px',
+                                }}
+                            />
+                            Trivex
+                        </Typography>
+                        <Typography
+                            variant="h7"
+                            component={Link}
+                            to="/trade"
+                            sx={{
+                                textDecoration: 'none',
+                                color: '#7E57C2',
+                                fontWeight: 'bold',
+                                transition: 'transform 0.3s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                '&:hover': { color: '#6A4BA1' },
+                            }}
+                        >
+                            Trade
+                        </Typography>
+                        <Typography
+                            variant="h7"
+                            component={Link}
+                            to="/algo"
+                            sx={{
+                                textDecoration: 'none',
+                                color: '#7E57C2',
+                                fontWeight: 'bold',
+                                transition: 'transform 0.3s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                '&:hover': { color: '#6A4BA1' },
+                            }}
+                        >
+                            Algo
+                        </Typography>
+                    </Box>
+
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '16px',
+                            }}
+                        >
                             <Typography
                                 variant="h6"
                                 component={Link}
-                                to="/"
-                                sx={{textDecoration: 'none', color: '#7E57C2', fontWeight: 'bold', display: 'flex', alignItems: 'center',
-                                    transition: 'transform 0.3s ease', // Smooth transition
-                                    '&:hover': {
-                                    transform: 'scale(1.1)', // Slightly enlarge on hover}} 
-                                    },}}
-                                >
-                                <img
-                                    src={logo}
-                                    alt="Trivex Logo"
-                                    style={{
-                                        width: '30px',
-                                        height: '30px',
-                                        borderRadius: '50%',
-                                        marginRight: '10px',
-                                    }}
-                                />
-                                Trivex
-                            </Typography>
-                            <Typography
-                                variant="h6"
-                                component={Link}
-                                to="/trade"
+                                to="/setting"
                                 sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
                                     textDecoration: 'none',
                                     color: '#7E57C2',
                                     fontWeight: 'bold',
                                     transition: 'transform 0.3s ease',
-                                    '&:hover': {
-                                        transform: 'scale(1.1)',
-                                    },
+                                    '&:hover': { color: '#6A4BA1' },
                                 }}
                             >
-                                Trade
+                                <SettingsIcon />
                             </Typography>
-                            <Typography
-                                variant="h6"
-                                component={Link}
-                                to="/algo"
-                                sx={{
-                                    textDecoration: 'none',
-                                    color: '#7E57C2',
-                                    fontWeight: 'bold',
-                                    transition: 'transform 0.3s ease',
-                                    '&:hover': {
-                                        transform: 'scale(1.1)',
-                                    },
-                                }}
-                            >
-                                Algo
-                            </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                             <Button
                                 variant="contained"
                                 sx={{
                                     backgroundColor: '#7E57C2',
                                     color: 'white',
                                     fontWeight: 'bold',
-                                    borderRadius: '30px', // Makes the button rounded
-                                    padding: '10px 20px', // Adjusts the button's size
+                                    borderRadius: '30px',
+                                    padding: '10px 20px',
                                     '&:hover': { backgroundColor: '#6A4BA1' },
                                 }}
                                 onClick={connectWallet}
                             >
                                 {connected}
                             </Button>
-                            <SettingsIcon
-                                component={Link}
-                                to="/setting"
-                                sx={{
-                                    color: '#7E57C2',
-                                    cursor: 'pointer',
-                                    transition: 'color 0.3s ease',
-                                    '&:hover': {
-                                    color: '#6A4BA1', // Changes color on hover
-                                    },
-                                }}
-                            />
                         </Box>
                     </Box>
                 </Toolbar>
