@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Container, CssBaseline, ThemeProvider, createTheme, Button, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, CssBaseline, ThemeProvider, createTheme, Button, Box } from '@mui/material';
 import logo from '../assets/logo.png';
 import SettingsIcon from '@mui/icons-material/Settings'
 
+import { connect, disconnect } from "get-starknet";
+import { encode } from "starknet";
 const theme = createTheme({
     palette: {
         primary: {
@@ -26,39 +28,39 @@ const Navbar = () => {
     const [error, setError] = useState(null);
     const [connected, setConnected] = useState('Connect');
 
-    // Connect wallet function
-    const connectWallet = async () => {
-        if(connected === 'Connect'){
-            if (!window.ethereum) {
-                setError("MetaMask not detected!");
-                return;
-            }
-    
-            try {
-                const accounts = await window.ethereum.request({
-                    method: "eth_requestAccounts",
-                });
-                setWalletAddress(accounts[0]);
-                const profile = accounts[0].substring(0, 2)+"..."+accounts[0].substring(accounts[0].length-4, accounts[0].length);
-                setConnected(profile);
-            } catch (err) {
-                setError(err.message);
-                alert(err.message);
-            }
-        }else{
-            setWalletAddress(null);
-            setConnected('Connect');
+    const [walletName, setWalletName] = useState("");
+    const [wallet, setWallet] = useState("");
+
+    const handleDisconnect = async () => {
+        await disconnect({clearLastWallet: true});
+        setWallet("");
+        setWalletAddress(null);
+        setWalletName("")
+        setConnected('Connect');
+    }
+    const handleConnect = async () => {
+        try{
+            const getWallet = await connect();
+            await getWallet?.enable({ starknetVersion: "v5" });
+            setWallet(getWallet);
+            const addr = encode.addHexPrefix(encode.removeHexPrefix(getWallet?.selectedAddress ?? "0x").padStart(64, "0"));
+            setWalletAddress(addr);
+            const profile = addr.substring(0, 2)+"..."+addr.substring(addr.length-4, addr.length);
+            setConnected(profile);
+            setWalletName(getWallet?.name || "")
+        }
+        catch(e){
+            console.log(e)
         }
     };
 
-    // Handle account changes
-    useEffect(() => {
-        if (window.ethereum) {
-            window.ethereum.on("accountsChanged", (accounts) => {
-                setWalletAddress(accounts[0] || null);
-            });
+    const handleConnectButton = async () => {
+        if(walletAddress == null){
+            handleConnect();
+        }else{
+            handleDisconnect();
         }
-    }, []);
+    }
 
     return (
         <ThemeProvider theme={theme}>
@@ -178,7 +180,7 @@ const Navbar = () => {
                                     padding: '10px 20px',
                                     '&:hover': { backgroundColor: '#6A4BA1' },
                                 }}
-                                onClick={connectWallet}
+                                onClick={handleConnectButton}
                             >
                                 {connected}
                             </Button>
