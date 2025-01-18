@@ -1,26 +1,38 @@
 import React, { useState } from 'react';
 import { Grid, Box, Typography, Button, TextField, Paper } from '@mui/material';
 import Header from '../components/Header';
+import axios from 'axios';
 
 const MainPage = () => {
     const [formData, setFormData] = useState({
-        name: '',
         email: '',
+        wallet: '',
         message: '',
     });
+    const host = "localhost:8080";
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value
+        }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert('Form submitted!');
-        // Implement form submission logic here
+        try {
+            const response = await axios.post(`http://${host}/add_request`, formData);
+
+            const result = response.data.status;
+    
+            if (result === "Success") {
+                alert("Whitelist request has been submitted successfully");
+            }
+        } catch (error) {
+            console.error(error);
+            alert(`Error had occurred in submitting whitelist request: ${error}`);
+        }
     };
 
     return (
@@ -103,16 +115,7 @@ const MainPage = () => {
                         maxWidth: '600px', margin: '0 auto', background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
                     }}>
                         <TextField
-                            label="Your Name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            fullWidth
-                            required
-                            sx={{ marginBottom: '20px' }}
-                        />
-                        <TextField
-                            label="Your Email"
+                            label="Email"
                             name="email"
                             value={formData.email}
                             onChange={handleInputChange}
@@ -121,7 +124,16 @@ const MainPage = () => {
                             sx={{ marginBottom: '20px' }}
                         />
                         <TextField
-                            label="Your Message"
+                            label="Wallet"
+                            name="wallet"
+                            value={formData.wallet}
+                            onChange={handleInputChange}
+                            fullWidth
+                            required
+                            sx={{ marginBottom: '20px' }}
+                        />
+                        <TextField
+                            label="Message"
                             name="message"
                             value={formData.message}
                             onChange={handleInputChange}

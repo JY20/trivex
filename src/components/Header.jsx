@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Typography, styled } from "@mui/material";
-import { Link } from 'react-router-dom';
 
 import layer from '../assets/layers_removed.png';
 

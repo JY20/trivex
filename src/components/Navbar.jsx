@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState} from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, CssBaseline, ThemeProvider, createTheme, Button, Box } from '@mui/material';
 import logo from '../assets/logo.png';
@@ -6,6 +6,9 @@ import SettingsIcon from '@mui/icons-material/Settings'
 
 import { connect, disconnect } from "get-starknet";
 import { encode } from "starknet";
+import { useAppContext } from './AppProvider';
+
+
 const theme = createTheme({
     palette: {
         primary: {
@@ -24,7 +27,7 @@ const theme = createTheme({
 });
 
 const Navbar = () => {
-    const [walletAddress, setWalletAddress] = useState(null);
+    const [walletAddress, setWalletAddress] = useAppContext();
     const [error, setError] = useState(null);
     const [connected, setConnected] = useState('Connect');
 

@@ -100,7 +100,7 @@ const SettingsPage = () => {
                     Deposit and Withdrawal
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: '16px' }}>
-                    <Button variant="contained" sx={{ flex: 1, backgroundColor: '#7E57C2'}}>
+                    <Button variant="contained" sx={{ flex: 1, backgroundColor: '#7E57C2', marginBottom: '20px'}}>
                         Deposit
                     </Button>
                     <Button
@@ -116,7 +116,7 @@ const SettingsPage = () => {
                 <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: '20px' }}>
                     Portfolio
                 </Typography>
-                <TableContainer component={Paper}>
+                <TableContainer component={Paper} sx={{marginBottom: '20px'}}>
                     <Table>
                         <TableHead>
                             <TableRow>
