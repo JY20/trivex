@@ -1,8 +1,10 @@
-import React, { useState} from 'react';
+import React, { useState, useContext} from 'react';
 import axios from 'axios';
 import { Box} from '@mui/material';
 import OpenOrder from '../components/OpenOrder'; 
 import CloseOrder from '../components/CloseOrder'
+import {AppContext} from '../components/AppProvider';
+import { Connected, Whitelisted } from '../components/Alert';
 
 const TradePage = () => {
   const [sector, setSector] = useState('');
@@ -15,8 +17,8 @@ const TradePage = () => {
   const [position, setPosition] = useState([]); 
   const [price, setPrice] = useState(0); 
 
-  const userWalletAddress = '0x123abc456def789ghi';
   const host = "localhost:8080";
+  const info = useContext(AppContext);
 
 
   const handleSymbols = async (selectedSector) => {
@@ -72,10 +74,10 @@ const TradePage = () => {
     }
   };
   
-  const updateUserInfo = (userWalletAddress) => {
+  const updateUserInfo = (address) => {
     try {
-      handleBalance(userWalletAddress);
-      handlePositions(userWalletAddress);
+      handleBalance(address);
+      handlePositions(address);
     } catch (error) {
       console.error("Error updating user info:", error);
     }
@@ -109,7 +111,7 @@ const TradePage = () => {
     const selectedSector = e.target.value;
     setSector(selectedSector);
     handleSymbols(selectedSector); 
-    updateUserInfo(userWalletAddress)
+    updateUserInfo(info.walletAddress)
   };
 
   const handleOpenOrder = async (action) => {
@@ -135,7 +137,7 @@ const TradePage = () => {
       const sizeCurrent = Math.floor((size * leverage) / price);
   
       const data = {
-        wallet: userWalletAddress,
+        wallet: info.walletAddress,
         is_buy,
         symbol,
         size: sizeCurrent,
@@ -152,7 +154,7 @@ const TradePage = () => {
         alert("An error occurred while placing the order.");
       }
   
-      updateUserInfo(userWalletAddress);
+      updateUserInfo(info.walletAddress);
       return res.data;
     } catch (e) {
       console.error("Error during trade:", e);
@@ -175,34 +177,42 @@ const TradePage = () => {
       } else {
         alert("Order closure failed. Please try again.");
       }
-      await handlePositions(userWalletAddress);
+      await handlePositions(info.walletAddress);
     } catch (error) {
       console.error("Error closing position:", error);
       alert("An error occurred while closing the order.");
     }
   };
 
-  return (
-    <Box sx={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#D1C4E9', minHeight: '100vh', padding: '20px' }}>
-      <OpenOrder
-        sector={sector}
-        handleSectorChange={handleSectorChange}
-        symbol={symbol}
-        handleSymbol={symbolChange}
-        symbolList={symbolList}
-        symbolLeverages={symbolLeverages}
-        leverage={leverage}
-        setLeverage={setLeverage}
-        size={size}
-        setSize={setSize}
-        available={balance}
-        handleTrade={handleOpenOrder}
-        price={price}
-      />
-      <CloseOrder positions={position} handleCloseOrder={handleCloseOrder} />
-    </Box>
-
-  );
+  if(info.walletAddress != null){
+      if(info.Whitelisted){
+        return (
+          <Box sx={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#D1C4E9', minHeight: '100vh', padding: '20px' }}>
+            <OpenOrder
+              sector={sector}
+              handleSectorChange={handleSectorChange}
+              symbol={symbol}
+              handleSymbol={symbolChange}
+              symbolList={symbolList}
+              symbolLeverages={symbolLeverages}
+              leverage={leverage}
+              setLeverage={setLeverage}
+              size={size}
+              setSize={setSize}
+              available={balance}
+              handleTrade={handleOpenOrder}
+              price={price}
+            />
+            <CloseOrder positions={position} handleCloseOrder={handleCloseOrder} />
+          </Box>
+      
+        );
+      }else{
+          return <Whitelisted/>
+      }
+  }else{
+      return <Connected/>
+  }
 };
 
 export default TradePage;

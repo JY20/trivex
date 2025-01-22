@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, CssBaseline, ThemeProvider, createTheme, Button, Box } from '@mui/material';
 import logo from '../assets/logo.png';
@@ -6,13 +6,13 @@ import SettingsIcon from '@mui/icons-material/Settings'
 
 import { connect, disconnect } from "get-starknet";
 import { encode } from "starknet";
-import { useAppContext } from './AppProvider';
-
+import {AppContext} from './AppProvider';
+import axios from 'axios';
 
 const theme = createTheme({
     palette: {
         primary: {
-            main: '#D1C4E9', // Light purple color
+            main: '#D1C4E9', 
         },
         background: {
             default: '#D1C4E9',
@@ -27,38 +27,56 @@ const theme = createTheme({
 });
 
 const Navbar = () => {
-    const [walletAddress, setWalletAddress] = useAppContext();
-    const [error, setError] = useState(null);
+    const info = useContext(AppContext);
     const [connected, setConnected] = useState('Connect');
 
     const [walletName, setWalletName] = useState("");
     const [wallet, setWallet] = useState("");
 
+    const host = "localhost:8080";
+
+    const checkWhitelisted = async (address) => {
+        try {
+          const response = await axios.get(`http://${host}/wallets/${address}/whitelist`);
+    
+          const result = response.data;
+          console.log(result); 
+          info.setWhitelisted(result);
+        } catch (error) {
+          console.error('Error fetching balance:', error);
+        }
+    };
+
     const handleDisconnect = async () => {
         await disconnect({clearLastWallet: true});
         setWallet("");
-        setWalletAddress(null);
+        info.setWalletAddress(null);
+        info.setWhitelisted(null);
         setWalletName("")
         setConnected('Connect');
     }
+
     const handleConnect = async () => {
         try{
             const getWallet = await connect();
             await getWallet?.enable({ starknetVersion: "v5" });
             setWallet(getWallet);
             const addr = encode.addHexPrefix(encode.removeHexPrefix(getWallet?.selectedAddress ?? "0x").padStart(64, "0"));
-            setWalletAddress(addr);
+            info.setWalletAddress(addr);
             const profile = addr.substring(0, 2)+"..."+addr.substring(addr.length-4, addr.length);
             setConnected(profile);
             setWalletName(getWallet?.name || "")
+            checkWhitelisted(addr);
         }
         catch(e){
             console.log(e)
         }
     };
 
+    
+
     const handleConnectButton = async () => {
-        if(walletAddress == null){
+        if(info.walletAddress == null){
             handleConnect();
         }else{
             handleDisconnect();
@@ -74,12 +92,12 @@ const Navbar = () => {
                         sx={{
                             display: 'flex',
                             justifyContent: 'space-between',
-                            width: '80%', // Two-thirds width
+                            width: '80%', 
                             backgroundColor: 'white',
                             borderRadius: '30px',
                             padding: '8px 20px',
                             boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-                            alignItems: 'center', // Align buttons in the center
+                            alignItems: 'center', 
                         }}
                     >
                     <Box
@@ -113,7 +131,7 @@ const Navbar = () => {
                                     marginRight: '10px',
                                 }}
                             />
-                            Trivex
+                            Trivex 
                         </Typography>
                         <Typography
                             variant="h7"
