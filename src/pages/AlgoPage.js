@@ -133,7 +133,7 @@ const AlgoPage = () => {
   };
 
   if(info.walletAddress != null){
-    if(info.Whitelisted){
+    if(info.Whitelisted !== false){
       return (
         <Box
           sx={{

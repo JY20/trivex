@@ -4,6 +4,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import axios from 'axios';
 import {AppContext} from '../components/AppProvider';
 import { Connected, Whitelisted } from '../components/Alert';
+import { Contract, Provider } from "starknet";
 
 const SettingsPage = () => {
 
@@ -12,6 +13,17 @@ const SettingsPage = () => {
     const [transaction, setTransaction] = useState([]); 
     const [balance, setBalance] = useState(0);
     const host = "localhost:8080";
+
+    const provider = new Provider({ network: "sepolia" });
+    const classHash = "0x041c82a96b722d3f9c4fdeb27204b480ff69ea49a61f43d245dd04ea2e1926f9"; 
+    const contractAddress = "0x02cad016d184a5648b0b4274ba47b4828e1f94a82ec6c69a897fe658384cce2e"; 
+
+
+    const getABI = async (classHash) => {
+        const contractClass = await provider.getClassByHash(classHash);
+        return contractClass.abi;
+    };
+      
 
     const fetchBalance = async (address) => {
         try {
@@ -57,17 +69,36 @@ const SettingsPage = () => {
         }
     };
 
+    const getBalance = async (classHash, contractAddress) => {
+        try {
+          const abi = await getABI(classHash);
+          const contract = new Contract(abi, contractAddress, provider);
+          const usdcTokenAddress = '0x064814063ede1a3ab251648d02f6dfe720d9164c724e54d7f8a81e6ef39815d2';
+          const balance = await contract.call("get_usdc_balance", [usdcTokenAddress]);
+      
+        //   console.log("Balance:", balance[0]);
+        //   return balance[0];
+        return 1;
+        } catch (error) {
+          console.error("Error fetching balance:", error);
+          throw error;
+        }
+    };
+
     const refreshData = () => {
         fetchBalance(info.walletAddress);
         fetchPortfolio(info.walletAddress);
         fetchTransactions(info.walletAddress);
+        getBalance(classHash, contractAddress).then((balance) =>
+            console.log("Fetched Balance:", balance)
+        );
     };
 
     useEffect(() => {
         refreshData(); // Fetch data when the component mounts
     }, []);
     if(info.walletAddress != null){
-        if(info.Whitelisted){
+        if(info.Whitelisted !== false){
             return (
                 <Box
                     sx={{

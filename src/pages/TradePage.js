@@ -185,7 +185,7 @@ const TradePage = () => {
   };
 
   if(info.walletAddress != null){
-      if(info.Whitelisted){
+      if(info.Whitelisted !== false){
         return (
           <Box sx={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#D1C4E9', minHeight: '100vh', padding: '20px' }}>
             <OpenOrder

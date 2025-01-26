@@ -40,7 +40,6 @@ const Navbar = () => {
           const response = await axios.get(`http://${host}/wallets/${address}/whitelist`);
     
           const result = response.data;
-          console.log(result); 
           info.setWhitelisted(result);
         } catch (error) {
           console.error('Error fetching balance:', error);
