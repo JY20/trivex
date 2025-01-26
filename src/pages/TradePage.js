@@ -48,8 +48,12 @@ const TradePage = () => {
       const response = await axios.get(`http://${host}/wallets/${address}/balances`);
 
       const balances = response.data; 
-      const accountValue = parseFloat(balances[0].amount || 0);
-      setBalance(accountValue);
+      if (balances && balances.length > 0) {
+        const accountValue = parseFloat(balances[0].amount || 0);
+        setBalance(accountValue);
+      } else {
+          setBalance(0);
+      }
     } catch (error) {
       console.error('Error fetching balance:', error);
     }
@@ -60,13 +64,14 @@ const TradePage = () => {
       console.log("Fetching portfolio...");
       const response = await axios.get(`http://${host}/wallets/${address}/portfolio`);
   
-      const portfolio = response.data; 
-      const current_positions = portfolio.map(item => ({
-        address: item.address,
-        symbol: item.symbol,
-        quantity: parseFloat(item.quantity),
-        average_price: parseFloat(item.average_price),
-      }));
+      const current_positions = response.data && response.data.length > 0 
+      ? response.data.map(item => ({
+          address: item.address,
+          symbol: item.symbol,
+          quantity: parseFloat(item.quantity),
+          average_price: parseFloat(item.average_price),
+      })) 
+      : [];
   
       setPosition(current_positions);
     } catch (error) {

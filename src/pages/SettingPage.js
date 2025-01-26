@@ -15,8 +15,8 @@ const SettingsPage = () => {
     const host = "localhost:8080";
 
     const provider = new Provider({ network: "sepolia" });
-    const classHash = "0x041c82a96b722d3f9c4fdeb27204b480ff69ea49a61f43d245dd04ea2e1926f9"; 
-    const contractAddress = "0x02cad016d184a5648b0b4274ba47b4828e1f94a82ec6c69a897fe658384cce2e"; 
+    const classHash = "0x07d1273e339b451f9dbc0a9f9bc837838e1b91cfa5063567dcaee3f658587327"; 
+    const contractAddress = "0x04cbba9a5a1088033e404f4a6360c2f62847057e19135c581a6d288b728e66c0"; 
 
 
     const getABI = async (classHash) => {
@@ -27,58 +27,64 @@ const SettingsPage = () => {
 
     const fetchBalance = async (address) => {
         try {
-          const response = await axios.get(`http://${host}/wallets/${address}/balances`);
-    
-          const currnet_balances = response.data; 
-          const accountValue = parseFloat(currnet_balances[0].amount || 0);
-          setBalance(accountValue);
+            const response = await axios.get(`http://${host}/wallets/${address}/balances`);
+            const current_balances = response.data; 
+            if (current_balances && current_balances.length > 0) {
+                const accountValue = parseFloat(current_balances[0].amount || 0);
+                setBalance(accountValue);
+            } else {
+                setBalance(0);
+            }
         } catch (error) {
-          console.error('Error fetching balance:', error);
+            console.error('Error fetching balance:', error);
         }
     };
-
+    
     const fetchPortfolio = async (address) => {
         try {
             const response = await axios.get(`http://${host}/wallets/${address}/portfolio`);
-            const portfolioData = response.data.map(item => ({
-                address: item.address,
-                symbol: item.symbol,
-                quantity: parseFloat(item.quantity),
-                average_price: parseFloat(item.average_price),
-            }));
+            const portfolioData = response.data && response.data.length > 0 
+                ? response.data.map(item => ({
+                    address: item.address,
+                    symbol: item.symbol,
+                    quantity: parseFloat(item.quantity),
+                    average_price: parseFloat(item.average_price),
+                })) 
+                : [];
             setPortfolio(portfolioData);
         } catch (error) {
             console.error('Error fetching portfolio:', error);
         }
     };
-
+    
     const fetchTransactions = async (address) => {
         try {
             const response = await axios.get(`http://${host}/wallets/${address}/transactions`);
-            const transactionData = response.data.map(item => ({
-                transaction_id: parseInt(item.transaction_id),
-                type: item.type,
-                symbol: item.symbol,
-                amount: parseFloat(item.amount),
-                price: parseFloat(item.price),
-                timestamp: item.timestamp,
-            }));
+            const transactionData = response.data && response.data.length > 0 
+                ? response.data.map(item => ({
+                    transaction_id: parseInt(item.transaction_id),
+                    type: item.type,
+                    symbol: item.symbol,
+                    amount: parseFloat(item.amount),
+                    price: parseFloat(item.price),
+                    timestamp: item.timestamp,
+                })) 
+                : [];
             setTransaction(transactionData);
         } catch (error) {
             console.error('Error fetching transactions:', error);
         }
     };
+    
 
     const getBalance = async (classHash, contractAddress) => {
         try {
           const abi = await getABI(classHash);
           const contract = new Contract(abi, contractAddress, provider);
-          const usdcTokenAddress = '0x064814063ede1a3ab251648d02f6dfe720d9164c724e54d7f8a81e6ef39815d2';
-          const balance = await contract.call("get_usdc_balance", [usdcTokenAddress]);
+          const usdcTokenAddress = '0x02F37c3e00e75Ee4135b32BB60C37E0599aF264076376a618F138D2F9929Ac74';
+          const balance = await contract.call("get_usdc_balance", [usdcTokenAddress, info.walletAddress]);
       
-        //   console.log("Balance:", balance[0]);
-        //   return balance[0];
-        return 1;
+          return Number(balance);
         } catch (error) {
           console.error("Error fetching balance:", error);
           throw error;
@@ -89,13 +95,22 @@ const SettingsPage = () => {
         fetchBalance(info.walletAddress);
         fetchPortfolio(info.walletAddress);
         fetchTransactions(info.walletAddress);
+    };
+
+    const handleDeposit = () => {
+        getBalance(classHash, contractAddress).then((balance) =>
+            console.log("Fetched Balance:", balance)
+        );
+    };
+
+    const handleWithdrawal = () => {
         getBalance(classHash, contractAddress).then((balance) =>
             console.log("Fetched Balance:", balance)
         );
     };
 
     useEffect(() => {
-        refreshData(); // Fetch data when the component mounts
+        refreshData(); 
     }, []);
     if(info.walletAddress != null){
         if(info.Whitelisted !== false){
@@ -135,14 +150,19 @@ const SettingsPage = () => {
                             Deposit and Withdrawal
                         </Typography>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: '16px', marginBottom: '20px' }}>
-                            <Button variant="contained" sx={{ flex: 1, backgroundColor: '#7E57C2'}}>
+                            <Button 
+                                variant="contained" 
+                                sx={{ flex: 1, backgroundColor: '#7E57C2'}}
+                                onClick={handleDeposit}
+                                >
                                 Deposit
                             </Button>
                             <Button
-                            variant="outlined"
-                            color="secondary"
-                            fullWidth
-                            sx={{ flex: 1}}
+                                variant="outlined"
+                                color="secondary"
+                                fullWidth
+                                sx={{ flex: 1}}
+                                onClick={handleWithdrawal}
                             >
                                 Withdraw
                             </Button>
