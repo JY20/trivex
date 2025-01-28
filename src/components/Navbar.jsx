@@ -5,7 +5,7 @@ import logo from '../assets/logo.png';
 import SettingsIcon from '@mui/icons-material/Settings'
 
 import { connect, disconnect } from "get-starknet";
-import { encode } from "starknet";
+import { encode} from "starknet";
 import {AppContext} from './AppProvider';
 import axios from 'axios';
 
@@ -55,6 +55,7 @@ const Navbar = () => {
         setConnected('Connect');
     }
 
+
     const handleConnect = async () => {
         try{
             const getWallet = await connect();
@@ -66,6 +67,8 @@ const Navbar = () => {
             setConnected(profile);
             setWalletName(getWallet?.name || "")
             checkWhitelisted(addr);
+
+            info.setWallet(getWallet);
         }
         catch(e){
             console.log(e)

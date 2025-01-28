@@ -4,7 +4,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import axios from 'axios';
 import {AppContext} from '../components/AppProvider';
 import { Connected, Whitelisted } from '../components/Alert';
-import { Contract, Provider } from "starknet";
+import { Contract, Provider, cairo, CallData} from "starknet";
+import DepositPopup from "../components/Deposit";
 
 const SettingsPage = () => {
 
@@ -14,13 +15,16 @@ const SettingsPage = () => {
     const [balance, setBalance] = useState(0);
     const host = "localhost:8080";
 
-    const provider = new Provider({ network: "sepolia" });
-    const classHash = "0x07d1273e339b451f9dbc0a9f9bc837838e1b91cfa5063567dcaee3f658587327"; 
-    const contractAddress = "0x04cbba9a5a1088033e404f4a6360c2f62847057e19135c581a6d288b728e66c0"; 
+    const hash_provider = new Provider({ network: "sepolia" });
+    const classHash = "0x005ee2404ac20c626a450d2fa39c3ea29715593b8fae8cab8ffb5a8d6aae2577"; 
+    const contractAddress = "0x0710cf1f9166dc14d9a58633874b95e584c0eb11efc87b08be6992c27c42d664"; 
+    const usdcTokenAddress = '0x02F37c3e00e75Ee4135b32BB60C37E0599aF264076376a618F138D2F9929Ac74';
 
+    const [isDepositPopupOpen, setDepositPopupOpen] = useState(true);
+    const [parameter, setParameter] = useState(0);
 
     const getABI = async (classHash) => {
-        const contractClass = await provider.getClassByHash(classHash);
+        const contractClass = await hash_provider.getClassByHash(classHash);
         return contractClass.abi;
     };
       
@@ -77,17 +81,16 @@ const SettingsPage = () => {
     };
     
 
-    const getBalance = async (classHash, contractAddress) => {
+    const getBalance = async () => {
         try {
-          const abi = await getABI(classHash);
-          const contract = new Contract(abi, contractAddress, provider);
-          const usdcTokenAddress = '0x02F37c3e00e75Ee4135b32BB60C37E0599aF264076376a618F138D2F9929Ac74';
-          const balance = await contract.call("get_usdc_balance", [usdcTokenAddress, info.walletAddress]);
-      
-          return Number(balance);
+            const abi = await getABI(classHash);
+            const contract = new Contract(abi, contractAddress, hash_provider);
+            const balance = await contract.call("get_balance", [usdcTokenAddress, info.walletAddress]);
+            console.log(balance);
+            return Number(balance);
         } catch (error) {
-          console.error("Error fetching balance:", error);
-          throw error;
+            console.error("Error fetching balance:", error);
+            throw error;
         }
     };
 
@@ -97,17 +100,91 @@ const SettingsPage = () => {
         fetchTransactions(info.walletAddress);
     };
 
-    const handleDeposit = () => {
-        getBalance(classHash, contractAddress).then((balance) =>
-            console.log("Fetched Balance:", balance)
-        );
+    const handleDepositPopUp = () => {
+        const user_balance = getBalance();
+        setParameter(user_balance);
+        setDepositPopupOpen(true);
     };
 
-    const handleWithdrawal = () => {
-        getBalance(classHash, contractAddress).then((balance) =>
-            console.log("Fetched Balance:", balance)
-        );
+    /* global BigInt */
+
+    const handleDeposit = async (amount) => {
+        try {
+            const provider = info.wallet.account;
+
+            const contractClass = await hash_provider.getClassByHash(classHash);
+            const abi = contractClass.abi;
+            const contract = new Contract(abi, contractAddress, provider);
+
+            const weiAmount = amount * 1000000; 
+
+            const approveResult = await provider.execute([{
+                contractAddress: usdcTokenAddress,
+                entrypoint: "approve",
+                calldata: CallData.compile({
+                spender: contractAddress,
+                amount: cairo.uint256(weiAmount),
+                }),
+            }]);
+            console.log("Approve Result:", approveResult);
+        
+            const deposit = contract.populate("deposit", [info.walletAddress, BigInt(weiAmount), usdcTokenAddress]);
+            const depositResult = await provider.execute([{
+                contractAddress: contractAddress,
+                entrypoint: "deposit",
+                calldata: deposit.calldata,
+            }]);
+        
+            console.log("Deposit Result:", depositResult);
+
+            alert("Deposit completed successfully!");
+        } catch (error) {
+            console.error("An error occurred during the deposit process:", error);
+
+            if (error.message.includes("User abort")) {
+                alert("Transaction aborted by user.");
+            } else {
+                alert("An unexpected error occurred. Please try again.");
+            }
+        }
     };
+
+    const handleWithdrawal = async (amount) => {
+        try {
+            const provider = info.wallet.account;
+        
+            const contractClass = await hash_provider.getClassByHash(classHash);
+            const abi = contractClass.abi;
+            const contract = new Contract(abi, contractAddress, provider);
+        
+            const weiAmount = amount * 1000000;
+        
+            const withdrawal = contract.populate("withdraw", [
+                info.walletAddress,
+                BigInt(weiAmount),
+                usdcTokenAddress,
+            ]);
+        
+            const withdrawalResult = await provider.execute([{
+                contractAddress: contractAddress,
+                entrypoint: "withdraw",
+                calldata: withdrawal.calldata,
+            }]);
+        
+            console.log("Withdrawal Result:", withdrawalResult);
+        
+            alert("Withdrawal completed successfully!");
+        } catch (error) {
+            console.error("An error occurred during the withdrawal process:", error);
+        
+            if (error.message.includes("User abort")) {
+                alert("Transaction aborted by user.");
+            } else {
+                alert("An unexpected error occurred. Please try again.");
+            }
+        }
+    };
+      
 
     useEffect(() => {
         refreshData(); 
@@ -153,7 +230,7 @@ const SettingsPage = () => {
                             <Button 
                                 variant="contained" 
                                 sx={{ flex: 1, backgroundColor: '#7E57C2'}}
-                                onClick={handleDeposit}
+                                onClick={handleDepositPopUp}
                                 >
                                 Deposit
                             </Button>
@@ -221,7 +298,12 @@ const SettingsPage = () => {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-        
+                        <DepositPopup
+                            open={isDepositPopupOpen}
+                            onClose={() => setDepositPopupOpen(false)}
+                            balance={parameter}
+                            handleDeposit={handleDeposit}
+                        />
                     </Box>
                 </Box>
             );
