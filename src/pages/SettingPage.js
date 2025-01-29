@@ -6,6 +6,7 @@ import {AppContext} from '../components/AppProvider';
 import { Connected, Whitelisted } from '../components/Alert';
 import { Contract, Provider, cairo, CallData} from "starknet";
 import DepositPopup from "../components/Deposit";
+import WithdrawPopup from "../components/Withdraw";
 
 const SettingsPage = () => {
 
@@ -20,8 +21,9 @@ const SettingsPage = () => {
     const contractAddress = "0x0710cf1f9166dc14d9a58633874b95e584c0eb11efc87b08be6992c27c42d664"; 
     const usdcTokenAddress = '0x02F37c3e00e75Ee4135b32BB60C37E0599aF264076376a618F138D2F9929Ac74';
 
-    const [isDepositPopupOpen, setDepositPopupOpen] = useState(true);
-    const [parameter, setParameter] = useState(0);
+    const [isDepositPopupOpen, setDepositPopupOpen] = useState(false);
+    const [isWithdrawPopupOpen, setWithdrawPopupOpen] = useState(false);
+    const [walletBalance, setWalletBalance] = useState(0);
 
     const getABI = async (classHash) => {
         const contractClass = await hash_provider.getClassByHash(classHash);
@@ -94,17 +96,22 @@ const SettingsPage = () => {
         }
     };
 
-    const refreshData = () => {
+    const refreshData =  async () => {
         fetchBalance(info.walletAddress);
         fetchPortfolio(info.walletAddress);
         fetchTransactions(info.walletAddress);
+        const value = await getBalance();
+        setWalletBalance(value);
     };
 
     const handleDepositPopUp = () => {
-        const user_balance = getBalance();
-        setParameter(user_balance);
         setDepositPopupOpen(true);
     };
+
+    const handleWithdrawPopUp = () => {
+        setWithdrawPopupOpen(true);
+    };
+
 
     /* global BigInt */
 
@@ -159,11 +166,7 @@ const SettingsPage = () => {
         
             const weiAmount = amount * 1000000;
         
-            const withdrawal = contract.populate("withdraw", [
-                info.walletAddress,
-                BigInt(weiAmount),
-                usdcTokenAddress,
-            ]);
+            const withdrawal = contract.populate("withdraw", [info.walletAddress, BigInt(weiAmount), usdcTokenAddress]);
         
             const withdrawalResult = await provider.execute([{
                 contractAddress: contractAddress,
@@ -189,6 +192,7 @@ const SettingsPage = () => {
     useEffect(() => {
         refreshData(); 
     }, []);
+
     if(info.walletAddress != null){
         if(info.Whitelisted !== false){
             return (
@@ -239,7 +243,7 @@ const SettingsPage = () => {
                                 color="secondary"
                                 fullWidth
                                 sx={{ flex: 1}}
-                                onClick={handleWithdrawal}
+                                onClick={handleWithdrawPopUp}
                             >
                                 Withdraw
                             </Button>
@@ -301,8 +305,14 @@ const SettingsPage = () => {
                         <DepositPopup
                             open={isDepositPopupOpen}
                             onClose={() => setDepositPopupOpen(false)}
-                            balance={parameter}
+                            balance={walletBalance}
                             handleDeposit={handleDeposit}
+                        />
+                        <WithdrawPopup
+                            open={isWithdrawPopupOpen}
+                            onClose={() => setWithdrawPopupOpen(false)}
+                            balance={balance}
+                            handleDeposit={handleWithdrawal}
                         />
                     </Box>
                 </Box>

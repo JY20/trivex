@@ -93,10 +93,10 @@ const DepositPopup = ({ open, onClose, balance = 0, handleDeposit }) => {
                 fullWidth
                 variant="contained"
                 sx={{
-                backgroundColor: "#7E57C2",
-                color: "#fff",
-                borderRadius: "12px",
-                textTransform: "none",
+                    backgroundColor: "#7E57C2",
+                    color: "#fff",
+                    borderRadius: "12px",
+                    textTransform: "none",
                 }}
             >
                 Deposit
