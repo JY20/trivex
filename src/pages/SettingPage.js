@@ -113,6 +113,22 @@ const SettingsPage = () => {
     };
 
 
+    const updateBalance = async (walletAddress, amount, action) => {
+        try {
+            const response = await axios.post(`http://${host}/action`, {
+                wallet_address: walletAddress,
+                amount: amount,
+                balance: balance,
+                action: action,
+            });
+    
+            console.log("Balance updated:", response.data);
+        } catch (error) {
+            console.error("Failed to update balance:", error.response?.data?.detail || error.message);
+            alert("Failed to update balance.");
+        }
+    };
+
     /* global BigInt */
 
     const handleDeposit = async (amount) => {
@@ -143,6 +159,8 @@ const SettingsPage = () => {
             }]);
         
             console.log("Deposit Result:", depositResult);
+
+            await updateBalance(info.walletAddress, amount, "deposit");
 
             alert("Deposit completed successfully!");
         } catch (error) {
@@ -176,6 +194,8 @@ const SettingsPage = () => {
         
             console.log("Withdrawal Result:", withdrawalResult);
         
+            await updateBalance(info.walletAddress, amount, "withdraw");
+
             alert("Withdrawal completed successfully!");
         } catch (error) {
             console.error("An error occurred during the withdrawal process:", error);
