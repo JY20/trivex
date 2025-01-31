@@ -2,9 +2,6 @@
 
 Front end of the Trivex DAPP
 
-React Setup:
+Web Startup:
 
-
-
-Contract Setup:
-https://docs.starknet.io/quick-start/environment-setup/ 
+npm run start

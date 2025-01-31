@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, CssBaseline, ThemeProvider, createTheme, Button, Box } from '@mui/material';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo5.png';
 import SettingsIcon from '@mui/icons-material/Settings'
 
 import { connect, disconnect } from "get-starknet";
