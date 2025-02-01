@@ -17,7 +17,7 @@ const DepositPopup = ({ open, onClose, balance = 0, handleDeposit }) => {
 
     const handleConfirmDeposit = () => {
         const amount = parseFloat(depositAmount);
-        if (isNaN(amount) || amount <= 0) {
+        if (isNaN(amount) || amount < 0) {
         alert("Please enter a valid deposit amount.");
         return;
         }

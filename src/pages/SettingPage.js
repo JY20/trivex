@@ -97,11 +97,13 @@ const SettingsPage = () => {
     };
 
     const refreshData =  async () => {
-        fetchBalance(info.walletAddress);
-        fetchPortfolio(info.walletAddress);
-        fetchTransactions(info.walletAddress);
-        const value = await getBalance();
-        setWalletBalance(value);
+        if(info.Whitelisted){
+            fetchBalance(info.walletAddress);
+            fetchPortfolio(info.walletAddress);
+            fetchTransactions(info.walletAddress);
+            const value = await getBalance();
+            setWalletBalance(value);
+        }
     };
 
     const handleDepositPopUp = () => {
@@ -113,13 +115,11 @@ const SettingsPage = () => {
     };
 
 
-    const updateBalance = async (walletAddress, amount, action) => {
+    const updateBalance = async (hash) => {
         try {
+            console.log(typeof(hash));
             const response = await axios.post(`http://${host}/action`, {
-                wallet_address: walletAddress,
-                amount: amount,
-                balance: balance,
-                action: action,
+                hash
             });
     
             console.log("Balance updated:", response.data);
@@ -139,28 +139,29 @@ const SettingsPage = () => {
             const abi = contractClass.abi;
             const contract = new Contract(abi, contractAddress, provider);
 
-            const weiAmount = amount * 1000000; 
-
-            const approveResult = await provider.execute([{
-                contractAddress: usdcTokenAddress,
-                entrypoint: "approve",
-                calldata: CallData.compile({
-                spender: contractAddress,
-                amount: cairo.uint256(weiAmount),
-                }),
-            }]);
-            console.log("Approve Result:", approveResult);
+            const weiAmount = amount * 1000000;
         
             const deposit = contract.populate("deposit", [info.walletAddress, BigInt(weiAmount), usdcTokenAddress]);
-            const depositResult = await provider.execute([{
-                contractAddress: contractAddress,
-                entrypoint: "deposit",
-                calldata: deposit.calldata,
-            }]);
-        
-            console.log("Deposit Result:", depositResult);
 
-            await updateBalance(info.walletAddress, amount, "deposit");
+            const result = await provider.execute([
+                {
+                    contractAddress: usdcTokenAddress,
+                    entrypoint: "approve",
+                    calldata: CallData.compile({
+                    spender: contractAddress,
+                    amount: cairo.uint256(weiAmount),
+                    }),
+                },
+                {
+                    contractAddress: contractAddress,
+                    entrypoint: "deposit",
+                    calldata: deposit.calldata,
+                }
+                ]);
+        
+            console.log("Deposit Result:", result);
+
+            updateBalance(result["transaction_hash"]);
 
             alert("Deposit completed successfully!");
         } catch (error) {
@@ -186,15 +187,15 @@ const SettingsPage = () => {
         
             const withdrawal = contract.populate("withdraw", [info.walletAddress, BigInt(weiAmount), usdcTokenAddress]);
         
-            const withdrawalResult = await provider.execute([{
+            const result = await provider.execute([{
                 contractAddress: contractAddress,
                 entrypoint: "withdraw",
                 calldata: withdrawal.calldata,
             }]);
         
-            console.log("Withdrawal Result:", withdrawalResult);
+            console.log("Withdrawal Result:", result);
         
-            await updateBalance(info.walletAddress, amount, "withdraw");
+            updateBalance(result["transaction_hash"]);
 
             alert("Withdrawal completed successfully!");
         } catch (error) {
@@ -332,7 +333,7 @@ const SettingsPage = () => {
                             open={isWithdrawPopupOpen}
                             onClose={() => setWithdrawPopupOpen(false)}
                             balance={balance}
-                            handleDeposit={handleWithdrawal}
+                            handleWithdraw={handleWithdrawal}
                         />
                     </Box>
                 </Box>

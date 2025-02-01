@@ -17,7 +17,7 @@ const WithdrawPopup = ({ open, onClose, balance = 0, handleWithdraw }) => {
 
     const handleConfirmWithdraw = () => {
         const amount = parseFloat(withdrawAmount);
-        if (isNaN(amount) || amount <= 0 || amount > balance) {
+        if (isNaN(amount) || amount < 0 || amount > balance) {
             alert("Please enter a valid withdrawal amount.");
             return;
         }
