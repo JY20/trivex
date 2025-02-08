@@ -65,7 +65,7 @@ const WithdrawPopup = ({ open, onClose, balance = 0, handleWithdraw }) => {
                     }}
                 >
                     <Typography variant="body2" color="textSecondary">
-                        Balance: {typeof balance === "number" ? balance : "Invalid balance"} USD
+                        Balance: {balance} USD
                     </Typography>
                     <Button onClick={handleMax} size="small" sx={{ textTransform: "none" }}>
                         Max

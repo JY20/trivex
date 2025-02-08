@@ -17,9 +17,9 @@ const SettingsPage = () => {
     const host = "localhost:8080";
 
     const hash_provider = new Provider({ network: "sepolia" });
-    const classHash = "0x005ee2404ac20c626a450d2fa39c3ea29715593b8fae8cab8ffb5a8d6aae2577"; 
-    const contractAddress = "0x0710cf1f9166dc14d9a58633874b95e584c0eb11efc87b08be6992c27c42d664"; 
-    const usdcTokenAddress = '0x02F37c3e00e75Ee4135b32BB60C37E0599aF264076376a618F138D2F9929Ac74';
+    const classHash = "0x04e0392a9fc371869d6465c0aa3fbd601de418980221da44f7a842d94926b307"; 
+    const contractAddress = "0x00eb5e9294cb65c680c46f8381daf5a8c8f48a332c74263dcc5e258dc3485d8f"; 
+    const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
 
     const [isDepositPopupOpen, setDepositPopupOpen] = useState(false);
     const [isWithdrawPopupOpen, setWithdrawPopupOpen] = useState(false);
@@ -28,8 +28,7 @@ const SettingsPage = () => {
     const getABI = async (classHash) => {
         const contractClass = await hash_provider.getClassByHash(classHash);
         return contractClass.abi;
-    };
-      
+    };  
 
     const fetchBalance = async (address) => {
         try {
@@ -88,8 +87,8 @@ const SettingsPage = () => {
             const abi = await getABI(classHash);
             const contract = new Contract(abi, contractAddress, hash_provider);
             const balance = await contract.call("get_balance", [usdcTokenAddress, info.walletAddress]);
-            console.log(balance);
-            return Number(balance);
+            const convertedBalance = (Number(balance)/1000000).toFixed(2);
+            return convertedBalance;
         } catch (error) {
             console.error("Error fetching balance:", error);
             throw error;
@@ -97,18 +96,24 @@ const SettingsPage = () => {
     };
 
     const refreshData =  async () => {
-        if(info.Whitelisted){
-            fetchBalance(info.walletAddress);
-            fetchPortfolio(info.walletAddress);
-            fetchTransactions(info.walletAddress);
-            const value = await getBalance();
+        fetchBalance(info.walletAddress);
+        fetchPortfolio(info.walletAddress);
+        fetchTransactions(info.walletAddress);
+    };
+
+    const handleDepositPopUp = async () => {
+        const value = await getBalance();
+        
+        if (value) {
             setWalletBalance(value);
+            setDepositPopupOpen(true);
         }
     };
 
-    const handleDepositPopUp = () => {
-        setDepositPopupOpen(true);
+    const handleDepositClose = async () => {
+        setDepositPopupOpen(false);
     };
+    
 
     const handleWithdrawPopUp = () => {
         setWithdrawPopupOpen(true);
@@ -117,7 +122,6 @@ const SettingsPage = () => {
 
     const updateBalance = async (hash) => {
         try {
-            console.log(typeof(hash));
             const response = await axios.post(`http://${host}/action`, {
                 hash
             });
@@ -141,7 +145,7 @@ const SettingsPage = () => {
 
             const weiAmount = amount * 1000000;
         
-            const deposit = contract.populate("deposit", [info.walletAddress, BigInt(weiAmount), usdcTokenAddress]);
+            const deposit = contract.populate("deposit", [BigInt(weiAmount), usdcTokenAddress]);
 
             const result = await provider.execute([
                 {
@@ -185,7 +189,7 @@ const SettingsPage = () => {
         
             const weiAmount = amount * 1000000;
         
-            const withdrawal = contract.populate("withdraw", [info.walletAddress, BigInt(weiAmount), usdcTokenAddress]);
+            const withdrawal = contract.populate("withdraw", [BigInt(weiAmount), usdcTokenAddress]);
         
             const result = await provider.execute([{
                 contractAddress: contractAddress,
@@ -325,7 +329,7 @@ const SettingsPage = () => {
                         </TableContainer>
                         <DepositPopup
                             open={isDepositPopupOpen}
-                            onClose={() => setDepositPopupOpen(false)}
+                            onClose={() => handleDepositClose()}
                             balance={walletBalance}
                             handleDeposit={handleDeposit}
                         />

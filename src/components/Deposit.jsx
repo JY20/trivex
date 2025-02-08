@@ -25,6 +25,7 @@ const DepositPopup = ({ open, onClose, balance = 0, handleDeposit }) => {
         onClose();
     };
 
+
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
         <DialogContent sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
@@ -65,7 +66,7 @@ const DepositPopup = ({ open, onClose, balance = 0, handleDeposit }) => {
             }}
             >
             <Typography variant="body2" color="textSecondary">
-                Balance: {typeof balance === "number" ? balance : "Invalid balance"} USD
+                Balance: {balance} USD
             </Typography>
             <Button onClick={handleMax} size="small" sx={{ textTransform: "none" }}>
                 Max
