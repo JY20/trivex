@@ -88,13 +88,10 @@ const TradePage = () => {
     }
   };
 
-  const handlePrice = async (symbol, sector) => {
+  const handlePrice = async (symbol) => {
     try {
-      console.log(`Fetching ${symbol} for sector: ${sector}...`);
-      const response = await axios.post(`http://${host}/price`, {
-        symbol,
-        sector
-      });
+      console.log(`Fetching ${symbol}`);
+      const response = await axios.get(`http://${host}/price/${symbol}`);
 
       const current_price = parseFloat(response.data.price);
       setPrice(current_price);
@@ -107,8 +104,10 @@ const TradePage = () => {
   };
 
   const symbolChange = (e) => {
-    setSymbol(e.target.value);
-    handlePrice(e.target.value, sector);
+    setSymbol(e);
+    console.log(typeof(e));
+    console.log(typeof(sector));
+    handlePrice(e+"-"+sector);
   };
 
 
@@ -128,26 +127,16 @@ const TradePage = () => {
     try {
       let is_buy = action === "Buy";
   
-      const priceResponse = await axios.post(`http://${host}/price`, {
-        symbol,
-        sector
-      });
-  
-      const price = parseFloat(priceResponse.data.price);
-      if (isNaN(price)) {
-        alert("Failed to fetch the current price. Please try again.");
-        return;
-      }
-      
-      const sizeCurrent = Math.floor((size * leverage) / price);
-  
       const data = {
         wallet: info.walletAddress,
         is_buy,
         symbol,
-        size: sizeCurrent,
+        size,
         sector,
+        leverage
       };
+
+      console.log(data);
     
       const res = await axios.post(`http://${host}/open`, data);
     

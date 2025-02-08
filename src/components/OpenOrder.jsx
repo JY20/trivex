@@ -20,10 +20,13 @@ const OpenOrder = ({ sector, handleSectorChange, symbol, handleSymbol, symbolLis
       </TextField>
       <Autocomplete
         options={symbolList}
+        getOptionLabel={(option) => String(option)} // Ensure all labels are strings
         value={symbol}
-        onChange={(e) => handleSymbol(e)}
+        onChange={(event, newValue) => handleSymbol(newValue || "")} // Use handleSymbol
+        onInputChange={(event, newInputValue) => handleSymbol(newInputValue)} // Handle typing updates
         disabled={!sector}
         fullWidth
+        freeSolo
         renderInput={(params) => (
           <TextField
             {...params}
