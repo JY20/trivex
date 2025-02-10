@@ -1,6 +1,7 @@
 import React, { useState, useContext} from 'react';
 import axios from 'axios';
-import { Box} from '@mui/material';
+import { Box, IconButton } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import OpenOrder from '../components/OpenOrder'; 
 import CloseOrder from '../components/CloseOrder'
 import {AppContext} from '../components/AppProvider';
@@ -20,6 +21,15 @@ const TradePage = () => {
   const host = "localhost:8080";
   const info = useContext(AppContext);
 
+  
+  const refreshData =  async () => {
+    setSector('');
+    setSymbol('');
+    setLeverage(null);
+    setSize('');
+    setPrice('N/A');
+    setSymbolLeverages([]);
+  };
 
   const handleSymbols = async (selectedSector) => {
     try {
@@ -196,6 +206,7 @@ const TradePage = () => {
               available={balance}
               handleTrade={handleOpenOrder}
               price={price}
+              refreshData={refreshData}
             />
             <CloseOrder positions={position} handleCloseOrder={handleCloseOrder} />
           </Box>
