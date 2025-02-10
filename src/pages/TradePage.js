@@ -73,13 +73,14 @@ const TradePage = () => {
     try {
       console.log("Fetching portfolio...");
       const response = await axios.get(`http://${host}/wallets/${address}/portfolio`);
-  
+      console.log(response.data);
       const current_positions = response.data && response.data.length > 0 
       ? response.data.map(item => ({
           address: item.address,
           symbol: item.symbol,
           quantity: parseFloat(item.quantity),
           average_price: parseFloat(item.average_price),
+          sector: item.sector
       })) 
       : [];
   
@@ -166,13 +167,16 @@ const TradePage = () => {
     }
   };
 
-  const handleCloseOrder = async () => {
+  const handleCloseOrder = async (position) => {
     try {
-      alert(`Closing position for ${position.coin}`);
+      console.log(position);
+      alert(`Closing position for ${position.symbol}`);
   
       const res = await axios.post(`http://${host}/close`, {
-        symbol,
-        sector
+        wallet: position.address,
+        symbol: position.symbol,
+        size: position.quantity,
+        sector: position.sector
       });
   
       if (res.data.status === "Success") {
