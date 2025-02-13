@@ -12,11 +12,6 @@ mod TrivexAction {
     
     #[storage]
     struct Storage {
-        // balance: felt252,
-        // campaigns: LegacyMap<CampaignID, Campaign>,
-        // campaigns_count: u256,
-        // donations: LegacyMap<(CampaignID, DonationID), Donation>,
-        // guardian: ContractAddress,
         records: LegacyMap<UserAddress, Record>,
         balance: u256,
     }
@@ -31,13 +26,15 @@ mod TrivexAction {
             token.balanceOf(agent_address)
         }
 
-        fn deposit(ref self: ContractState, user_address: UserAddress, amount: Amount, token_address: TokenAddress) {
+        fn deposit(ref self: ContractState, amount: Amount, token_address: TokenAddress) {
+            let caller = get_caller_address();
+
             let token: IERC20Dispatcher = IERC20Dispatcher {
                 contract_address: token_address,
             };
 
             let transfer_success = token.transferFrom(
-                user_address,
+                caller,
                 get_contract_address(),
                 amount,
             );
@@ -46,9 +43,9 @@ mod TrivexAction {
             
             if transfer_success {
                 let record = Record {
-                    user: user_address, amount: amount, date: get_block_timestamp()
+                    user: caller, amount: amount, date: get_block_timestamp()
                 };
-                self.records.write(user_address, record);
+                self.records.write(caller, record);
                 
                 let current_balance = self.balance.read();
                 let updated_balance = current_balance + amount;
@@ -56,12 +53,30 @@ mod TrivexAction {
             }
         }
 
-        fn withdraw(ref self: ContractState, user_address: UserAddress, amount: Amount, token_address: TokenAddress) {
+        fn run_strategy(ref self: ContractState, amount: Amount, token_address: TokenAddress) {
+            let caller = get_caller_address();
+
             let token: IERC20Dispatcher = IERC20Dispatcher {
                 contract_address: token_address,
             };
 
-            let transfer_success = token.transfer(user_address, amount);
+            let transfer_success = token.transferFrom(
+                caller,
+                get_contract_address(),
+                amount,
+            );
+
+            assert(transfer_success, 'Token transfer failed.');
+        }
+
+        fn withdraw(ref self: ContractState, amount: Amount, token_address: TokenAddress) {
+            let caller = get_caller_address();
+
+            let token: IERC20Dispatcher = IERC20Dispatcher {
+                contract_address: token_address,
+            };
+
+            let transfer_success = token.transfer(caller, amount);
             assert(transfer_success, 'Token withdrawal failed.');
 
             if transfer_success {

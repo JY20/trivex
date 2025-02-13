@@ -17,8 +17,8 @@ const SettingsPage = () => {
     const host = "localhost:8080";
 
     const hash_provider = new Provider({ network: "sepolia" });
-    const classHash = "0x04e0392a9fc371869d6465c0aa3fbd601de418980221da44f7a842d94926b307"; 
-    const contractAddress = "0x00eb5e9294cb65c680c46f8381daf5a8c8f48a332c74263dcc5e258dc3485d8f"; 
+    const classHash = "0x008e2b7d5289f1ca14683bc643f42687dd1ef949e8a35be4c429aa825a097604"; 
+    const contractAddress = "0x005262cd7aee4715e4a00c41384a5f5ad151ff16da7523f41b93836bed922ced"; 
     const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
 
     const [isDepositPopupOpen, setDepositPopupOpen] = useState(false);
