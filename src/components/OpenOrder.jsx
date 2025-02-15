@@ -8,7 +8,7 @@ const OpenOrder = ({ sector, handleSectorChange, symbol, handleSymbol, symbolLis
     <Box sx={{ maxWidth: '50%', margin: '0 auto', background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
       <Box sx={{ display: 'flex', justifyContent: 'left', alignItems: 'center', marginBottom: '20px' }}>
           <Typography variant="h7">
-              Clean Input
+              Refresh
           </Typography>
           <IconButton sx={{color: '#7E57C2'}} onClick={refreshData}>
               <RefreshIcon />

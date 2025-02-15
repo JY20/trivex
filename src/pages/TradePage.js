@@ -21,15 +21,6 @@ const TradePage = () => {
   const host = "localhost:8080";
   const info = useContext(AppContext);
 
-  
-  const refreshData =  async () => {
-    setSector('');
-    setSymbol('');
-    setLeverage(null);
-    setSize('');
-    setPrice('N/A');
-    setSymbolLeverages([]);
-  };
 
   const handleSymbols = async (selectedSector) => {
     try {
@@ -190,6 +181,11 @@ const TradePage = () => {
       console.error("Error closing position:", error);
       alert("An error occurred while closing the order.");
     }
+  };
+
+  const refreshData = async () => {
+    handlePrice(symbol+"-"+sector);
+    updateUserInfo(info.walletAddress);
   };
 
   if(info.walletAddress != null){
