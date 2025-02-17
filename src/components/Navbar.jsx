@@ -112,7 +112,6 @@ const Navbar = () => {
                         <Typography
                             variant="h6"
                             component={Link}
-                            to="/trade"
                             sx={{
                                 textDecoration: 'none',
                                 color: '#7E57C2',
@@ -134,6 +133,22 @@ const Navbar = () => {
                                 }}
                             />
                             Trivex 
+                        </Typography>
+                        <Typography
+                            variant="h7"
+                            component={Link}
+                            to="/trade"
+                            sx={{
+                                textDecoration: 'none',
+                                color: '#7E57C2',
+                                fontWeight: 'bold',
+                                transition: 'transform 0.3s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                '&:hover': { color: '#6A4BA1' },
+                            }}
+                        >
+                            Trade
                         </Typography>
                         <Typography
                             variant="h7"

@@ -12,7 +12,8 @@ const CloseOrder = ({ positions, handleCloseOrder }) => {
         <Table>
           <TableHead>
             <TableRow>
-            <TableCell><strong>Sector</strong></TableCell>
+              <TableCell><strong>Portfolio ID</strong></TableCell>
+              <TableCell><strong>Sector</strong></TableCell>
               <TableCell><strong>Symbol</strong></TableCell>
               <TableCell align="right"><strong>Quantity</strong></TableCell>
               <TableCell align="right"><strong>Average Price</strong></TableCell>
@@ -22,6 +23,7 @@ const CloseOrder = ({ positions, handleCloseOrder }) => {
           <TableBody>
             {positions.map((position, index) => (
               <TableRow key={index}>
+                <TableCell>{position.portfolio_id}</TableCell>
                 <TableCell>{position.sector}</TableCell>
                 <TableCell>{position.symbol}</TableCell>
                 <TableCell align="right">{position.quantity}</TableCell>

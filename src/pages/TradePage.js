@@ -67,6 +67,7 @@ const TradePage = () => {
       console.log(response.data);
       const current_positions = response.data && response.data.length > 0 
       ? response.data.map(item => ({
+          portfolio_id: item.portfolio_id,
           address: item.address,
           symbol: item.symbol,
           quantity: parseFloat(item.quantity),
@@ -164,6 +165,7 @@ const TradePage = () => {
       alert(`Closing position for ${position.symbol}`);
   
       const res = await axios.post(`http://${host}/close`, {
+        portfolio_id: position.portfolio_id,
         wallet: position.address,
         symbol: position.symbol,
         size: position.quantity,

@@ -13,7 +13,7 @@ const App = () => (
         <BrowserRouter>
             <Navbar />
             <Routes>
-            <Route path="/" element={<MainPage />} />
+            <Route path="/" element={<TradePage />} />
             <Route path="/trade" element={<TradePage />} />
             <Route path="/algo" element={<AlgoPage />} />
             <Route path="/setting" element={<SettingPage />} />
