@@ -49,13 +49,15 @@ const SettingsPage = () => {
         try {
             const response = await axios.get(`http://${host}/wallets/${address}/portfolio`);
             const portfolioData = response.data && response.data.length > 0 
-                ? response.data.map(item => ({
-                    address: item.address,
-                    symbol: item.symbol,
-                    quantity: parseFloat(item.quantity),
-                    average_price: parseFloat(item.average_price),
-                })) 
-                : [];
+            ? response.data.map(item => ({
+                portfolio_id: item.portfolio_id,
+                address: item.address,
+                symbol: item.symbol,
+                quantity: parseFloat(item.quantity),
+                average_price: parseFloat(item.average_price),
+                sector: item.sector
+            })) 
+            : [];
             setPortfolio(portfolioData);
         } catch (error) {
             console.error('Error fetching portfolio:', error);
@@ -68,11 +70,11 @@ const SettingsPage = () => {
             const transactionData = response.data && response.data.length > 0 
                 ? response.data.map(item => ({
                     transaction_id: parseInt(item.transaction_id),
-                    type: item.type,
+                    action: item.action,
                     symbol: item.symbol,
-                    amount: parseFloat(item.amount),
-                    price: parseFloat(item.price),
-                    timestamp: item.timestamp,
+                    quantity: parseFloat(item.quantity),
+                    average_price: parseFloat(item.average_price),
+                    last_updated: item.last_updated,
                 })) 
                 : [];
             setTransaction(transactionData);
@@ -281,17 +283,21 @@ const SettingsPage = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
+                                        <TableCell><strong>Portfolio ID</strong></TableCell>
+                                        <TableCell><strong>Sector</strong></TableCell>
                                         <TableCell><strong>Symbol</strong></TableCell>
                                         <TableCell align="right"><strong>Quantity</strong></TableCell>
                                         <TableCell align="right"><strong>Average Price</strong></TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {portfolio.map((asset, index) => (
+                                    {portfolio.map((position, index) => (
                                         <TableRow key={index}>
-                                            <TableCell>{asset.symbol}</TableCell>
-                                            <TableCell align="right">{asset.quantity}</TableCell>
-                                            <TableCell align="right">{asset.average_price}</TableCell>
+                                            <TableCell>{position.portfolio_id}</TableCell>
+                                            <TableCell>{position.sector}</TableCell>
+                                            <TableCell>{position.symbol}</TableCell>
+                                            <TableCell align="right">{position.quantity}</TableCell>
+                                            <TableCell align="right">{position.average_price}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -306,10 +312,10 @@ const SettingsPage = () => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell><strong>Transaction ID</strong></TableCell>
-                                        <TableCell align="right"><strong>Type</strong></TableCell>
+                                        <TableCell align="right"><strong>Action</strong></TableCell>
                                         <TableCell align="right"><strong>Symbol</strong></TableCell>
-                                        <TableCell align="right"><strong>Amount</strong></TableCell>
-                                        <TableCell align="right"><strong>Price</strong></TableCell>
+                                        <TableCell align="right"><strong>Quantity</strong></TableCell>
+                                        <TableCell align="right"><strong>Average Price</strong></TableCell>
                                         <TableCell align="right"><strong>Timestamp</strong></TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -317,11 +323,11 @@ const SettingsPage = () => {
                                     {transaction.map((item, index) => (
                                         <TableRow key={index}>
                                             <TableCell>{item.transaction_id}</TableCell>
-                                            <TableCell align="right">{item.type}</TableCell>
+                                            <TableCell align="right">{item.action}</TableCell>
                                             <TableCell align="right">{item.symbol}</TableCell>
-                                            <TableCell align="right">${item.amount}</TableCell>
-                                            <TableCell align="right">${item.price}</TableCell>
-                                            <TableCell align="right">{new Date(item.timestamp).toLocaleString()}</TableCell>
+                                            <TableCell align="right">${item.quantity}</TableCell>
+                                            <TableCell align="right">${item.average_price}</TableCell>
+                                            <TableCell align="right">{new Date(item.last_updated).toLocaleString()}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
