@@ -51,20 +51,25 @@ const OpenOrder = ({ sector, handleSectorChange, symbol, handleSymbol, symbolLis
       </Typography>
 
       {symbol && (
-        <>
+        <> 
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
           <Typography variant="body1" sx={{ marginBottom: '10px', color: 'black' }}>
             Select Leverage:
           </Typography>
-          <Slider
-            value={leverage}
-            min={1}
-            max={symbolLeverages[symbol] || 1}
-            step={1}
-            onChange={(e) => setLeverage(Number(e.target.value))}
-            valueLabelDisplay="auto"
-            valueLabelFormat={(value) => `${value}x`}
-            sx={{ marginBottom: '20px' }}
-          />
+          <Typography variant="body1" sx={{ fontWeight: 'bold', minWidth: '30px',  marginBottom: '10px' }}>
+            {leverage}x
+          </Typography>
+        </Box>
+            <Slider
+              value={leverage}
+              min={1}
+              max={symbolLeverages[symbol] || 1}
+              step={1}
+              onChange={(e) => setLeverage(Number(e.target.value))}
+              valueLabelDisplay="auto"
+              valueLabelFormat={(value) => `${value}x`}
+              sx={{ marginBottom: '20px' }}
+            />
         </>
       )}
 
@@ -84,7 +89,7 @@ const OpenOrder = ({ sector, handleSectorChange, symbol, handleSymbol, symbolLis
         ))}
       </Box>
       <TextField
-        label="Manual Input"
+        label="Manual Input in USD"
         type="number"
         value={size}
         onChange={(e) => setSize(e.target.value)}
