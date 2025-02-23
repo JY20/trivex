@@ -1,7 +1,6 @@
 import React, { useState, useContext} from 'react';
 import axios from 'axios';
-import { Box, IconButton,Grid  } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import { Box, Grid} from '@mui/material';
 import OpenOrder from '../components/OpenOrder'; 
 import CloseOrder from '../components/CloseOrder'
 import {AppContext} from '../components/AppProvider';
@@ -18,6 +17,7 @@ const TradePage = () => {
   const [symbolLeverages, setSymbolLeverages] = useState({});
   const [position, setPosition] = useState([]); 
   const [price, setPrice] = useState(0); 
+  const [tradingSymbol, setTradingSymbol] = useState('');
 
   const host = "localhost:8080";
   const info = useContext(AppContext);
@@ -109,8 +109,14 @@ const TradePage = () => {
 
   const symbolChange = (e) => {
     setSymbol(e);
-    console.log(typeof(e));
-    console.log(typeof(sector));
+    console.log(sector);
+    if(sector === "crypto"){
+      setTradingSymbol(e+"USDC");
+    }else if(sector === "tsx"){
+      setTradingSymbol("TSX:"+e);
+    }else{
+      setTradingSymbol(e);
+    }
     handlePrice(e+"-"+sector);
   };
 
@@ -197,7 +203,7 @@ const TradePage = () => {
             <Box sx={{ fontFamily: "Arial, sans-serif", backgroundColor: "#D1C4E9", minHeight: "100vh", padding: '10px'}}>
             <Grid container spacing={2}>
               <Grid item xs={8}>
-                <TradingViewWidget symbol={symbol}/>
+                <TradingViewWidget symbol={tradingSymbol}/>
                 <CloseOrder positions={position} handleCloseOrder={handleCloseOrder} />
               </Grid>
               <Grid item xs={4}>
