@@ -279,7 +279,7 @@ const SettingsPage = () => {
                         <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: '20px' }}>
                             Portfolio
                         </Typography>
-                        <TableContainer component={Paper} sx={{marginBottom: '20px'}}>
+                        <TableContainer component={Paper} sx={{marginBottom: '20px', maxHeight: 300, overflowY: 'auto' }}>
                             <Table>
                                 <TableHead>
                                     <TableRow>

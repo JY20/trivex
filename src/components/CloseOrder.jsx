@@ -4,11 +4,11 @@ import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, T
 const CloseOrder = ({ positions, handleCloseOrder }) => {
   console.log(positions);
   return (
-    <Box sx={{ maxWidth: '50%', marginTop: '30px', padding: '20px', backgroundColor: '#f1f1f1', borderRadius: '8px', margin: '20px auto' }}>
+    <Box sx={{marginTop: '30px', padding: '20px', backgroundColor: '#f1f1f1', borderRadius: '8px', margin: '20px auto'}}>
       <Typography variant="h5" sx={{ marginBottom: '20px' }}>
         Positions
       </Typography>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ maxHeight: 200, overflowY: 'auto' }}>
         <Table>
           <TableHead>
             <TableRow>

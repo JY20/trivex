@@ -1,11 +1,12 @@
 import React, { useState, useContext} from 'react';
 import axios from 'axios';
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton,Grid  } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import OpenOrder from '../components/OpenOrder'; 
 import CloseOrder from '../components/CloseOrder'
 import {AppContext} from '../components/AppProvider';
 import { Connected, Whitelisted } from '../components/Alert';
+import TradingViewWidget from "../components/TradingViewWidget";
 
 const TradePage = () => {
   const [sector, setSector] = useState('');
@@ -193,26 +194,32 @@ const TradePage = () => {
   if(info.walletAddress != null){
       if(info.Whitelisted !== false){
         return (
-          <Box sx={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#D1C4E9', minHeight: '100vh', padding: '20px' }}>
-            <OpenOrder
-              sector={sector}
-              handleSectorChange={handleSectorChange}
-              symbol={symbol}
-              handleSymbol={symbolChange}
-              symbolList={symbolList}
-              symbolLeverages={symbolLeverages}
-              leverage={leverage}
-              setLeverage={setLeverage}
-              size={size}
-              setSize={setSize}
-              available={balance}
-              handleTrade={handleOpenOrder}
-              price={price}
-              refreshData={refreshData}
-            />
-            <CloseOrder positions={position} handleCloseOrder={handleCloseOrder} />
+            <Box sx={{ fontFamily: "Arial, sans-serif", backgroundColor: "#D1C4E9", minHeight: "100vh", padding: '10px'}}>
+            <Grid container spacing={2}>
+              <Grid item xs={8}>
+                <TradingViewWidget symbol={symbol}/>
+                <CloseOrder positions={position} handleCloseOrder={handleCloseOrder} />
+              </Grid>
+              <Grid item xs={4}>
+                <OpenOrder
+                  sector={sector}
+                  handleSectorChange={handleSectorChange}
+                  symbol={symbol}
+                  handleSymbol={symbolChange}
+                  symbolList={symbolList}
+                  symbolLeverages={symbolLeverages}
+                  leverage={leverage}
+                  setLeverage={setLeverage}
+                  size={size}
+                  setSize={setSize}
+                  available={balance}
+                  handleTrade={handleOpenOrder}
+                  price={price}
+                  refreshData={refreshData}
+                />
+              </Grid>
+            </Grid>
           </Box>
-      
         );
       }else{
           return <Whitelisted/>
