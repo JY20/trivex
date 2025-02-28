@@ -1,6 +1,6 @@
-import React, { useState, useContext} from 'react';
+import React, { useState, useEffect, useContext} from 'react';
 import axios from 'axios';
-import { Box, Grid} from '@mui/material';
+import { Box, Grid, Stack } from '@mui/material';
 import OpenOrder from '../components/OpenOrder'; 
 import CloseOrder from '../components/CloseOrder'
 import {AppContext} from '../components/AppProvider';
@@ -197,14 +197,22 @@ const TradePage = () => {
     updateUserInfo(info.walletAddress);
   };
 
+  useEffect(() => {
+      if (info.walletAddress) {
+          refreshData();
+      }
+  }, [info.walletAddress]);
+
   if(info.walletAddress != null){
       if(info.Whitelisted !== false){
         return (
-            <Box sx={{ fontFamily: "Arial, sans-serif", backgroundColor: "#D1C4E9", minHeight: "100vh", padding: '10px'}}>
+          <Box sx={{ fontFamily: "Arial, sans-serif", backgroundColor: "#D1C4E9", padding: "10px"}}>
             <Grid container spacing={2}>
               <Grid item xs={8}>
-                <TradingViewWidget symbol={tradingSymbol}/>
-                <CloseOrder positions={position} handleCloseOrder={handleCloseOrder} />
+                <Stack spacing={2} sx={{ height: "100%" }}>
+                  <TradingViewWidget symbol={tradingSymbol} />
+                  <CloseOrder positions={position} handleCloseOrder={handleCloseOrder} />
+                </Stack>
               </Grid>
               <Grid item xs={4}>
                 <OpenOrder

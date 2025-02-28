@@ -217,8 +217,10 @@ const SettingsPage = () => {
       
 
     useEffect(() => {
-        refreshData(); 
-    }, []);
+        if (info.walletAddress) {
+            refreshData();
+        }
+    }, [info.walletAddress]);
 
     if(info.walletAddress != null){
         if(info.Whitelisted !== false){

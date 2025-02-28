@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, memo } from "react";
+import { Box } from "@mui/material";
 
 const TradingViewWidget = ({ symbol = "AAPL" }) => {
   const container = useRef(null);
@@ -9,7 +10,7 @@ const TradingViewWidget = ({ symbol = "AAPL" }) => {
     container.current.innerHTML = "";
 
     setTimeout(() => {
-      if (!container.current) return; // Ensure container is still mounted
+      if (!container.current) return;
 
       const script = document.createElement("script");
       script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
@@ -17,7 +18,7 @@ const TradingViewWidget = ({ symbol = "AAPL" }) => {
       script.async = true;
       script.innerHTML = JSON.stringify({
         width: "100%",
-        height: "500",
+        height: "100%",
         symbol,
         interval: "60",
         timezone: "Etc/UTC",
@@ -34,28 +35,29 @@ const TradingViewWidget = ({ symbol = "AAPL" }) => {
       });
 
       container.current.appendChild(script);
-    }, 100); // Small delay to ensure proper mounting
+    }, 100);
   }, [symbol]);
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
+        height: "100%",
         textAlign: "center",
-        borderRadius: "6px", // Rounded corners
-        overflow: "hidden", 
-        padding: "10px", 
-        backgroundColor:"white"
+        borderRadius: "6px",
+        overflow: "hidden",
+        padding: "10px",
+        backgroundColor: "white",
       }}
     >
       <div
-        key={symbol} // Force re-render when symbol changes
+        key={symbol}
         className="tradingview-widget-container"
         ref={container}
-        style={{ width: "100%", height: "500", margin: "0 auto" }}
+        style={{ width: "100%", height: "100%", margin: "0 auto" }}
       >
         <div className="tradingview-widget-container__widget"></div>
       </div>
-    </div>
+    </Box>
   );
 };
 
