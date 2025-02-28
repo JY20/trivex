@@ -32,7 +32,9 @@ const SettingsPage = () => {
 
     const fetchBalance = async (address) => {
         try {
-            const response = await axios.get(`http://${host}/wallets/${address}/balances`);
+            const response = await axios.get(`${host}/wallets/${address}/balances`, {
+                headers: { "ngrok-skip-browser-warning": "true" }
+                });
             const current_balances = response.data; 
             if (current_balances && current_balances.length > 0) {
                 const accountValue = parseFloat(current_balances[0].amount || 0);
@@ -220,6 +222,12 @@ const SettingsPage = () => {
         refreshData(); 
     }, []);
 
+    useEffect(() => {
+        if (info.walletAddress) {
+            refreshData();
+        }
+    }, [info.walletAddress]);
+    
     if(info.walletAddress != null){
         if(info.Whitelisted !== false){
             return (
