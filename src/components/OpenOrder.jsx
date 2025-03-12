@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Box, Typography, TextField, MenuItem, Button, Slider, Autocomplete, IconButton } from '@mui/material';
 import Loading from './Loading';
@@ -21,6 +21,12 @@ const OpenOrder = ({
 }) => {
   const [loading, setLoading] = useState(false);
 
+  // 计算估算值
+  const feeRate = 0.001; // 0.1% 的手续费
+  const estimatePrice = price || 0;
+  const total = size * estimatePrice;
+  const fee = total * feeRate;
+
   const handleTradeWithLoading = async (type) => {
     try {
       setLoading(true);
@@ -41,7 +47,6 @@ const OpenOrder = ({
 
   return (
     <>
-      {/* 全屏加载动画 */}
       {loading && <Loading />}
 
       <Box sx={{ margin: '0 auto', background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
@@ -150,6 +155,22 @@ const OpenOrder = ({
           sx={{ marginBottom: '20px' }}
           disabled={loading}
         />
+
+        {/* Estimate 框 */}
+        <Box
+          sx={{
+            backgroundColor: '#F0F0F0',
+            padding: '15px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            color: '#000'
+          }}
+        >
+          <Typography variant="body2">Estimate Price: ${estimatePrice.toFixed(2)}</Typography>
+          <Typography variant="body2">Size: {size || 0}</Typography>
+          <Typography variant="body2">Total: ${total.toFixed(2)}</Typography>
+          <Typography variant="body2">Fee: ${fee.toFixed(2)}</Typography>
+        </Box>
 
         <Typography variant="body1" sx={{ marginBottom: '20px', color: 'black' }}>
           Balance: {available.toFixed(2)} USD
