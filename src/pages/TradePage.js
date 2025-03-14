@@ -15,7 +15,8 @@ const TradePage = () => {
   const [leverage, setLeverage] = useState(1);
   const [symbolList, setSymbolList] = useState([]);
   const [symbolLeverages, setSymbolLeverages] = useState({});
-  const [position, setPosition] = useState([]); 
+  const [position, setPosition] = useState([]);
+  const [transaction, setTransaction] = useState([]);  
   const [price, setPrice] = useState(0); 
   const [tradingSymbol, setTradingSymbol] = useState('');
 
@@ -82,11 +83,31 @@ const TradePage = () => {
       console.error('Error fetching portfolio:', error);
     }
   };
+
+  const handleTransactions = async (address) => {
+      try {
+          const response = await axios.get(`http://${host}/wallets/${address}/transactions`);
+          const transactionData = response.data && response.data.length > 0 
+              ? response.data.map(item => ({
+                  transaction_id: parseInt(item.transaction_id),
+                  action: item.action,
+                  symbol: item.symbol,
+                  quantity: parseFloat(item.quantity),
+                  average_price: parseFloat(item.average_price),
+                  last_updated: item.last_updated,
+              })) 
+              : [];
+          setTransaction(transactionData);
+      } catch (error) {
+          console.error('Error fetching transactions:', error);
+      }
+  };
   
   const updateUserInfo = (address) => {
     try {
       handleBalance(address);
       handlePositions(address);
+      handleTransactions(address);
     } catch (error) {
       console.error("Error updating user info:", error);
     }
@@ -211,7 +232,7 @@ const TradePage = () => {
               <Grid item xs={8}>
                 <Stack spacing={2} sx={{ height: "100%" }}>
                   <TradingViewWidget symbol={tradingSymbol} />
-                  <CloseOrder positions={position} handleCloseOrder={handleCloseOrder} />
+                  <CloseOrder positions={position} transactions={transaction} handleCloseOrder={handleCloseOrder} />
                 </Stack>
               </Grid>
               <Grid item xs={4}>

@@ -15,33 +15,8 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 
-const CloseOrder = ({ positions, handleCloseOrder, walletAddress }) => {
+const CloseOrder = ({ positions, transactions, handleCloseOrder, walletAddress }) => {
   const [activeTab, setActiveTab] = useState(0);
-  const [transactions, setTransactions] = useState([]);
-
-  const fetchTransactions = async (address) => {
-    try {
-      const response = await axios.get(`http://2660-2001-1970-51a3-8f00-00-c11.ngrok-free.app/wallets/${address}/transactions`);
-      const transactionData = response.data.map(item => ({
-        transaction_id: item.transaction_id,
-        action: item.action,
-        symbol: item.symbol,
-        quantity: parseFloat(item.quantity),
-        average_price: parseFloat(item.average_price),
-        last_updated: item.last_updated,
-      }));
-      setTransactions(transactionData);
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (walletAddress) {
-      fetchTransactions(walletAddress);
-    }
-  }, [walletAddress]);
-
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -58,17 +33,19 @@ const CloseOrder = ({ positions, handleCloseOrder, walletAddress }) => {
       }}
     >
       {/* Tabs 组件 */}
-      <Tabs value={activeTab} onChange={handleTabChange} centered>
-        <Tab label="Positions" />
-        <Tab label="Transactions" />
+      <Tabs 
+        value={activeTab} 
+        onChange={handleTabChange} 
+        sx={{ display: "flex", justifyContent: "flex-start", alignItems: "flex-start" }} 
+        variant="scrollable"
+      >
+        <Tab label="Positions" sx={{ textTransform: "none", fontSize: "1.1rem", fontWeight: "bold", color: "black" }} />
+        <Tab label="Transactions" sx={{ textTransform: "none", fontSize: "1.1rem", fontWeight: "bold", color: "black" }} />
       </Tabs>
 
       {/* Positions Tab 内容 */}
       {activeTab === 0 && (
         <Box sx={{ marginTop: '20px' }}>
-          <Typography variant="h5" sx={{ marginBottom: '20px' }}>
-            Positions
-          </Typography>
           <TableContainer component={Paper} sx={{ maxHeight: 200, overflowY: 'auto' }}>
             <Table>
               <TableHead>
@@ -114,10 +91,7 @@ const CloseOrder = ({ positions, handleCloseOrder, walletAddress }) => {
       {/* Transactions Tab 内容 */}
       {activeTab === 1 && (
         <Box sx={{ marginTop: '20px' }}>
-          <Typography variant="h5" sx={{ marginBottom: '20px' }}>
-            Transaction History
-          </Typography>
-          <TableContainer component={Paper} sx={{ maxHeight: 300, overflowY: 'auto' }}>
+          <TableContainer component={Paper} sx={{ maxHeight: 200, overflowY: 'auto' }}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>

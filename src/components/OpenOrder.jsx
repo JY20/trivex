@@ -159,17 +159,29 @@ const OpenOrder = ({
         {/* Estimate 框 */}
         <Box
           sx={{
-            backgroundColor: '#F0F0F0',
+            backgroundColor: '#D7CCE8', // Lighter shade
             padding: '15px',
             borderRadius: '8px',
             marginBottom: '20px',
             color: '#000'
           }}
         >
-          <Typography variant="body2">Estimate Price: ${estimatePrice.toFixed(2)}</Typography>
-          <Typography variant="body2">Size: {size || 0}</Typography>
-          <Typography variant="body2">Total: ${total.toFixed(2)}</Typography>
-          <Typography variant="body2">Fee: ${fee.toFixed(2)}</Typography>
+          <Box display="flex" justifyContent="space-between">
+            <Typography variant="body1">Price:</Typography>
+            <Typography variant="body1">${estimatePrice.toFixed(2)}</Typography>
+          </Box>
+          <Box display="flex" justifyContent="space-between">
+            <Typography variant="body1">Size:</Typography>
+            <Typography variant="body1">{size || 0}</Typography>
+          </Box>
+          <Box display="flex" justifyContent="space-between">
+            <Typography variant="body1">Total:</Typography>
+            <Typography variant="body1">${total.toFixed(2)}</Typography>
+          </Box>
+          <Box display="flex" justifyContent="space-between">
+            <Typography variant="body1">Fee:</Typography>
+            <Typography variant="body1">${fee.toFixed(2)}</Typography>
+          </Box>
         </Box>
 
         <Typography variant="body1" sx={{ marginBottom: '20px', color: 'black' }}>
