@@ -46,7 +46,7 @@ const CloseOrder = ({ positions, transactions, handleCloseOrder, walletAddress }
       {/* Positions Tab 内容 */}
       {activeTab === 0 && (
         <Box sx={{ marginTop: '20px' }}>
-          <TableContainer component={Paper} sx={{ maxHeight: 200, overflowY: 'auto' }}>
+          <TableContainer component={Paper} sx={{ height: 200, overflowY: 'auto' }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -91,7 +91,7 @@ const CloseOrder = ({ positions, transactions, handleCloseOrder, walletAddress }
       {/* Transactions Tab 内容 */}
       {activeTab === 1 && (
         <Box sx={{ marginTop: '20px' }}>
-          <TableContainer component={Paper} sx={{ maxHeight: 200, overflowY: 'auto' }}>
+          <TableContainer component={Paper} sx={{ height: 200, overflowY: 'auto' }}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
