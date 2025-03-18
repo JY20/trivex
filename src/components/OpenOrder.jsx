@@ -12,20 +12,16 @@ const OpenOrder = ({
   symbolLeverages,
   leverage,
   setLeverage,
-  size,
-  setSize,
+  amount,
+  setAmount,
   available,
   handleTrade,
   price,
-  refreshData
+  refreshData,
+  fee,
+  size
 }) => {
   const [loading, setLoading] = useState(false);
-
-  // 计算估算值
-  const feeRate = 0.001; // 0.1% 的手续费
-  const estimatePrice = price || 0;
-  const total = size * estimatePrice;
-  const fee = total * feeRate;
 
   const handleTradeWithLoading = async (type) => {
     try {
@@ -138,7 +134,7 @@ const OpenOrder = ({
               key={percentage}
               variant="outlined"
               sx={{ backgroundColor: '#6c4f91', color: '#fff' }}
-              onClick={() => setSize((percentage / 100) * available)}
+              onClick={() => setAmount((percentage / 100) * available)}
               disabled={loading}
             >
               {percentage}%
@@ -149,8 +145,8 @@ const OpenOrder = ({
         <TextField
           label="Manual Input in USD"
           type="number"
-          value={size}
-          onChange={(e) => setSize(e.target.value)}
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
           fullWidth
           sx={{ marginBottom: '20px' }}
           disabled={loading}
@@ -168,15 +164,15 @@ const OpenOrder = ({
         >
           <Box display="flex" justifyContent="space-between">
             <Typography variant="body1">Price:</Typography>
-            <Typography variant="body1">${estimatePrice.toFixed(2)}</Typography>
+            <Typography variant="body1">${price}</Typography>
           </Box>
           <Box display="flex" justifyContent="space-between">
             <Typography variant="body1">Size:</Typography>
-            <Typography variant="body1">{size || 0}</Typography>
+            <Typography variant="body1">{size.toFixed(2) || 0}</Typography>
           </Box>
           <Box display="flex" justifyContent="space-between">
             <Typography variant="body1">Total:</Typography>
-            <Typography variant="body1">${total.toFixed(2)}</Typography>
+            <Typography variant="body1">${(price*size).toFixed(2)}</Typography>
           </Box>
           <Box display="flex" justifyContent="space-between">
             <Typography variant="body1">Fee:</Typography>

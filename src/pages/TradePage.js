@@ -11,6 +11,7 @@ const TradePage = () => {
   const [sector, setSector] = useState('');
   const [symbol, setSymbol] = useState('');
   const [balance, setBalance] = useState(0); 
+  const [amount, setAmount] = useState(0); 
   const [size, setSize] = useState(0); 
   const [leverage, setLeverage] = useState(1);
   const [symbolList, setSymbolList] = useState([]);
@@ -19,6 +20,7 @@ const TradePage = () => {
   const [transaction, setTransaction] = useState([]);  
   const [price, setPrice] = useState(0); 
   const [tradingSymbol, setTradingSymbol] = useState('');
+  const [fee, setFee] = useState(0);
 
   const host = "localhost:8080";
   const info = useContext(AppContext);
@@ -102,12 +104,28 @@ const TradePage = () => {
           console.error('Error fetching transactions:', error);
       }
   };
+
+  const fetchFee = async (address, symbol, size) => {
+    try {
+      console.log(`Fetching fee for ${address} for order ${symbol} with size ${size}`);
+      const response = await axios.get(`http://${host}/fee/${address}/${symbol}/${size}`);
+      console.log(response.data.fee);
+      const estimate_fee = parseFloat(response.data.fee);
+      setFee(estimate_fee);
+      if (isNaN(estimate_fee)) {
+        alert("Failed to fetch the estimate fee. Please try again.");
+      }
+    } catch (error) {
+      console.error('Error fetching price:', error);
+    }
+  };
   
   const updateUserInfo = (address) => {
     try {
       handleBalance(address);
       handlePositions(address);
       handleTransactions(address);
+      fetchFee(address, symbol, size);
     } catch (error) {
       console.error("Error updating user info:", error);
     }
@@ -126,6 +144,12 @@ const TradePage = () => {
     } catch (error) {
       console.error('Error fetching price:', error);
     }
+  };
+
+  const amountChange = async (value) => {
+    setAmount(value);
+    setSize(value/price);
+    fetchFee(info.walletAddress, symbol+"-"+sector, size);
   };
 
   const symbolChange = (e) => {
@@ -215,6 +239,7 @@ const TradePage = () => {
 
   const refreshData = async () => {
     handlePrice(symbol+"-"+sector);
+    fetchFee(info.walletAddress, symbol+"-"+sector, size);
     updateUserInfo(info.walletAddress);
   };
 
@@ -245,12 +270,14 @@ const TradePage = () => {
                   symbolLeverages={symbolLeverages}
                   leverage={leverage}
                   setLeverage={setLeverage}
-                  size={size}
-                  setSize={setSize}
+                  amount={amount}
+                  setAmount={amountChange}
                   available={balance}
                   handleTrade={handleOpenOrder}
                   price={price}
                   refreshData={refreshData}
+                  fee={fee}
+                  size={size}
                 />
               </Grid>
             </Grid>
