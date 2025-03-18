@@ -186,7 +186,7 @@ const TradePage = () => {
         wallet: info.walletAddress,
         is_buy,
         symbol,
-        size,
+        amount,
         sector,
         leverage
       };
@@ -225,8 +225,11 @@ const TradePage = () => {
       });
   
       if (res.data.status === "Success") {
-        handleBalance(sector);
         alert("Order closed successfully!");
+        const balances = res.data.balance;
+        console.log(balances);
+        const accountValue = parseFloat(balances[0].amount || 0);
+        setBalance(accountValue);
       } else {
         alert("Order closure failed. Please try again.");
       }
