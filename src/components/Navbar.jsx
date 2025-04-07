@@ -181,6 +181,22 @@ const Navbar = () => {
                             >
                                 Strategy
                             </Typography>
+                        <Typography
+                                variant="h7"
+                                component={Link}
+                                to="/stake"
+                                sx={{
+                                    textDecoration: 'none',
+                                    color: '#7E57C2',
+                                    fontWeight: 'bold',
+                                    transition: 'transform 0.3s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    '&:hover': { color: '#6A4BA1' },
+                                }}
+                            >
+                                Stake
+                            </Typography>
                         </Box>
                         {/* Mobile Menu Icon */}
                         

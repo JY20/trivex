@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, memo } from "react";
 import { Box } from "@mui/material";
 
-const TradingViewWidget = ({ symbol = "AAPL" }) => {
+const TradingViewWidget = ({ symbol = "STRKUSDT" }) => {
   const container = useRef(null);
 
   useEffect(() => {
