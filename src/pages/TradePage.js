@@ -19,7 +19,7 @@ const TradePage = () => {
   const [position, setPosition] = useState([]);
   const [transaction, setTransaction] = useState([]);  
   const [price, setPrice] = useState(0); 
-  const [tradingSymbol, setTradingSymbol] = useState('');
+  const [tradingSymbol, setTradingSymbol] = useState('STRKUSDC');
   const [fee, setFee] = useState(0);
 
   const host = "localhost:8080";
@@ -155,13 +155,14 @@ const TradePage = () => {
   const symbolChange = (e) => {
     setSymbol(e);
     console.log(sector);
-    if(sector === "crypto"){
-      setTradingSymbol(e+"USDC");
-    }else if(sector === "tsx"){
-      setTradingSymbol("TSX:"+e);
-    }else{
-      setTradingSymbol(e);
-    }
+    setTradingSymbol(e+"USDC");
+    // if(sector === "crypto"){
+    //   setTradingSymbol(e+"USDC");
+    // }else if(sector === "tsx"){
+    //   setTradingSymbol("TSX:"+e);
+    // }else{
+    //   setTradingSymbol(e);
+    // }
     handlePrice(e+"-"+sector);
   };
 

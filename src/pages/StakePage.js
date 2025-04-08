@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Grid, Box, Typography, Button, TextField, Paper } from '@mui/material';
-import Header from '../components/Header';
 import axios from 'axios';
 
 const StakePage = () => {

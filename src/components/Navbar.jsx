@@ -12,7 +12,7 @@ import {
     styled,
     Drawer,
     IconButton } from '@mui/material';
-import logo from '../assets/logo5.png';
+import logo from '../assets/Trivex1.png';
 import SettingsIcon from '@mui/icons-material/Settings'
 
 import { connect, disconnect } from "get-starknet";
