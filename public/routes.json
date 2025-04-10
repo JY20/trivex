@@ -1,0 +1,25 @@
+{
+    "routes": [
+      {
+        "route": "/trade",
+        "serve": "/index.html"
+      },
+      {
+        "route": "/algo",
+        "serve": "/index.html"
+      },
+      {
+        "route": "/stake",
+        "serve": "/index.html"
+      },
+      {
+        "route": "/setting",
+        "serve": "/index.html"
+      },
+      {
+        "route": "/",
+        "serve": "/index.html"
+      }
+    ]
+  }
+  
