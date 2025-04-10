@@ -251,7 +251,7 @@ const TradePage = () => {
       if (info.walletAddress) {
           refreshData();
       }
-  }, [info.walletAddress]);
+  }, [info.walletAddress, refreshData]);
 
   if(info.walletAddress != null){
       if(info.Whitelisted !== false){
