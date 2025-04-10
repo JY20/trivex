@@ -4,7 +4,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import axios from 'axios';
 import {AppContext} from '../components/AppProvider';
 import { Connected, Whitelisted } from '../components/Alert';
-import { Contract, Provider, cairo, CallData} from "starknet";
+// import { Contract, Provider, cairo, CallData} from "starknet";
 import DepositPopup from "../components/Deposit";
 import WithdrawPopup from "../components/Withdraw";
 
@@ -14,9 +14,9 @@ const SettingsPage = () => {
     const [portfolio, setPortfolio] = useState([]); 
     const [transaction, setTransaction] = useState([]); 
     const [balance, setBalance] = useState(0);
-    const host = "localhost:8080";
+    const host = "trivex-trade-faekh0awhkdphxhq.canadacentral-01.azurewebsites.net";
 
-    const hash_provider = new Provider({ network: "sepolia" });
+    // const hash_provider = new Provider({ network: "sepolia" });
     const classHash = "0x008e2b7d5289f1ca14683bc643f42687dd1ef949e8a35be4c429aa825a097604"; 
     const contractAddress = "0x005262cd7aee4715e4a00c41384a5f5ad151ff16da7523f41b93836bed922ced"; 
     const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
@@ -25,14 +25,14 @@ const SettingsPage = () => {
     const [isWithdrawPopupOpen, setWithdrawPopupOpen] = useState(false);
     const [walletBalance, setWalletBalance] = useState(0);
 
-    const getABI = async (classHash) => {
-        const contractClass = await hash_provider.getClassByHash(classHash);
-        return contractClass.abi;
-    };  
+    // const getABI = async (classHash) => {
+    //     const contractClass = await hash_provider.getClassByHash(classHash);
+    //     return contractClass.abi;
+    // };  
 
     const fetchBalance = async (address) => {
         try {
-            const response = await axios.get(`http://${host}/wallets/${address}/balances`);
+            const response = await axios.get(`https://${host}/wallets/${address}/balances`);
             const current_balances = response.data; 
             if (current_balances && current_balances.length > 0) {
                 const accountValue = parseFloat(current_balances[0].amount || 0);
@@ -47,7 +47,7 @@ const SettingsPage = () => {
     
     const fetchPortfolio = async (address) => {
         try {
-            const response = await axios.get(`http://${host}/wallets/${address}/portfolio`);
+            const response = await axios.get(`https://${host}/wallets/${address}/portfolio`);
             const portfolioData = response.data && response.data.length > 0 
             ? response.data.map(item => ({
                 portfolio_id: item.portfolio_id,
@@ -66,7 +66,7 @@ const SettingsPage = () => {
     
     const fetchTransactions = async (address) => {
         try {
-            const response = await axios.get(`http://${host}/wallets/${address}/transactions`);
+            const response = await axios.get(`https://${host}/wallets/${address}/transactions`);
             const transactionData = response.data && response.data.length > 0 
                 ? response.data.map(item => ({
                     transaction_id: parseInt(item.transaction_id),
@@ -86,11 +86,11 @@ const SettingsPage = () => {
 
     const getBalance = async () => {
         try {
-            const abi = await getABI(classHash);
-            const contract = new Contract(abi, contractAddress, hash_provider);
-            const balance = await contract.call("get_balance", [usdcTokenAddress, info.walletAddress]);
-            const convertedBalance = (Number(balance)/1000000).toFixed(2);
-            return convertedBalance;
+            // const abi = await getABI(classHash);
+            // const contract = new Contract(abi, contractAddress, hash_provider);
+            // const balance = await contract.call("get_balance", [usdcTokenAddress, info.walletAddress]);
+            // const convertedBalance = (Number(balance)/1000000).toFixed(2);
+            // return convertedBalance;
         } catch (error) {
             console.error("Error fetching balance:", error);
             throw error;
@@ -124,7 +124,7 @@ const SettingsPage = () => {
 
     const updateBalance = async (hash) => {
         try {
-            const response = await axios.post(`http://${host}/action`, {
+            const response = await axios.post(`https://${host}/action`, {
                 hash
             });
     
@@ -141,33 +141,33 @@ const SettingsPage = () => {
         try {
             const provider = info.wallet.account;
 
-            const contractClass = await hash_provider.getClassByHash(classHash);
-            const abi = contractClass.abi;
-            const contract = new Contract(abi, contractAddress, provider);
+            // const contractClass = await hash_provider.getClassByHash(classHash);
+            // const abi = contractClass.abi;
+            // const contract = new Contract(abi, contractAddress, provider);
 
             const weiAmount = amount * 1000000;
         
-            const deposit = contract.populate("deposit", [BigInt(weiAmount), usdcTokenAddress]);
+            // const deposit = contract.populate("deposit", [BigInt(weiAmount), usdcTokenAddress]);
 
-            const result = await provider.execute([
-                {
-                    contractAddress: usdcTokenAddress,
-                    entrypoint: "approve",
-                    calldata: CallData.compile({
-                    spender: contractAddress,
-                    amount: cairo.uint256(weiAmount),
-                    }),
-                },
-                {
-                    contractAddress: contractAddress,
-                    entrypoint: "deposit",
-                    calldata: deposit.calldata,
-                }
-                ]);
+            // const result = await provider.execute([
+            //     {
+            //         contractAddress: usdcTokenAddress,
+            //         entrypoint: "approve",
+            //         calldata: CallData.compile({
+            //         spender: contractAddress,
+            //         amount: cairo.uint256(weiAmount),
+            //         }),
+            //     },
+            //     {
+            //         contractAddress: contractAddress,
+            //         entrypoint: "deposit",
+            //         calldata: deposit.calldata,
+            //     }
+            //     ]);
         
-            console.log("Deposit Result:", result);
+            // console.log("Deposit Result:", result);
 
-            updateBalance(result["transaction_hash"]);
+            // updateBalance(result["transaction_hash"]);
 
             alert("Deposit completed successfully!");
         } catch (error) {
@@ -185,23 +185,23 @@ const SettingsPage = () => {
         try {
             const provider = info.wallet.account;
         
-            const contractClass = await hash_provider.getClassByHash(classHash);
-            const abi = contractClass.abi;
-            const contract = new Contract(abi, contractAddress, provider);
+            // const contractClass = await hash_provider.getClassByHash(classHash);
+            // const abi = contractClass.abi;
+            // const contract = new Contract(abi, contractAddress, provider);
         
-            const weiAmount = amount * 1000000;
+            // const weiAmount = amount * 1000000;
         
-            const withdrawal = contract.populate("withdraw", [BigInt(weiAmount), usdcTokenAddress]);
+            // const withdrawal = contract.populate("withdraw", [BigInt(weiAmount), usdcTokenAddress]);
         
-            const result = await provider.execute([{
-                contractAddress: contractAddress,
-                entrypoint: "withdraw",
-                calldata: withdrawal.calldata,
-            }]);
+            // const result = await provider.execute([{
+            //     contractAddress: contractAddress,
+            //     entrypoint: "withdraw",
+            //     calldata: withdrawal.calldata,
+            // }]);
         
-            console.log("Withdrawal Result:", result);
+            // console.log("Withdrawal Result:", result);
         
-            updateBalance(result["transaction_hash"]);
+            // updateBalance(result["transaction_hash"]);
 
             alert("Withdrawal completed successfully!");
         } catch (error) {

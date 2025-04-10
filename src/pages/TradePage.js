@@ -22,14 +22,14 @@ const TradePage = () => {
   const [tradingSymbol, setTradingSymbol] = useState('STRKUSDC');
   const [fee, setFee] = useState(0);
 
-  const host = "localhost:8080";
+  const host = "trivex-trade-faekh0awhkdphxhq.canadacentral-01.azurewebsites.net";
   const info = useContext(AppContext);
 
 
   const handleSymbols = async (selectedSector) => {
     try {
       console.log(`Fetching symbols for sector: ${selectedSector}...`);
-      const response = await axios.get(`http://${host}/symbols/${selectedSector}`);
+      const response = await axios.get(`https://${host}/symbols/${selectedSector}`);
 
       const symbols = Object.keys(response.data); 
       const symbolLeverages = response.data; 
@@ -50,7 +50,7 @@ const TradePage = () => {
   const handleBalance = async (address) => {
     try {
       console.log("Fetching balance...");
-      const response = await axios.get(`http://${host}/wallets/${address}/balances`);
+      const response = await axios.get(`https://${host}/wallets/${address}/balances`);
 
       const balances = response.data; 
       if (balances && balances.length > 0) {
@@ -67,7 +67,7 @@ const TradePage = () => {
   const handlePositions = async (address) => {
     try {
       console.log("Fetching portfolio...");
-      const response = await axios.get(`http://${host}/wallets/${address}/portfolio`);
+      const response = await axios.get(`https://${host}/wallets/${address}/portfolio`);
       console.log(response.data);
       const current_positions = response.data && response.data.length > 0 
       ? response.data.map(item => ({
@@ -88,7 +88,7 @@ const TradePage = () => {
 
   const handleTransactions = async (address) => {
       try {
-          const response = await axios.get(`http://${host}/wallets/${address}/transactions`);
+          const response = await axios.get(`https://${host}/wallets/${address}/transactions`);
           const transactionData = response.data && response.data.length > 0 
               ? response.data.map(item => ({
                   transaction_id: parseInt(item.transaction_id),
@@ -108,7 +108,7 @@ const TradePage = () => {
   const fetchFee = async (address, symbol, size) => {
     try {
       console.log(`Fetching fee for ${address} for order ${symbol} with size ${size}`);
-      const response = await axios.get(`http://${host}/fee/${address}/${symbol}/${size}`);
+      const response = await axios.get(`https://${host}/fee/${address}/${symbol}/${size}`);
       console.log(response.data.fee);
       const estimate_fee = parseFloat(response.data.fee);
       setFee(estimate_fee);
@@ -134,7 +134,7 @@ const TradePage = () => {
   const handlePrice = async (symbol) => {
     try {
       console.log(`Fetching ${symbol}`);
-      const response = await axios.get(`http://${host}/price/${symbol}`);
+      const response = await axios.get(`https://${host}/price/${symbol}`);
 
       const current_price = parseFloat(response.data.price);
       setPrice(current_price);
@@ -194,7 +194,7 @@ const TradePage = () => {
 
       console.log(data);
     
-      const res = await axios.post(`http://${host}/open`, data);
+      const res = await axios.post(`https://${host}/open`, data);
     
       const result = res.data.status;
     
@@ -217,7 +217,7 @@ const TradePage = () => {
       console.log(position);
       alert(`Closing position for ${position.symbol}`);
   
-      const res = await axios.post(`http://${host}/close`, {
+      const res = await axios.post(`https://${host}/close`, {
         portfolio_id: position.portfolio_id,
         wallet: position.address,
         symbol: position.symbol,

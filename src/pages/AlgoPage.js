@@ -3,7 +3,7 @@ import { Box, Typography, TextField, MenuItem, Button, Switch, List, ListItem, L
 import axios from 'axios';
 import {AppContext} from '../components/AppProvider';
 import { Connected, Whitelisted } from '../components/Alert';
-import { Contract, Provider, cairo, CallData} from "starknet";
+// import { Contract, Provider, cairo, CallData} from "starknet";
 
 const AlgoPage = () => {
   const [strategy, setStrategy] = useState('');
@@ -23,9 +23,9 @@ const AlgoPage = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  const host = "localhost:8082";
+  const host = "trivex-strategy-etbga3bramfwgfe9.canadacentral-01.azurewebsites.net";
 
-  const hash_provider = new Provider({ network: "sepolia" });
+  // const hash_provider = new Provider({ network: "sepolia" });
   const classHash = "0x008e2b7d5289f1ca14683bc643f42687dd1ef949e8a35be4c429aa825a097604"; 
   const contractAddress = "0x005262cd7aee4715e4a00c41384a5f5ad151ff16da7523f41b93836bed922ced"; 
   const strkTokenAddress = '0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d';
@@ -39,10 +39,10 @@ const AlgoPage = () => {
   const info = useContext(AppContext);
 
 
-  const getABI = async (classHash) => {
-    const contractClass = await hash_provider.getClassByHash(classHash);
-    return contractClass.abi;
-  };  
+  // const getABI = async (classHash) => {
+  //   const contractClass = await hash_provider.getClassByHash(classHash);
+  //   return contractClass.abi;
+  // };  
 
   
   /* global BigInt */
@@ -51,31 +51,31 @@ const AlgoPage = () => {
       try {
           const provider = info.wallet.account;
 
-          const contractClass = await hash_provider.getClassByHash(classHash);
-          const abi = contractClass.abi;
-          const contract = new Contract(abi, contractAddress, provider);
+          // const contractClass = await hash_provider.getClassByHash(classHash);
+          // const abi = contractClass.abi;
+          // const contract = new Contract(abi, contractAddress, provider);
 
-          const weiAmount = amount * 1e18;
+          // const weiAmount = amount * 1e18;
       
-          const run_strategy = contract.populate("run_strategy", [BigInt(weiAmount), strkTokenAddress]);
+          // const run_strategy = contract.populate("run_strategy", [BigInt(weiAmount), strkTokenAddress]);
 
-          const result = await provider.execute([
-              {
-                  contractAddress: strkTokenAddress,
-                  entrypoint: "approve",
-                  calldata: CallData.compile({
-                  spender: contractAddress,
-                  amount: cairo.uint256(weiAmount),
-                  }),
-              },
-              {
-                  contractAddress: contractAddress,
-                  entrypoint: "run_strategy",
-                  calldata: run_strategy.calldata,
-              }
-              ]);
+          // const result = await provider.execute([
+          //     {
+          //         contractAddress: strkTokenAddress,
+          //         entrypoint: "approve",
+          //         calldata: CallData.compile({
+          //         spender: contractAddress,
+          //         amount: cairo.uint256(weiAmount),
+          //         }),
+          //     },
+          //     {
+          //         contractAddress: contractAddress,
+          //         entrypoint: "run_strategy",
+          //         calldata: run_strategy.calldata,
+          //     }
+          //     ]);
       
-          console.log("Run Strategy Result:", result);
+          // console.log("Run Strategy Result:", result);
 
           alert("Run strategy completed successfully!");
       } catch (error) {
@@ -128,7 +128,7 @@ const AlgoPage = () => {
   const standardDeviation = async (symbol, openSd, closeSd, isBuy) => {
 
     try {
-      const res = await axios.post(`http://${host}/standardDeviation`, {
+      const res = await axios.post(`https://${host}/standardDeviation`, {
         symbol,
         openSd,
         closeSd,
@@ -146,7 +146,7 @@ const AlgoPage = () => {
   const coVariance= async (symbol1, symbol2, startDate, endDate) => {
 
     try {
-      const res = await axios.post(`http://${host}/coVariance`, {
+      const res = await axios.post(`https://${host}/coVariance`, {
         symbol1,
         symbol2,
         start_date: new Date(startDate),
@@ -164,7 +164,7 @@ const AlgoPage = () => {
   const averageRebalance = async (list, email) => {
 
     try {
-      const res = await axios.post(`http://${host}/averageRebalance`, {
+      const res = await axios.post(`https://${host}/averageRebalance`, {
         list, 
         email
       });
@@ -179,7 +179,7 @@ const AlgoPage = () => {
   const momentum = async (list, email) => {
 
     try {
-      const res = await axios.post(`http://${host}/momentum`, {
+      const res = await axios.post(`https://${host}/momentum`, {
         list, 
         email
       });

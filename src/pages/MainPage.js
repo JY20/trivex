@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Grid, Box, Typography, Button, TextField, Paper } from '@mui/material';
-import Header from '../components/Header';
 import axios from 'axios';
 
 const MainPage = () => {
@@ -37,7 +36,6 @@ const MainPage = () => {
 
     return (
         <Box sx={{ fontFamily: 'Arial, sans-serif', backgroundColor: '#D1C4E9', minHeight: '100vh', width: '100%'}}>
-            <Header />
             <section style={{
                 padding: '50px 30px',
                 width: '66%',
