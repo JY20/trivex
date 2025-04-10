@@ -14,8 +14,8 @@ import {
     IconButton } from '@mui/material';
 import logo from '../assets/Trivex1.png';
 import SettingsIcon from '@mui/icons-material/Settings'
-// import { connect, disconnect } from "get-starknet";
-// import { encode} from "starknet";
+import { connect, disconnect } from "get-starknet";
+import { encode} from "starknet";
 import {AppContext} from './AppProvider';
 import axios from 'axios';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -59,49 +59,49 @@ const theme = createTheme({
 });
 
 const Navbar = () => {
-    // const info = useContext(AppContext);
-    // const [connected, setConnected] = useState('Connect');
+    const info = useContext(AppContext);
+    const [connected, setConnected] = useState('Connect');
 
-    // const [openDrawer, setOpenDrawer] = useState(false);
+    const [openDrawer, setOpenDrawer] = useState(false);
 
-    // const [walletName, setWalletName] = useState("");
-    // const [wallet, setWallet] = useState("");
+    const [walletName, setWalletName] = useState("");
+    const [wallet, setWallet] = useState("");
 
     const host = "localhost:8080";
 
     const checkWhitelisted = async (address) => {
         try {
-        //   const response = await axios.get(`http://${host}/wallets/${address}/whitelist`);
+          const response = await axios.get(`http://${host}/wallets/${address}/whitelist`);
     
-        //   const result = response.data;
-        //   info.setWhitelisted(true);
+          const result = response.data;
+          info.setWhitelisted(true);
         } catch (error) {
           console.error('Error fetching balance:', error);
         }
     };
 
     const handleDisconnect = async () => {
-        // await disconnect({clearLastWallet: true});
-        // setWallet("");
-        // info.setWalletAddress(null);
-        // info.setWhitelisted(null);
-        // setWalletName("")
-        // setConnected('Connect');
+        await disconnect({clearLastWallet: true});
+        setWallet("");
+        info.setWalletAddress(null);
+        info.setWhitelisted(null);
+        setWalletName("")
+        setConnected('Connect');
     }
 
 
     const handleConnect = async () => {
         try{
-            // const getWallet = await connect();
-            // await getWallet?.enable({ starknetVersion: "v5" });
-            // setWallet(getWallet);
-            // const addr = encode.addHexPrefix(encode.removeHexPrefix(getWallet?.selectedAddress ?? "0x").padStart(64, "0"));
-            // info.setWalletAddress(addr);
-            // const profile = addr.substring(0, 2)+"..."+addr.substring(addr.length-4, addr.length);
-            // setConnected(profile);
-            // setWalletName(getWallet?.name || "")
-            // checkWhitelisted(addr);
-            // info.setWallet(getWallet);
+            const getWallet = await connect();
+            await getWallet?.enable({ starknetVersion: "v5" });
+            setWallet(getWallet);
+            const addr = encode.addHexPrefix(encode.removeHexPrefix(getWallet?.selectedAddress ?? "0x").padStart(64, "0"));
+            info.setWalletAddress(addr);
+            const profile = addr.substring(0, 2)+"..."+addr.substring(addr.length-4, addr.length);
+            setConnected(profile);
+            setWalletName(getWallet?.name || "")
+            checkWhitelisted(addr);
+            info.setWallet(getWallet);
         }
         catch(e){
             console.log(e)
@@ -111,11 +111,11 @@ const Navbar = () => {
     
 
     const handleConnectButton = async () => {
-        // if(info.walletAddress == null){
-        //     handleConnect();
-        // }else{
-        //     handleDisconnect();
-        // }
+        if(info.walletAddress == null){
+            handleConnect();
+        }else{
+            handleDisconnect();
+        }
     }
 
     return (
@@ -223,8 +223,7 @@ const Navbar = () => {
                                 <SettingsIcon />
                             </Typography>
                             <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
-                                <IconButton >
-                                    {/* onClick={() => setOpenDrawer(true)}> */}
+                                <IconButton onClick={() => setOpenDrawer(true)}>
                                     <MenuIcon sx={{ color: '#060f5e' }} />
                                 </IconButton>
                             </Box>
@@ -241,7 +240,7 @@ const Navbar = () => {
                                     }}
                                     onClick={handleConnectButton}
                                 >
-                                    {/* {connected} */}
+                                    {connected}
                                 </Button>
                             </Box>
                         </Box>
@@ -249,7 +248,7 @@ const Navbar = () => {
                 </StyledToolbar>
 
                 {/* Mobile Drawer */}
-                {/* <Drawer anchor="right" open={openDrawer} onClose={() => setOpenDrawer(false)}>
+                <Drawer anchor="right" open={openDrawer} onClose={() => setOpenDrawer(false)}>
                     <Box sx={{ width: 250, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 2 }}>
                         <Button
                             variant="contained"
@@ -266,7 +265,7 @@ const Navbar = () => {
                             {connected}
                         </Button>
                     </Box>
-                </Drawer> */}
+                </Drawer>
             </AppBar>
         </ThemeProvider>
     );
