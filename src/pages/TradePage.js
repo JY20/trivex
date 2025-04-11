@@ -254,42 +254,38 @@ const TradePage = () => {
   }, [info.walletAddress, refreshData]);
 
   if(info.walletAddress != null){
-      if(info.Whitelisted !== false){
-        return (
-          <Box sx={{ fontFamily: "Arial, sans-serif", backgroundColor: "#D1C4E9", padding: "10px"}}>
-            <Grid container spacing={2}>
-              <Grid item xs={8}>
-                <Stack spacing={2} sx={{ height: "100%" }}>
-                  <TradingViewWidget symbol={tradingSymbol} />
-                  <CloseOrder positions={position} transactions={transaction} handleCloseOrder={handleCloseOrder} />
-                </Stack>
-              </Grid>
-              <Grid item xs={4}>
-                <OpenOrder
-                  sector={sector}
-                  handleSectorChange={handleSectorChange}
-                  symbol={symbol}
-                  handleSymbol={symbolChange}
-                  symbolList={symbolList}
-                  symbolLeverages={symbolLeverages}
-                  leverage={leverage}
-                  setLeverage={setLeverage}
-                  amount={amount}
-                  setAmount={amountChange}
-                  available={balance}
-                  handleTrade={handleOpenOrder}
-                  price={price}
-                  refreshData={refreshData}
-                  fee={fee}
-                  size={size}
-                />
-              </Grid>
+      return (
+        <Box sx={{ fontFamily: "Arial, sans-serif", backgroundColor: "#D1C4E9", padding: "10px"}}>
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+              <Stack spacing={2} sx={{ height: "100%" }}>
+                <TradingViewWidget symbol={tradingSymbol} />
+                <CloseOrder positions={position} transactions={transaction} handleCloseOrder={handleCloseOrder} />
+              </Stack>
             </Grid>
-          </Box>
-        );
-      }else{
-          return <Whitelisted/>
-      }
+            <Grid item xs={4}>
+              <OpenOrder
+                sector={sector}
+                handleSectorChange={handleSectorChange}
+                symbol={symbol}
+                handleSymbol={symbolChange}
+                symbolList={symbolList}
+                symbolLeverages={symbolLeverages}
+                leverage={leverage}
+                setLeverage={setLeverage}
+                amount={amount}
+                setAmount={amountChange}
+                available={balance}
+                handleTrade={handleOpenOrder}
+                price={price}
+                refreshData={refreshData}
+                fee={fee}
+                size={size}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+      );
   }else{
       return <Connected/>
   }

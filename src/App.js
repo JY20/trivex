@@ -1,8 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import MainPage from "./pages/MainPage";
 import TradePage from "./pages/TradePage";
-import AlgoPage from "./pages/AlgoPage";
+import StrategyPage from "./pages/StrategyPage";
 import StakePage from "./pages/StakePage";
 import SettingPage from "./pages/SettingPage";
 import Navbar from "./components/Navbar";
@@ -16,7 +15,7 @@ const App = () => (
             <Routes>
             <Route path="/" element={<TradePage />} />
             <Route path="/trade" element={<TradePage />} />
-            <Route path="/algo" element={<AlgoPage />} />
+            <Route path="/algo" element={<StrategyPage />} />
             <Route path="/stake" element={<StakePage />} />
             <Route path="/setting" element={<SettingPage />} />
             </Routes>

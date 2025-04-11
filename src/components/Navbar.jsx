@@ -13,6 +13,7 @@ import {
     Drawer,
     IconButton } from '@mui/material';
 import logo from '../assets/Trivex1.png';
+import starknet_logo from '../assets/starknet.png';
 import SettingsIcon from '@mui/icons-material/Settings'
 import { connect, disconnect } from "get-starknet";
 import { encode} from "starknet";
@@ -206,7 +207,7 @@ const Navbar = () => {
                                 gap: '16px',
                             }}
                         >
-                            <Typography
+                            {/* <Typography
                                 variant="h6"
                                 component={Link}
                                 to="/setting"
@@ -221,11 +222,21 @@ const Navbar = () => {
                                 }}
                             >
                                 <SettingsIcon />
-                            </Typography>
+                            </Typography> */}
                             <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
                                 <IconButton onClick={() => setOpenDrawer(true)}>
                                     <MenuIcon sx={{ color: '#060f5e' }} />
                                 </IconButton>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: '8px', padding: '4px 8px' }}>
+                                <img
+                                    src={starknet_logo}
+                                    alt="Starknet Logo"
+                                    style={{ width: '24px', height: '24px', marginRight: '8px' }}
+                                />
+                                <Typography variant="h10" sx={{ color: '#7E57C2', fontWeight: 'bold' }}>
+                                    Starknet
+                                </Typography>
                             </Box>
                             <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                                 <Button

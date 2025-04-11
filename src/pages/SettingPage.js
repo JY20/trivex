@@ -5,8 +5,8 @@ import axios from 'axios';
 import {AppContext} from '../components/AppProvider';
 import { Connected, Whitelisted } from '../components/Alert';
 import { Contract, Provider, cairo, CallData} from "starknet";
-import DepositPopup from "../components/Deposit";
-import WithdrawPopup from "../components/Withdraw";
+import DepositPopup from "../components/Stake";
+import WithdrawPopup from "../components/Unstake";
 
 const SettingsPage = () => {
 

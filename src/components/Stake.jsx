@@ -8,7 +8,7 @@ import {
   Box
 } from "@mui/material";
 
-const DepositPopup = ({ open, onClose, balance = 0, handleDeposit }) => {
+const StakePopup = ({ open, onClose, balance = 0, handleDeposit }) => {
     const [depositAmount, setDepositAmount] = useState("");
 
     const handleMax = () => {
@@ -30,7 +30,7 @@ const DepositPopup = ({ open, onClose, balance = 0, handleDeposit }) => {
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
         <DialogContent sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
             <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
-            Deposit
+            Stake
             </Typography>
             <Box
             sx={{
@@ -108,4 +108,4 @@ const DepositPopup = ({ open, onClose, balance = 0, handleDeposit }) => {
     );
 };
   
-export default DepositPopup;
+export default StakePopup;

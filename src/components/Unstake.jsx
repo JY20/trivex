@@ -8,7 +8,7 @@ import {
   Box
 } from "@mui/material";
 
-const WithdrawPopup = ({ open, onClose, balance = 0, handleWithdraw }) => {
+const UnstakePopup = ({ open, onClose, balance = 0, handleWithdraw }) => {
     const [withdrawAmount, setWithdrawAmount] = useState("");
 
     const handleMax = () => {
@@ -29,7 +29,7 @@ const WithdrawPopup = ({ open, onClose, balance = 0, handleWithdraw }) => {
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogContent sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
                 <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
-                    Withdraw
+                    Unstake
                 </Typography>
                 <Box
                     sx={{
@@ -107,4 +107,4 @@ const WithdrawPopup = ({ open, onClose, balance = 0, handleWithdraw }) => {
     );
 };
 
-export default WithdrawPopup;
+export default UnstakePopup;
