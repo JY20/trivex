@@ -167,7 +167,7 @@ const Navbar = () => {
                         <Typography
                                 variant="h7"
                                 component={Link}
-                                to="/algo"
+                                to="/strategy"
                                 sx={{
                                     textDecoration: 'none',
                                     color: '#7E57C2',
