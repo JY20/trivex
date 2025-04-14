@@ -19,7 +19,7 @@ const TradePage = () => {
   const [position, setPosition] = useState([]);
   const [transaction, setTransaction] = useState([]);  
   const [price, setPrice] = useState(0); 
-  const [tradingSymbol, setTradingSymbol] = useState('STRKUSDC');
+  const [tradingSymbol, setTradingSymbol] = useState('BTCUSDC');
   const [fee, setFee] = useState(0);
 
   const host = "trivex-trade-faekh0awhkdphxhq.canadacentral-01.azurewebsites.net";
