@@ -24,26 +24,13 @@ const SettingsPage = () => {
     const [isDepositPopupOpen, setDepositPopupOpen] = useState(false);
     const [isWithdrawPopupOpen, setWithdrawPopupOpen] = useState(false);
     const [walletBalance, setWalletBalance] = useState(0);
+    const [triggerVariable, setTriggerVariable] = useState(false);
+
 
     const getABI = async (classHash) => {
         const contractClass = await hash_provider.getClassByHash(classHash);
         return contractClass.abi;
     };  
-
-    const fetchBalance = async (address) => {
-        try {
-            const response = await axios.get(`https://${host}/wallets/${address}/balances`);
-            const current_balances = response.data; 
-            if (current_balances && current_balances.length > 0) {
-                const accountValue = parseFloat(current_balances[0].amount || 0);
-                setBalance(accountValue);
-            } else {
-                setBalance(0);
-            }
-        } catch (error) {
-            console.error('Error fetching balance:', error);
-        }
-    };
     
     const fetchPortfolio = async (address) => {
         try {
@@ -82,25 +69,26 @@ const SettingsPage = () => {
             console.error('Error fetching transactions:', error);
         }
     };
-    
 
     const getBalance = async () => {
         try {
             const abi = await getABI(classHash);
             const contract = new Contract(abi, contractAddress, hash_provider);
             const balance = await contract.call("get_balance", [usdcTokenAddress, info.walletAddress]);
-            const convertedBalance = (Number(balance)/1000000).toFixed(2);
-            return convertedBalance;
+            const convertedBalance = (Number(balance) / 1000000).toFixed(2);
+            setBalance(Number(convertedBalance));
         } catch (error) {
-            console.error("Error fetching balance:", error);
-            throw error;
+            console.error("Error fetching wallet balance:", error);
+            setBalance(0);
         }
     };
+    
 
     const refreshData =  async () => {
-        fetchBalance(info.walletAddress);
         fetchPortfolio(info.walletAddress);
         fetchTransactions(info.walletAddress);
+        getBalance();
+        setTriggerVariable(true);
     };
 
     const handleDepositPopUp = async () => {
@@ -217,142 +205,105 @@ const SettingsPage = () => {
       
 
     useEffect(() => {
-        if (info.walletAddress) {
+        if (info.walletAddress && !triggerVariable) {
             refreshData();
         }
-    }, [info.walletAddress, refreshData]);
+    }, [info.walletAddress, triggerVariable, refreshData]);
+
 
     if(info.walletAddress != null){
-        if(info.Whitelisted !== false){
-            return (
+        return (
+            <Box
+                sx={{
+                    fontFamily: 'Arial, sans-serif',
+                    backgroundColor: '#D1C4E9',
+                    minHeight: '100vh',
+                    padding: '20px',
+                }}
+            >
+    
                 <Box
                     sx={{
-                        fontFamily: 'Arial, sans-serif',
-                        backgroundColor: '#D1C4E9',
-                        minHeight: '100vh',
-                        padding: '20px',
+                        margin: '0 auto',
+                        background: '#fff',
+                        padding: '30px',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                        maxWidth: '50%'
                     }}
                 >
-        
-                    <Box
-                        sx={{
-                            margin: '0 auto',
-                            background: '#fff',
-                            padding: '30px',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                            maxWidth: '50%'
-                        }}
-                    >
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <Typography variant="h6" fontWeight="bold">
-                                Balance
-                            </Typography>
-                            <IconButton sx={{color: '#7E57C2'}} onClick={refreshData}>
-                                <RefreshIcon />
-                            </IconButton>
-                        </Box>
-                        <Typography variant="h4" fontWeight="bold" sx={{ marginTop: '10px', marginBottom: '20px',  color: '#7E57C2'}}>
-                            {balance.toFixed(2)} USD
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <Typography variant="h6" fontWeight="bold">
+                            Balance
                         </Typography>
-        
-                        <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: '10px' }}>
-                            Deposit and Withdrawal
-                        </Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: '16px', marginBottom: '20px' }}>
-                            <Button 
-                                variant="contained" 
-                                sx={{ flex: 1, backgroundColor: '#7E57C2'}}
-                                onClick={handleDepositPopUp}
-                                >
-                                Deposit
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                color="secondary"
-                                fullWidth
-                                sx={{ flex: 1}}
-                                onClick={handleWithdrawPopUp}
-                            >
-                                Withdraw
-                            </Button>
-                        </Box>
-        
-                        <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: '20px' }}>
-                            Portfolio
-                        </Typography>
-                        <TableContainer component={Paper} sx={{marginBottom: '20px', maxHeight: 300, overflowY: 'auto' }}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell><strong>Portfolio ID</strong></TableCell>
-                                        <TableCell><strong>Sector</strong></TableCell>
-                                        <TableCell><strong>Symbol</strong></TableCell>
-                                        <TableCell align="right"><strong>Quantity</strong></TableCell>
-                                        <TableCell align="right"><strong>Average Price</strong></TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {portfolio.map((position, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{position.portfolio_id}</TableCell>
-                                            <TableCell>{position.sector}</TableCell>
-                                            <TableCell>{position.symbol}</TableCell>
-                                            <TableCell align="right">{position.quantity}</TableCell>
-                                            <TableCell align="right">{position.average_price}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-        
-                        <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: '20px' }}>
-                            Transactions
-                        </Typography>
-                        <TableContainer component={Paper} sx={{ maxHeight: 300, overflowY: 'auto' }}>
-                            <Table stickyHeader>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell><strong>Transaction ID</strong></TableCell>
-                                        <TableCell align="right"><strong>Action</strong></TableCell>
-                                        <TableCell align="right"><strong>Symbol</strong></TableCell>
-                                        <TableCell align="right"><strong>Quantity</strong></TableCell>
-                                        <TableCell align="right"><strong>Average Price</strong></TableCell>
-                                        <TableCell align="right"><strong>Timestamp</strong></TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {transaction.map((item, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{item.transaction_id}</TableCell>
-                                            <TableCell align="right">{item.action}</TableCell>
-                                            <TableCell align="right">{item.symbol}</TableCell>
-                                            <TableCell align="right">${item.quantity}</TableCell>
-                                            <TableCell align="right">${item.average_price}</TableCell>
-                                            <TableCell align="right">{new Date(item.last_updated).toLocaleString()}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                        <DepositPopup
-                            open={isDepositPopupOpen}
-                            onClose={() => handleDepositClose()}
-                            balance={walletBalance}
-                            handleDeposit={handleDeposit}
-                        />
-                        <WithdrawPopup
-                            open={isWithdrawPopupOpen}
-                            onClose={() => setWithdrawPopupOpen(false)}
-                            balance={balance}
-                            handleWithdraw={handleWithdrawal}
-                        />
+                        <IconButton sx={{color: '#7E57C2'}} onClick={refreshData}>
+                            <RefreshIcon />
+                        </IconButton>
                     </Box>
+                    <Typography variant="h4" fontWeight="bold" sx={{ marginTop: '10px', marginBottom: '20px',  color: '#7E57C2'}}>
+                        {balance.toFixed(2)} USD
+                    </Typography>
+    
+                    <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: '20px' }}>
+                        Portfolio
+                    </Typography>
+                    <TableContainer component={Paper} sx={{marginBottom: '20px', maxHeight: 300, overflowY: 'auto' }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell><strong>Portfolio ID</strong></TableCell>
+                                    <TableCell><strong>Sector</strong></TableCell>
+                                    <TableCell><strong>Symbol</strong></TableCell>
+                                    <TableCell align="right"><strong>Quantity</strong></TableCell>
+                                    <TableCell align="right"><strong>Average Price</strong></TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {portfolio.map((position, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{position.portfolio_id}</TableCell>
+                                        <TableCell>{position.sector}</TableCell>
+                                        <TableCell>{position.symbol}</TableCell>
+                                        <TableCell align="right">{position.quantity}</TableCell>
+                                        <TableCell align="right">{position.average_price}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+    
+                    <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: '20px' }}>
+                        Transactions
+                    </Typography>
+                    <TableContainer component={Paper} sx={{ maxHeight: 300, overflowY: 'auto' }}>
+                        <Table stickyHeader>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell><strong>Transaction ID</strong></TableCell>
+                                    <TableCell align="right"><strong>Action</strong></TableCell>
+                                    <TableCell align="right"><strong>Symbol</strong></TableCell>
+                                    <TableCell align="right"><strong>Quantity</strong></TableCell>
+                                    <TableCell align="right"><strong>Average Price</strong></TableCell>
+                                    <TableCell align="right"><strong>Timestamp</strong></TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {transaction.map((item, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{item.transaction_id}</TableCell>
+                                        <TableCell align="right">{item.action}</TableCell>
+                                        <TableCell align="right">{item.symbol}</TableCell>
+                                        <TableCell align="right">${item.quantity}</TableCell>
+                                        <TableCell align="right">${item.average_price}</TableCell>
+                                        <TableCell align="right">{new Date(item.last_updated).toLocaleString()}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </Box>
-            );
-        }else{
-            return <Whitelisted/>
-        }
+            </Box>
+        );
     }else{
         return <Connected/>
     }

@@ -207,22 +207,6 @@ const Navbar = () => {
                                 gap: '16px',
                             }}
                         >
-                            {/* <Typography
-                                variant="h6"
-                                component={Link}
-                                to="/setting"
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    textDecoration: 'none',
-                                    color: '#7E57C2',
-                                    fontWeight: 'bold',
-                                    transition: 'transform 0.3s ease',
-                                    '&:hover': { color: '#6A4BA1' },
-                                }}
-                            >
-                                <SettingsIcon />
-                            </Typography> */}
                             <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
                                 <IconButton onClick={() => setOpenDrawer(true)}>
                                     <MenuIcon sx={{ color: '#060f5e' }} />
@@ -254,6 +238,22 @@ const Navbar = () => {
                                     {connected}
                                 </Button>
                             </Box>
+                            <Typography
+                                variant="h6"
+                                component={Link}
+                                to="/setting"
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    textDecoration: 'none',
+                                    color: '#7E57C2',
+                                    fontWeight: 'bold',
+                                    transition: 'transform 0.3s ease',
+                                    '&:hover': { color: '#6A4BA1' },
+                                }}
+                            >
+                                <SettingsIcon />
+                            </Typography>
                         </Box>
                     </NavbarContainer>
                 </StyledToolbar>
