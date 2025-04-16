@@ -206,7 +206,7 @@ const StrategyPage = () => {
             padding: '30px',
             borderRadius: '8px',
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-            maxWidth: '50%'
+            maxWidth: '70%'
           }}
         >
           <TextField

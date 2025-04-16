@@ -4,7 +4,7 @@ import { Box, Grid, Stack } from '@mui/material';
 import OpenOrder from '../components/OpenOrder'; 
 import CloseOrder from '../components/CloseOrder'
 import {AppContext} from '../components/AppProvider';
-import { Connected, Whitelisted } from '../components/Alert';
+import { Connected, routeTrigger} from '../components/Alert';
 import TradingViewWidget from "../components/TradingViewWidget";
 import { Contract, Provider, cairo, CallData} from "starknet";
 
@@ -171,6 +171,79 @@ const TradePage = () => {
     handleSymbols(selectedSector); 
     updateUserInfo(info.walletAddress)
   };
+  
+  /* global BigInt */
+
+  const handleDeposit = async (amount) => {
+    try {
+      const provider = info.wallet.account;
+      const contractClass = await hash_provider.getClassByHash(classHash);
+      const abi = contractClass.abi;
+      const contract = new Contract(abi, contractAddress, provider);
+      const weiAmount = amount * 1000000;
+  
+      const deposit = contract.populate("deposit", [BigInt(weiAmount), usdcTokenAddress]);
+  
+      const result = await provider.execute([
+        {
+          contractAddress: usdcTokenAddress,
+          entrypoint: "approve",
+          calldata: CallData.compile({
+            spender: contractAddress,
+            amount: cairo.uint256(weiAmount),
+          }),
+        },
+        {
+          contractAddress: contractAddress,
+          entrypoint: "deposit",
+          calldata: deposit.calldata,
+        },
+      ]);
+  
+      console.log("Deposit Result:", result);
+      alert("Deposit completed successfully!");
+    } catch (error) {
+      console.error("An error occurred during the deposit process:", error);
+      if (error.message.includes("User abort")) {
+        alert("Transaction aborted by user.");
+      } else {
+        alert("An unexpected error occurred. Please try again.");
+      }
+      throw error;
+    }
+  };
+  
+  const handleWithdrawal = async (amount) => {
+      try {
+          const provider = info.wallet.account;
+      
+          const contractClass = await hash_provider.getClassByHash(classHash);
+          const abi = contractClass.abi;
+          const contract = new Contract(abi, contractAddress, provider);
+      
+          const weiAmount = amount * 1000000;
+      
+          const withdrawal = contract.populate("withdraw", [BigInt(weiAmount), usdcTokenAddress]);
+      
+          const result = await provider.execute([{
+              contractAddress: contractAddress,
+              entrypoint: "withdraw",
+              calldata: withdrawal.calldata,
+          }]);
+      
+          console.log("Withdrawal Result:", result);
+
+          alert("Withdrawal completed successfully!");
+      } catch (error) {
+          console.error("An error occurred during the withdrawal process:", error);
+      
+          if (error.message.includes("User abort")) {
+              alert("Transaction aborted by user.");
+          } else {
+              alert("An unexpected error occurred. Please try again.");
+          }
+      }
+  };
 
   const handleOpenOrder = async (action) => {
     if (!sector || !symbol) {
@@ -180,6 +253,8 @@ const TradePage = () => {
   
     try {
       let is_buy = action === "Buy";
+
+      await handleDeposit(amount);
   
       const data = {
         wallet: info.walletAddress,
@@ -244,13 +319,14 @@ const TradePage = () => {
     fetchFee(info.walletAddress, symbol+"-"+sector, size);
     updateUserInfo(info.walletAddress);
     handleBalance(info.walletAddress);
+    info.setRouteTrigger(true);
   };
 
-  // useEffect(() => {
-  //     if (info.walletAddress) {
-  //         refreshData();
-  //     }
-  // }, [info.walletAddress, refreshData]);
+  useEffect(() => {
+      if (info.walletAddress && !info.routeTrigger) {
+          refreshData();
+      }
+  }, [info, refreshData]);
 
   if(info.walletAddress != null){
       return (

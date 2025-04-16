@@ -3,10 +3,8 @@ import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, T
 import RefreshIcon from '@mui/icons-material/Refresh';
 import axios from 'axios';
 import {AppContext} from '../components/AppProvider';
-import { Connected, Whitelisted } from '../components/Alert';
+import { Connected} from '../components/Alert';
 import { Contract, Provider, cairo, CallData} from "starknet";
-import DepositPopup from "../components/Stake";
-import WithdrawPopup from "../components/Unstake";
 
 const SettingsPage = () => {
 
@@ -88,127 +86,14 @@ const SettingsPage = () => {
         fetchPortfolio(info.walletAddress);
         fetchTransactions(info.walletAddress);
         getBalance();
-        setTriggerVariable(true);
+        info.setRouteTrigger(true);
     };
-
-    const handleDepositPopUp = async () => {
-        const value = await getBalance();
-        
-        if (value) {
-            setWalletBalance(value);
-            setDepositPopupOpen(true);
-        }
-    };
-
-    const handleDepositClose = async () => {
-        setDepositPopupOpen(false);
-    };
-    
-
-    const handleWithdrawPopUp = () => {
-        setWithdrawPopupOpen(true);
-    };
-
-
-    const updateBalance = async (hash) => {
-        try {
-            const response = await axios.post(`https://${host}/action`, {
-                hash
-            });
-    
-            console.log("Balance updated:", response.data);
-        } catch (error) {
-            console.error("Failed to update balance:", error.response?.data?.detail || error.message);
-            alert("Failed to update balance.");
-        }
-    };
-
-    /* global BigInt */
-
-    const handleDeposit = async (amount) => {
-        try {
-            const provider = info.wallet.account;
-
-            const contractClass = await hash_provider.getClassByHash(classHash);
-            const abi = contractClass.abi;
-            const contract = new Contract(abi, contractAddress, provider);
-
-            const weiAmount = amount * 1000000;
-        
-            const deposit = contract.populate("deposit", [BigInt(weiAmount), usdcTokenAddress]);
-
-            const result = await provider.execute([
-                {
-                    contractAddress: usdcTokenAddress,
-                    entrypoint: "approve",
-                    calldata: CallData.compile({
-                    spender: contractAddress,
-                    amount: cairo.uint256(weiAmount),
-                    }),
-                },
-                {
-                    contractAddress: contractAddress,
-                    entrypoint: "deposit",
-                    calldata: deposit.calldata,
-                }
-                ]);
-        
-            console.log("Deposit Result:", result);
-
-            updateBalance(result["transaction_hash"]);
-
-            alert("Deposit completed successfully!");
-        } catch (error) {
-            console.error("An error occurred during the deposit process:", error);
-
-            if (error.message.includes("User abort")) {
-                alert("Transaction aborted by user.");
-            } else {
-                alert("An unexpected error occurred. Please try again.");
-            }
-        }
-    };
-
-    const handleWithdrawal = async (amount) => {
-        try {
-            const provider = info.wallet.account;
-        
-            const contractClass = await hash_provider.getClassByHash(classHash);
-            const abi = contractClass.abi;
-            const contract = new Contract(abi, contractAddress, provider);
-        
-            const weiAmount = amount * 1000000;
-        
-            const withdrawal = contract.populate("withdraw", [BigInt(weiAmount), usdcTokenAddress]);
-        
-            const result = await provider.execute([{
-                contractAddress: contractAddress,
-                entrypoint: "withdraw",
-                calldata: withdrawal.calldata,
-            }]);
-        
-            console.log("Withdrawal Result:", result);
-        
-            updateBalance(result["transaction_hash"]);
-
-            alert("Withdrawal completed successfully!");
-        } catch (error) {
-            console.error("An error occurred during the withdrawal process:", error);
-        
-            if (error.message.includes("User abort")) {
-                alert("Transaction aborted by user.");
-            } else {
-                alert("An unexpected error occurred. Please try again.");
-            }
-        }
-    };
-      
 
     useEffect(() => {
-        if (info.walletAddress && !triggerVariable) {
+        if (info.walletAddress && !info.routeTrigger) {
             refreshData();
         }
-    }, [info.walletAddress, triggerVariable, refreshData]);
+    }, [info, refreshData]);
 
 
     if(info.walletAddress != null){
@@ -229,7 +114,7 @@ const SettingsPage = () => {
                         padding: '30px',
                         borderRadius: '8px',
                         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                        maxWidth: '50%'
+                        maxWidth: '70%'
                     }}
                 >
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
