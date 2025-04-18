@@ -4,8 +4,9 @@ import { Box, Grid, Stack } from '@mui/material';
 import OpenOrder from '../components/OpenOrder'; 
 import CloseOrder from '../components/CloseOrder'
 import {AppContext} from '../components/AppProvider';
-import { Connected, Whitelisted } from '../components/Alert';
+import { Connected, routeTrigger} from '../components/Alert';
 import TradingViewWidget from "../components/TradingViewWidget";
+import { Contract, Provider, cairo, CallData} from "starknet";
 
 const TradePage = () => {
   const [sector, setSector] = useState('');
@@ -22,14 +23,24 @@ const TradePage = () => {
   const [tradingSymbol, setTradingSymbol] = useState('BTCUSDC');
   const [fee, setFee] = useState(0);
 
-  const host = "trivex-trade-faekh0awhkdphxhq.canadacentral-01.azurewebsites.net";
+  const host = "https://trivex-trade-faekh0awhkdphxhq.canadacentral-01.azurewebsites.net";
   const info = useContext(AppContext);
 
+  const hash_provider = new Provider({ network: "sepolia" });
+  const classHash = "0x008e2b7d5289f1ca14683bc643f42687dd1ef949e8a35be4c429aa825a097604"; 
+  const contractAddress = "0x005262cd7aee4715e4a00c41384a5f5ad151ff16da7523f41b93836bed922ced"; 
+  const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
+
+
+  const getABI = async (classHash) => {
+    const contractClass = await hash_provider.getClassByHash(classHash);
+    return contractClass.abi;
+  };  
 
   const handleSymbols = async (selectedSector) => {
     try {
       console.log(`Fetching symbols for sector: ${selectedSector}...`);
-      const response = await axios.get(`https://${host}/symbols/${selectedSector}`);
+      const response = await axios.get(`${host}/symbols/${selectedSector}`);
 
       const symbols = Object.keys(response.data); 
       const symbolLeverages = response.data; 
@@ -47,27 +58,23 @@ const TradePage = () => {
     }
   };
   
-  const handleBalance = async (address) => {
+  const handleBalance = async () => {
     try {
-      console.log("Fetching balance...");
-      const response = await axios.get(`https://${host}/wallets/${address}/balances`);
-
-      const balances = response.data; 
-      if (balances && balances.length > 0) {
-        const accountValue = parseFloat(balances[0].amount || 0);
-        setBalance(accountValue);
-      } else {
-          setBalance(0);
-      }
+        const abi = await getABI(classHash);
+        const contract = new Contract(abi, contractAddress, hash_provider);
+        const balance = await contract.call("get_balance", [usdcTokenAddress, info.walletAddress]);
+        const convertedBalance = (Number(balance) / 1000000).toFixed(2);
+        setBalance(Number(convertedBalance));
     } catch (error) {
-      console.error('Error fetching balance:', error);
+        console.error("Error fetching wallet balance:", error);
+        setBalance(0);
     }
   };
   
   const handlePositions = async (address) => {
     try {
       console.log("Fetching portfolio...");
-      const response = await axios.get(`https://${host}/wallets/${address}/portfolio`);
+      const response = await axios.get(`${host}/wallets/${address}/portfolio`);
       console.log(response.data);
       const current_positions = response.data && response.data.length > 0 
       ? response.data.map(item => ({
@@ -88,7 +95,7 @@ const TradePage = () => {
 
   const handleTransactions = async (address) => {
       try {
-          const response = await axios.get(`https://${host}/wallets/${address}/transactions`);
+          const response = await axios.get(`${host}/wallets/${address}/transactions`);
           const transactionData = response.data && response.data.length > 0 
               ? response.data.map(item => ({
                   transaction_id: parseInt(item.transaction_id),
@@ -108,7 +115,7 @@ const TradePage = () => {
   const fetchFee = async (address, symbol, size) => {
     try {
       console.log(`Fetching fee for ${address} for order ${symbol} with size ${size}`);
-      const response = await axios.get(`https://${host}/fee/${address}/${symbol}/${size}`);
+      const response = await axios.get(`${host}/fee/${address}/${symbol}/${size}`);
       console.log(response.data.fee);
       const estimate_fee = parseFloat(response.data.fee);
       setFee(estimate_fee);
@@ -122,7 +129,6 @@ const TradePage = () => {
   
   const updateUserInfo = (address) => {
     try {
-      handleBalance(address);
       handlePositions(address);
       handleTransactions(address);
       fetchFee(address, symbol, size);
@@ -134,7 +140,7 @@ const TradePage = () => {
   const handlePrice = async (symbol) => {
     try {
       console.log(`Fetching ${symbol}`);
-      const response = await axios.get(`https://${host}/price/${symbol}`);
+      const response = await axios.get(`${host}/price/${symbol}`);
 
       const current_price = parseFloat(response.data.price);
       setPrice(current_price);
@@ -154,15 +160,7 @@ const TradePage = () => {
 
   const symbolChange = (e) => {
     setSymbol(e);
-    console.log(sector);
     setTradingSymbol(e+"USDC");
-    // if(sector === "crypto"){
-    //   setTradingSymbol(e+"USDC");
-    // }else if(sector === "tsx"){
-    //   setTradingSymbol("TSX:"+e);
-    // }else{
-    //   setTradingSymbol(e);
-    // }
     handlePrice(e+"-"+sector);
   };
 
@@ -173,6 +171,79 @@ const TradePage = () => {
     handleSymbols(selectedSector); 
     updateUserInfo(info.walletAddress)
   };
+  
+  /* global BigInt */
+
+  const handleDeposit = async (amount) => {
+    try {
+      const provider = info.wallet.account;
+      const contractClass = await hash_provider.getClassByHash(classHash);
+      const abi = contractClass.abi;
+      const contract = new Contract(abi, contractAddress, provider);
+      const weiAmount = amount * 1000000;
+  
+      const deposit = contract.populate("deposit", [BigInt(weiAmount), usdcTokenAddress]);
+  
+      const result = await provider.execute([
+        {
+          contractAddress: usdcTokenAddress,
+          entrypoint: "approve",
+          calldata: CallData.compile({
+            spender: contractAddress,
+            amount: cairo.uint256(weiAmount),
+          }),
+        },
+        {
+          contractAddress: contractAddress,
+          entrypoint: "deposit",
+          calldata: deposit.calldata,
+        },
+      ]);
+  
+      console.log("Deposit Result:", result);
+      alert("Order open completed successfully!");
+    } catch (error) {
+      console.error("An error occurred during the deposit process:", error);
+      if (error.message.includes("User abort")) {
+        alert("Transaction aborted by user.");
+      } else {
+        alert("An unexpected error occurred. Please try again.");
+      }
+      throw error;
+    }
+  };
+  
+  const handleWithdrawal = async (amount) => {
+      try {
+          const provider = info.wallet.account;
+      
+          const contractClass = await hash_provider.getClassByHash(classHash);
+          const abi = contractClass.abi;
+          const contract = new Contract(abi, contractAddress, provider);
+      
+          const weiAmount = amount * 1000000;
+      
+          const withdrawal = contract.populate("withdraw", [BigInt(weiAmount), usdcTokenAddress]);
+      
+          const result = await provider.execute([{
+              contractAddress: contractAddress,
+              entrypoint: "withdraw",
+              calldata: withdrawal.calldata,
+          }]);
+      
+          console.log("Withdrawal Result:", result);
+
+          alert("Close order completed successfully!");
+      } catch (error) {
+          console.error("An error occurred during the withdrawal process:", error);
+      
+          if (error.message.includes("User abort")) {
+              alert("Transaction aborted by user.");
+          } else {
+              alert("An unexpected error occurred. Please try again.");
+          }
+      }
+  };
 
   const handleOpenOrder = async (action) => {
     if (!sector || !symbol) {
@@ -182,6 +253,8 @@ const TradePage = () => {
   
     try {
       let is_buy = action === "Buy";
+
+      await handleDeposit(amount);
   
       const data = {
         wallet: info.walletAddress,
@@ -194,7 +267,7 @@ const TradePage = () => {
 
       console.log(data);
     
-      const res = await axios.post(`https://${host}/open`, data);
+      const res = await axios.post(`${host}/open`, data);
     
       const result = res.data.status;
     
@@ -217,7 +290,7 @@ const TradePage = () => {
       console.log(position);
       alert(`Closing position for ${position.symbol}`);
   
-      const res = await axios.post(`https://${host}/close`, {
+      const res = await axios.post(`${host}/close`, {
         portfolio_id: position.portfolio_id,
         wallet: position.address,
         symbol: position.symbol,
@@ -226,11 +299,8 @@ const TradePage = () => {
       });
   
       if (res.data.status === "Success") {
+        await handleWithdrawal(res.data.amount);
         alert("Order closed successfully!");
-        const balances = res.data.balance;
-        console.log(balances);
-        const accountValue = parseFloat(balances[0].amount || 0);
-        setBalance(accountValue);
       } else {
         alert("Order closure failed. Please try again.");
       }
@@ -245,13 +315,15 @@ const TradePage = () => {
     handlePrice(symbol+"-"+sector);
     fetchFee(info.walletAddress, symbol+"-"+sector, size);
     updateUserInfo(info.walletAddress);
+    handleBalance(info.walletAddress);
+    info.setRouteTrigger(true);
   };
 
   useEffect(() => {
-      if (info.walletAddress) {
+      if (info.walletAddress && !info.routeTrigger) {
           refreshData();
       }
-  }, [info.walletAddress, refreshData]);
+  }, [info, refreshData]);
 
   if(info.walletAddress != null){
       return (

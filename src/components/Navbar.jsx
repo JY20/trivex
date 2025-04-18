@@ -11,16 +11,15 @@ import {
     Box,
     styled,
     Drawer,
-    IconButton } from '@mui/material';
+    IconButton 
+} from '@mui/material';
 import logo from '../assets/Trivex1.png';
 import starknet_logo from '../assets/starknet.png';
 import SettingsIcon from '@mui/icons-material/Settings'
 import { connect, disconnect } from "get-starknet";
-import { encode} from "starknet";
-import {AppContext} from './AppProvider';
-import axios from 'axios';
+import { encode } from "starknet";
+import { AppContext } from './AppProvider';
 import MenuIcon from '@mui/icons-material/Menu';
-
 
 const StyledToolbar = styled(Toolbar)({
     display: 'flex',
@@ -37,7 +36,7 @@ const NavbarContainer = styled(Box)(({ theme }) => ({
     padding: '8px 20px',
     boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
     [theme.breakpoints.down("sm")]: {
-        width: '90%', // Slightly smaller on mobile for better spacing
+        width: '90%',
         padding: '6px 15px'
     }
 }));
@@ -62,69 +61,53 @@ const theme = createTheme({
 const Navbar = () => {
     const info = useContext(AppContext);
     const [connected, setConnected] = useState('Connect');
-
     const [openDrawer, setOpenDrawer] = useState(false);
-
     const [walletName, setWalletName] = useState("");
     const [wallet, setWallet] = useState("");
 
-    const host = "localhost:8080";
-
-    const checkWhitelisted = async (address) => {
-        try {
-          const response = await axios.get(`http://${host}/wallets/${address}/whitelist`);
-    
-          const result = response.data;
-          info.setWhitelisted(true);
-        } catch (error) {
-          console.error('Error fetching balance:', error);
-        }
-    };
-
     const handleDisconnect = async () => {
-        await disconnect({clearLastWallet: true});
+        await disconnect({ clearLastWallet: true });
         setWallet("");
         info.setWalletAddress(null);
-        info.setWhitelisted(null);
-        setWalletName("")
+        setWalletName("");
         setConnected('Connect');
-    }
-
+    };
 
     const handleConnect = async () => {
-        try{
+        try {
             const getWallet = await connect();
             await getWallet?.enable({ starknetVersion: "v5" });
             setWallet(getWallet);
             const addr = encode.addHexPrefix(encode.removeHexPrefix(getWallet?.selectedAddress ?? "0x").padStart(64, "0"));
             info.setWalletAddress(addr);
-            const profile = addr.substring(0, 2)+"..."+addr.substring(addr.length-4, addr.length);
+            const profile = addr.substring(0, 2) + "..." + addr.substring(addr.length - 4);
             setConnected(profile);
-            setWalletName(getWallet?.name || "")
-            checkWhitelisted(addr);
+            setWalletName(getWallet?.name || "");
             info.setWallet(getWallet);
-        }
-        catch(e){
-            console.log(e)
+            info.setRouteTrigger(false);
+        } catch (e) {
+            console.log(e);
         }
     };
 
-    
-
     const handleConnectButton = async () => {
-        if(info.walletAddress == null){
+        if (info.walletAddress == null) {
             handleConnect();
-        }else{
+        } else {
             handleDisconnect();
         }
-    }
+    };
+
+    const handleRouteClick = () => {
+        info.setRouteTrigger(false);
+    };
 
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <AppBar component="nav" position="sticky" sx={{ backgroundColor: '#D1C4E9', color: '#060f5e' }} elevation={0}>
                 <StyledToolbar>
-                    <NavbarContainer sx={{width: '80%', background: 'white'}}>
+                    <NavbarContainer>
                         <Box
                             sx={{
                                 display: 'flex',
@@ -132,42 +115,45 @@ const Navbar = () => {
                                 gap: '16px',
                             }}
                         >
-                            {/* Logo */}
                             <Typography 
                                 variant="h6" 
                                 component={Link}
-                                    sx={{
-                                        textDecoration: 'none',
-                                        color: '#7E57C2',
-                                        fontWeight: 'bold',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        transition: 'transform 0.3s ease',
-                                        '&:hover': { color: '#6A4BA1' },
-                                    }}>
+                                to="/"
+                                onClick={handleRouteClick}
+                                sx={{
+                                    textDecoration: 'none',
+                                    color: '#7E57C2',
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    transition: 'transform 0.3s ease',
+                                    '&:hover': { color: '#6A4BA1' },
+                                }}>
                                 <img src={logo} alt="Trivex Logo" style={{ width: "30px", height: "30px", borderRadius: '50%', marginRight: '10px' }} />
                                 Trivex
                             </Typography>
                             <Typography
-                            variant="h7"
-                            component={Link}
-                            to="/trade"
-                            sx={{
-                                textDecoration: 'none',
-                                color: '#7E57C2',
-                                fontWeight: 'bold',
-                                transition: 'transform 0.3s ease',
-                                display: 'flex',
-                                alignItems: 'center',
-                                '&:hover': { color: '#6A4BA1' },
-                            }}
-                        >
-                            Trade
-                        </Typography>
-                        <Typography
+                                variant="h7"
+                                component={Link}
+                                to="/trade"
+                                onClick={handleRouteClick}
+                                sx={{
+                                    textDecoration: 'none',
+                                    color: '#7E57C2',
+                                    fontWeight: 'bold',
+                                    transition: 'transform 0.3s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    '&:hover': { color: '#6A4BA1' },
+                                }}
+                            >
+                                Trade
+                            </Typography>
+                            <Typography
                                 variant="h7"
                                 component={Link}
                                 to="/strategy"
+                                onClick={handleRouteClick}
                                 sx={{
                                     textDecoration: 'none',
                                     color: '#7E57C2',
@@ -180,10 +166,11 @@ const Navbar = () => {
                             >
                                 Strategy
                             </Typography>
-                        <Typography
+                            <Typography
                                 variant="h7"
                                 component={Link}
                                 to="/stake"
+                                onClick={handleRouteClick}
                                 sx={{
                                     textDecoration: 'none',
                                     color: '#7E57C2',
@@ -197,8 +184,7 @@ const Navbar = () => {
                                 Stake
                             </Typography>
                         </Box>
-                        {/* Mobile Menu Icon */}
-                        
+
                         <Box
                             sx={{
                                 display: 'flex',
@@ -207,22 +193,6 @@ const Navbar = () => {
                                 gap: '16px',
                             }}
                         >
-                            {/* <Typography
-                                variant="h6"
-                                component={Link}
-                                to="/setting"
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    textDecoration: 'none',
-                                    color: '#7E57C2',
-                                    fontWeight: 'bold',
-                                    transition: 'transform 0.3s ease',
-                                    '&:hover': { color: '#6A4BA1' },
-                                }}
-                            >
-                                <SettingsIcon />
-                            </Typography> */}
                             <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
                                 <IconButton onClick={() => setOpenDrawer(true)}>
                                     <MenuIcon sx={{ color: '#060f5e' }} />
@@ -254,11 +224,27 @@ const Navbar = () => {
                                     {connected}
                                 </Button>
                             </Box>
+                            <Typography
+                                variant="h6"
+                                component={Link}
+                                to="/setting"
+                                onClick={handleRouteClick}
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    textDecoration: 'none',
+                                    color: '#7E57C2',
+                                    fontWeight: 'bold',
+                                    transition: 'transform 0.3s ease',
+                                    '&:hover': { color: '#6A4BA1' },
+                                }}
+                            >
+                                <SettingsIcon />
+                            </Typography>
                         </Box>
                     </NavbarContainer>
                 </StyledToolbar>
 
-                {/* Mobile Drawer */}
                 <Drawer anchor="right" open={openDrawer} onClose={() => setOpenDrawer(false)}>
                     <Box sx={{ width: 250, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 2 }}>
                         <Button
