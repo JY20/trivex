@@ -69,7 +69,6 @@ const Navbar = () => {
         await disconnect({ clearLastWallet: true });
         setWallet("");
         info.setWalletAddress(null);
-        info.setWhitelisted(null);
         setWalletName("");
         setConnected('Connect');
     };

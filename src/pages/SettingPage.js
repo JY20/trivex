@@ -12,18 +12,13 @@ const SettingsPage = () => {
     const [portfolio, setPortfolio] = useState([]); 
     const [transaction, setTransaction] = useState([]); 
     const [balance, setBalance] = useState(0);
+    const [points, setPoints] = useState(0);
     const host = "trivex-trade-faekh0awhkdphxhq.canadacentral-01.azurewebsites.net";
 
     const hash_provider = new Provider({ network: "sepolia" });
     const classHash = "0x008e2b7d5289f1ca14683bc643f42687dd1ef949e8a35be4c429aa825a097604"; 
     const contractAddress = "0x005262cd7aee4715e4a00c41384a5f5ad151ff16da7523f41b93836bed922ced"; 
     const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
-
-    const [isDepositPopupOpen, setDepositPopupOpen] = useState(false);
-    const [isWithdrawPopupOpen, setWithdrawPopupOpen] = useState(false);
-    const [walletBalance, setWalletBalance] = useState(0);
-    const [triggerVariable, setTriggerVariable] = useState(false);
-
 
     const getABI = async (classHash) => {
         const contractClass = await hash_provider.getClassByHash(classHash);
@@ -48,6 +43,22 @@ const SettingsPage = () => {
             console.error('Error fetching portfolio:', error);
         }
     };
+
+    const fetchPoints= async (address) => {
+        try {
+            const response = await axios.get(`https://${host}/wallets/${address}/points`);
+            const current_points = response.data; 
+            if (current_points && current_points.length > 0) {
+                const accountValue = parseFloat(current_points[0].amount || 0);
+                setPoints(accountValue);
+            } else {
+                setPoints(0);
+            }
+        } catch (error) {
+            console.error('Error fetching balance:', error);
+        }
+    };
+
     
     const fetchTransactions = async (address) => {
         try {
@@ -121,13 +132,24 @@ const SettingsPage = () => {
                         <Typography variant="h6" fontWeight="bold">
                             Balance
                         </Typography>
-                        <IconButton sx={{color: '#7E57C2'}} onClick={refreshData}>
+                        <Typography variant="h6" fontWeight="bold">
+                            Points
+                        </Typography>
+                        <IconButton sx={{ color: '#7E57C2' }} onClick={refreshData}>
                             <RefreshIcon />
                         </IconButton>
                     </Box>
-                    <Typography variant="h4" fontWeight="bold" sx={{ marginTop: '10px', marginBottom: '20px',  color: '#7E57C2'}}>
-                        {balance.toFixed(2)} USD
-                    </Typography>
+
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                        <Typography variant="h4" fontWeight="bold" sx={{ color: '#7E57C2' }}>
+                            {balance.toFixed(2)} USD
+                        </Typography>
+                        <Typography variant="h4" fontWeight="bold" sx={{ color: '#7E57C2' }}>
+                            {points.toFixed(2)} Points
+                        </Typography>
+                        <Typography/>
+                    </Box>
+
     
                     <Typography variant="h6" fontWeight="bold" sx={{ marginBottom: '20px' }}>
                         Portfolio
