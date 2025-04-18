@@ -96,6 +96,7 @@ const SettingsPage = () => {
     const refreshData =  async () => {
         fetchPortfolio(info.walletAddress);
         fetchTransactions(info.walletAddress);
+        fetchPoints(info.walletAddress);
         getBalance();
         info.setRouteTrigger(true);
     };
@@ -145,7 +146,7 @@ const SettingsPage = () => {
                             {balance.toFixed(2)} USD
                         </Typography>
                         <Typography variant="h4" fontWeight="bold" sx={{ color: '#7E57C2' }}>
-                            {points.toFixed(2)} Points
+                            {points.toFixed(0)} Points
                         </Typography>
                         <Typography/>
                     </Box>
