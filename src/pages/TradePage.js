@@ -4,9 +4,9 @@ import { Box, Grid, Stack } from '@mui/material';
 import OpenOrder from '../components/OpenOrder'; 
 import CloseOrder from '../components/CloseOrder'
 import {AppContext} from '../components/AppProvider';
-import { Connected, routeTrigger} from '../components/Alert';
+import { Connected} from '../components/Alert';
 import TradingViewWidget from "../components/TradingViewWidget";
-import { Contract, Provider, cairo, CallData} from "starknet";
+import { AppContract } from '../components/AppContract';
 
 const TradePage = () => {
   const [sector, setSector] = useState('');
@@ -26,16 +26,7 @@ const TradePage = () => {
   const host = "https://trivex-trade-faekh0awhkdphxhq.canadacentral-01.azurewebsites.net";
   const info = useContext(AppContext);
 
-  const hash_provider = new Provider({ network: "sepolia" });
-  const classHash = "0x008e2b7d5289f1ca14683bc643f42687dd1ef949e8a35be4c429aa825a097604"; 
-  const contractAddress = "0x005262cd7aee4715e4a00c41384a5f5ad151ff16da7523f41b93836bed922ced"; 
-  const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
-
-
-  const getABI = async (classHash) => {
-    const contractClass = await hash_provider.getClassByHash(classHash);
-    return contractClass.abi;
-  };  
+  const contract =  new AppContract();
 
   const handleSymbols = async (selectedSector) => {
     try {
@@ -60,11 +51,8 @@ const TradePage = () => {
   
   const handleBalance = async () => {
     try {
-        const abi = await getABI(classHash);
-        const contract = new Contract(abi, contractAddress, hash_provider);
-        const balance = await contract.call("get_balance", [usdcTokenAddress, info.walletAddress]);
-        const convertedBalance = (Number(balance) / 1000000).toFixed(2);
-        setBalance(Number(convertedBalance));
+        const result = await contract.getWalletBalance(info.walletAddress);
+        setBalance(result);
     } catch (error) {
         console.error("Error fetching wallet balance:", error);
         setBalance(0);
@@ -171,34 +159,11 @@ const TradePage = () => {
     handleSymbols(selectedSector); 
     updateUserInfo(info.walletAddress)
   };
-  
-  /* global BigInt */
+
 
   const handleDeposit = async (amount) => {
     try {
-      const provider = info.wallet.account;
-      const contractClass = await hash_provider.getClassByHash(classHash);
-      const abi = contractClass.abi;
-      const contract = new Contract(abi, contractAddress, provider);
-      const weiAmount = amount * 1000000;
-  
-      const deposit = contract.populate("deposit", [BigInt(weiAmount), usdcTokenAddress]);
-  
-      const result = await provider.execute([
-        {
-          contractAddress: usdcTokenAddress,
-          entrypoint: "approve",
-          calldata: CallData.compile({
-            spender: contractAddress,
-            amount: cairo.uint256(weiAmount),
-          }),
-        },
-        {
-          contractAddress: contractAddress,
-          entrypoint: "deposit",
-          calldata: deposit.calldata,
-        },
-      ]);
+      const result = await contract.open_order(info.wallet.account, amount);
   
       console.log("Deposit Result:", result);
       alert("Order open completed successfully!");
@@ -215,21 +180,7 @@ const TradePage = () => {
   
   const handleWithdrawal = async (amount) => {
       try {
-          const provider = info.wallet.account;
-      
-          const contractClass = await hash_provider.getClassByHash(classHash);
-          const abi = contractClass.abi;
-          const contract = new Contract(abi, contractAddress, provider);
-      
-          const weiAmount = amount * 1000000;
-      
-          const withdrawal = contract.populate("withdraw", [BigInt(weiAmount), usdcTokenAddress]);
-      
-          const result = await provider.execute([{
-              contractAddress: contractAddress,
-              entrypoint: "withdraw",
-              calldata: withdrawal.calldata,
-          }]);
+          const result = await contract.close_order(info.wallet.account, amount);
       
           console.log("Withdrawal Result:", result);
 

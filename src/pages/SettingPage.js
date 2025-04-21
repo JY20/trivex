@@ -4,7 +4,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import axios from 'axios';
 import {AppContext} from '../components/AppProvider';
 import { Connected} from '../components/Alert';
-import { Contract, Provider, cairo, CallData} from "starknet";
+import { AppContract } from '../components/AppContract';
 
 const SettingsPage = () => {
 
@@ -15,15 +15,7 @@ const SettingsPage = () => {
     const [points, setPoints] = useState(0);
     const host = "trivex-trade-faekh0awhkdphxhq.canadacentral-01.azurewebsites.net";
 
-    const hash_provider = new Provider({ network: "sepolia" });
-    const classHash = "0x008e2b7d5289f1ca14683bc643f42687dd1ef949e8a35be4c429aa825a097604"; 
-    const contractAddress = "0x005262cd7aee4715e4a00c41384a5f5ad151ff16da7523f41b93836bed922ced"; 
-    const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
-
-    const getABI = async (classHash) => {
-        const contractClass = await hash_provider.getClassByHash(classHash);
-        return contractClass.abi;
-    };  
+    const contract =  new AppContract();
     
     const fetchPortfolio = async (address) => {
         try {
@@ -81,11 +73,8 @@ const SettingsPage = () => {
 
     const getBalance = async () => {
         try {
-            const abi = await getABI(classHash);
-            const contract = new Contract(abi, contractAddress, hash_provider);
-            const balance = await contract.call("get_balance", [usdcTokenAddress, info.walletAddress]);
-            const convertedBalance = (Number(balance) / 1000000).toFixed(2);
-            setBalance(Number(convertedBalance));
+            const result = await contract.getWalletBalance(info.walletAddress);
+            setBalance(result);
         } catch (error) {
             console.error("Error fetching wallet balance:", error);
             setBalance(0);
@@ -143,7 +132,7 @@ const SettingsPage = () => {
 
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                         <Typography variant="h4" fontWeight="bold" sx={{ color: '#7E57C2' }}>
-                            {balance.toFixed(2)} USD
+                            {balance} USD
                         </Typography>
                         <Typography variant="h4" fontWeight="bold" sx={{ color: '#7E57C2' }}>
                             {points.toFixed(0)} Points

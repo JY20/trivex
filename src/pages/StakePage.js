@@ -1,14 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Grid, Box, Typography, Button, Paper } from '@mui/material';
-import axios from 'axios';
 import { Connected } from '../components/Alert';
 import { AppContext } from '../components/AppProvider';
-import { Contract, Provider, cairo, CallData } from 'starknet';
 import StakePopup from '../components/Stake'; // Used as StakePopup
 import UnstakePopup from '../components/Unstake'; // Used as UnstakePopup
+import { AppContract } from '../components/AppContract';
 
 const StakePage = () => {
-    const host = 'localhost:8080';
     const info = useContext(AppContext);
 
     const stakeData = {
@@ -22,61 +20,26 @@ const StakePage = () => {
     const [walletBalance, setWalletBalance] = useState(0);
     const [poolBalance, setPoolBalance] = useState(0); // Balance in the staking pool
 
-    // Starknet contract details (same as SettingsPage)
-    const hash_provider = new Provider({ network: 'sepolia' });
-    const classHash = '0x008e2b7d5289f1ca14683bc643f42687dd1ef949e8a35be4c429aa825a097604';
-    const contractAddress = '0x005262cd7aee4715e4a00c41384a5f5ad151ff16da7523f41b93836bed922ced';
-    const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
-
-    // Fetch ABI for the contract
-    const getABI = async (classHash) => {
-        const contractClass = await hash_provider.getClassByHash(classHash);
-        return contractClass.abi;
-    };
-
-    /* global BigInt */
+    const contract =  new AppContract();
 
     // Fetch wallet balance (USDC balance)
     const getBalance = async () => {
         try {
-            const abi = await getABI(classHash);
-            const contract = new Contract(abi, contractAddress, hash_provider);
-            const balance = await contract.call('get_balance', [usdcTokenAddress, info.walletAddress]);
-            const convertedBalance = (Number(balance) / 1000000).toFixed(2);
-            return convertedBalance;
+            return await contract.getWalletBalance(info.walletAddress);
         } catch (error) {
             console.error('Error fetching balance:', error);
             throw error;
         }
     };
-
+    
     // Fetch pool balance (staked amount)
-    const fetchPoolBalance = async (address) => {
+    const fetchPoolBalance = async () => {
         try {
-            const response = await axios.get(`https://${host}/wallets/${address}/balances`);
-            const current_balances = response.data;
-            if (current_balances && current_balances.length > 0) {
-                const poolValue = parseFloat(current_balances[0].amount || 0);
-                setPoolBalance(poolValue);
-            } else {
-                setPoolBalance(0);
-            }
-        } catch (error) {
-            console.error('Error fetching pool balance:', error);
+            const result = await contract.getStakedBalance(info.walletAddress);
+            setPoolBalance(result);
+        } catch (err) {
+            console.error('Error fetching staked balance:', err);
             setPoolBalance(0);
-        }
-    };
-
-    // Update balance after transaction
-    const updateBalance = async (hash) => {
-        try {
-            const response = await axios.post(`https://${host}/action`, {
-                hash,
-            });
-            console.log('Balance updated:', response.data);
-        } catch (error) {
-            console.error('Failed to update balance:', error.response?.data?.detail || error.message);
-            alert('Failed to update balance.');
         }
     };
 
@@ -104,84 +67,44 @@ const StakePage = () => {
     // Handle Stake action
     const handleStake = async (amount) => {
         try {
-            const provider = info.wallet.account;
-            const contractClass = await hash_provider.getClassByHash(classHash);
-            const abi = contractClass.abi;
-            const contract = new Contract(abi, contractAddress, provider);
-
-            const weiAmount = amount * 1000000;
-
-            const stake = contract.populate('deposit', [BigInt(weiAmount), usdcTokenAddress]);
-
-            const result = await provider.execute([
-                {
-                    contractAddress: usdcTokenAddress,
-                    entrypoint: 'approve',
-                    calldata: CallData.compile({
-                        spender: contractAddress,
-                        amount: cairo.uint256(weiAmount),
-                    }),
-                },
-                {
-                    contractAddress: contractAddress,
-                    entrypoint: 'deposit',
-                    calldata: stake.calldata,
-                },
-            ]);
-
-            console.log('Stake Result:', result);
-            updateBalance(result['transaction_hash']);
-            alert('Stake completed successfully!');
-            setStakePopupOpen(false);
-            if (info.walletAddress) {
-                await fetchPoolBalance(info.walletAddress);
-            }
+            const result = await contract.stake(info.wallet.account, amount);
+            console.log("Stake Result:", result);
+            alert("Stake completed successfully!");
         } catch (error) {
-            console.error('An error occurred during staking:', error);
-            if (error.message.includes('User abort')) {
-                alert('Transaction aborted by user.');
+            console.error("An error occurred during the stake process:", error);
+            if (error.message.includes("User abort")) {
+                alert("Transaction aborted by user.");
             } else {
-                alert('An unexpected error occurred. Please try again.');
+                alert("An unexpected error occurred. Please try again.");
             }
+            throw error;
         }
     };
 
     // Handle Unstake action
     const handleUnstake = async (amount) => {
         try {
-            const provider = info.wallet.account;
-            const contractClass = await hash_provider.getClassByHash(classHash);
-            const abi = contractClass.abi;
-            const contract = new Contract(abi, contractAddress, provider);
-
-            const weiAmount = amount * 1000000;
-
-            const unstake = contract.populate('withdraw', [BigInt(weiAmount), usdcTokenAddress]);
-
-            const result = await provider.execute([
-                {
-                    contractAddress: contractAddress,
-                    entrypoint: 'withdraw',
-                    calldata: unstake.calldata,
-                },
-            ]);
-
+            const result = await contract.unstake(info.wallet.account, amount);
             console.log('Unstake Result:', result);
-            updateBalance(result['transaction_hash']);
             alert('Unstake completed successfully!');
             setUnstakePopupOpen(false);
-            if (info.walletAddress) {
-                await fetchPoolBalance(info.walletAddress);
-            }
-        } catch (error) {
-            console.error('An error occurred during unstaking:', error);
-            if (error.message.includes('User abort')) {
-                alert('Transaction aborted by user.');
-            } else {
-                alert('An unexpected error occurred. Please try again.');
-            }
+            
+            await fetchPoolBalance();
+        } catch (err) {
+            console.error('An error occurred during unstaking:', err);
+            alert(err.message.includes('User abort') ? 'Transaction aborted.' : 'Unexpected error.');
         }
     };
+
+    const refreshData = async () => {
+        fetchPoolBalance();
+    };
+
+    useEffect(() => {
+        if (info.walletAddress && !info.routeTrigger) {
+            refreshData();
+        }
+    }, [info, refreshData]);
 
     // Render
     if (info.walletAddress != null) {
@@ -218,7 +141,7 @@ const StakePage = () => {
                                     </Typography>
                                     <Typography variant="body1" sx={{ color: '#7E57C2', mt: 1 }}>
                                         Staked Balance: <span style={{ fontWeight: 'bold' }}>
-                                            {poolBalance.toFixed(2)} USD
+                                            {poolBalance} USD
                                         </span>
                                     </Typography>
                                 </Box>

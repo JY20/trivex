@@ -176,7 +176,7 @@ const OpenOrder = ({
         </Box>
 
         <Typography variant="body1" sx={{ marginBottom: '10px', color: 'black' }}>
-          Balance: {available.toFixed(2)} USD
+          Balance: {available} USD
         </Typography>
 
         {/* 交易按钮 */}
