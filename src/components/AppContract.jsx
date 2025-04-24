@@ -2,8 +2,8 @@ import { Contract, Provider, cairo, CallData, shortString } from 'starknet';
 
 const hash_provider = new Provider({ network: 'sepolia' });
 
-const classHash = '0x05221274ec869623f2afb525a99daf1146698b9a4bf5dfcbc6757983ec30d425';
-const contractAddress = '0x05323e5d8143ef7a738dc735a67bad0b980b8a0e506d5b498034d1fe76ee9bfd';
+const classHash = '0x0042dc8bf4946d20a561e3197c712c15ded3e6df272ae32157b09e776701cf30';
+const contractAddress = '0x005d2c86690ecdcc99761a9bda3043337e3552b8000a15ad0fdfb7b7ca009051';
 const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
 const strkTokenAddress = '0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d';
 
@@ -210,5 +210,15 @@ export class AppContract {
         ]);
 
         return result;
+    }
+
+    async getUsers() {
+        const abi = await this.getABI(classHash);
+        const contract = new Contract(abi, contractAddress, hash_provider);
+        const positionsRaw = await contract.call('get_all_user_addresses', []);
+        positionsRaw.forEach(position => {
+            const contractAddressHex = "0x" + position.toString(16).padStart(64, "0");
+            console.log(contractAddressHex);
+        });
     }
 }
