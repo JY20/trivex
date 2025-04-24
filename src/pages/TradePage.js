@@ -76,7 +76,6 @@ const TradePage = () => {
         console.log("Fetching transaction history...");
         const results = await contract.getTransactions(address);
         console.log(results);
-    
         setTransaction(results);
       } catch (error) {
           console.error('Error fetching transactions:', error);
@@ -98,11 +97,11 @@ const TradePage = () => {
     }
   };
   
-  const updateUserInfo = (address) => {
+  const updateUserInfo = async (address) => {
     try {
-      handlePositions(address);
-      handleTransactions(address);
-      fetchFee(address, symbol, size);
+      await handlePositions(address);
+      await handleTransactions(address);
+      await handleBalance(info.walletAddress);
     } catch (error) {
       console.error("Error updating user info:", error);
     }
@@ -143,42 +142,11 @@ const TradePage = () => {
     updateUserInfo(info.walletAddress)
   };
 
-
-  const handleDeposit = async (symbol, quantity, averagePrice, leverage, totalValue, action, amount) => {
-    try {
-      action = "Open "+action;
-      const result = await contract.open_order(info.wallet.account, symbol, quantity, averagePrice, leverage, totalValue, action, amount);
-  
-      console.log("Deposit Result:", result);
-      alert("Order open completed successfully!");
-    } catch (error) {
-      console.error("An error occurred during the deposit process:", error);
-      if (error.message.includes("User abort")) {
-        alert("Transaction aborted by user.");
-      } else {
-        alert("An unexpected error occurred. Please try again.");
-      }
-      throw error;
-    }
-  };
-  
-  const handleWithdrawal = async (position, amount) => {
-      try {
-          const action = "Close "+ position.action.split(" ")[1];
-          const result = await contract.close_order(info.wallet.account, position.id, amount, action);
-      
-          console.log("Withdrawal Result:", result);
-
-          alert("Close order completed successfully!");
-      } catch (error) {
-          console.error("An error occurred during the withdrawal process:", error);
-      
-          if (error.message.includes("User abort")) {
-              alert("Transaction aborted by user.");
-          } else {
-              alert("An unexpected error occurred. Please try again.");
-          }
-      }
+  const refreshData = async () => {
+    handlePrice(symbol+"-"+sector);
+    fetchFee(info.walletAddress, symbol+"-"+sector, size);
+    updateUserInfo(info.walletAddress);
+    info.setRouteTrigger(true);
   };
 
   const handleOpenOrder = async (action) => {
@@ -188,62 +156,60 @@ const TradePage = () => {
     }
   
     try {
-      let is_buy = action === "Buy";
-
-      await handleDeposit(symbol, size, price, leverage, size*price, action);
+      const totalValue = size * price;
+      const orderAction = "Open " + action;
   
-      const data = {
-        wallet: info.walletAddress,
-        is_buy,
+      const result = await contract.open_order(
+        info.wallet.account,
         symbol,
-        amount,
-        sector,
-        leverage
-      };
-
-      console.log(data);
-    
-      const res = await axios.post(`${host}/open`, data);
-    
-      const result = res.data.status;
-    
-      if (result === "Success") {
-        alert(`${action} order placed successfully at $${price.toFixed(2)}!`);
-      } else {
-        alert("An error occurred while placing the order.");
-      }
+        size,
+        price,
+        leverage,
+        totalValue,
+        orderAction,
+        amount
+      );
   
-      updateUserInfo(info.walletAddress);
-      return res.data;
-    } catch (e) {
-      console.error("Error during trade:", e);
-      alert("An error occurred while processing the trade.");
+      console.log("Contract Open Order Result:", result);
+      await updateUserInfo(info.walletAddress);
+    } catch (error) {
+      console.error("Error during trade:", error);
+      if (error.message.includes("User abort")) {
+        alert("Transaction aborted by user.");
+      } else {
+        alert("An unexpected error occurred. Please try again.");
+      }
     }
   };
-
+  
   const handleCloseOrder = async (position) => {
     try {
       console.log(position);
       alert(`Closing position for ${position.symbol}`);
   
-      const response = await axios.get(`${host}/price/${position.symbol+"-Crypto"}`);
+      let response = await axios.get(`${host}/price/${position.symbol + "-Crypto"}`);
       const current_price = parseFloat(response.data.price);
-      
-      await handleWithdrawal(position, position.quantity*current_price);
-      await handlePositions(info.walletAddress);
+      const amount = position.quantity * current_price;
+      const action = "Close " + position.action.split(" ")[1];
+  
+      const result = await contract.close_order(
+        info.wallet.account,
+        position.id,
+        amount,
+        action
+      );
+  
+      console.log("Contract Close Order Result:", result);
 
+      await updateUserInfo(info.walletAddress);
     } catch (error) {
       console.error("Error closing position:", error);
-      alert("An error occurred while closing the order.");
+      if (error.message.includes("User abort")) {
+        alert("Transaction aborted by user.");
+      } else {
+        alert("An unexpected error occurred. Please try again.");
+      }
     }
-  };
-
-  const refreshData = async () => {
-    handlePrice(symbol+"-"+sector);
-    fetchFee(info.walletAddress, symbol+"-"+sector, size);
-    updateUserInfo(info.walletAddress);
-    handleBalance(info.walletAddress);
-    info.setRouteTrigger(true);
   };
 
   useEffect(() => {
@@ -259,7 +225,7 @@ const TradePage = () => {
             <Grid item xs={8}>
               <Stack spacing={2} sx={{ height: "100%" }}>
                 <TradingViewWidget symbol={tradingSymbol} />
-                <CloseOrder positions={position} transactions={transaction} handleCloseOrder={handleCloseOrder} />
+                <CloseOrder positions={position} transactions={transaction} handleCloseOrder={handleCloseOrder} refreshData={refreshData}/>
               </Stack>
             </Grid>
             <Grid item xs={4}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import Loading from './Loading';
 
-const CloseOrder = ({ positions, transactions, handleCloseOrder }) => {
+const CloseOrder = ({ positions, transactions, handleCloseOrder, refreshData}) => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
@@ -27,10 +27,20 @@ const CloseOrder = ({ positions, transactions, handleCloseOrder }) => {
     try {
       setLoading(true);
       await handleCloseOrder(position);
+      await refreshData();
     } finally {
       setLoading(false);
     }
   };
+
+  // useEffect(() => {
+  //   console.log('Positions prop updated:', positions);
+  // }, [positions]);
+  
+  // useEffect(() => {
+  //   console.log('Transactions prop updated:', transactions);
+  // }, [transactions]);
+  
 
   return (
     <>
@@ -121,7 +131,7 @@ const CloseOrder = ({ positions, transactions, handleCloseOrder }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {transactions.map((item, index) => (
+                  {transactions.slice().reverse().map((item, index) => (
                     <TableRow key={index}>
                       <TableCell>{item.symbol}</TableCell>
                       <TableCell>{item.quantity}</TableCell>

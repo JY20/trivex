@@ -27,6 +27,7 @@ const OpenOrder = ({
     try {
       setLoading(true);
       await handleTrade(type);
+      await refreshData();
     } finally {
       setLoading(false);
     }

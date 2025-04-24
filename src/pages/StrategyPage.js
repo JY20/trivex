@@ -170,7 +170,7 @@ const StrategyPage = () => {
             fontFamily: 'Arial, sans-serif',
             backgroundColor: '#D1C4E9',
             padding: '20px',
-            height: '100%'
+            minHeight: '100vh'
           }}
         >
           <Box
