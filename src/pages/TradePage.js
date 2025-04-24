@@ -18,6 +18,7 @@ const TradePage = () => {
   const [symbolList, setSymbolList] = useState([]);
   const [symbolLeverages, setSymbolLeverages] = useState({});
   const [position, setPosition] = useState([]);
+  const [positionDB, setPositionDB] = useState([]);
   const [transaction, setTransaction] = useState([]);  
   const [price, setPrice] = useState(0); 
   const [tradingSymbol, setTradingSymbol] = useState('BTCUSDC');
@@ -62,20 +63,9 @@ const TradePage = () => {
   const handlePositions = async (address) => {
     try {
       console.log("Fetching portfolio...");
-      const response = await axios.get(`${host}/wallets/${address}/portfolio`);
-      console.log(response.data);
-      const current_positions = response.data && response.data.length > 0 
-      ? response.data.map(item => ({
-          portfolio_id: item.portfolio_id,
-          address: item.address,
-          symbol: item.symbol,
-          quantity: parseFloat(item.quantity),
-          average_price: parseFloat(item.average_price),
-          sector: item.sector
-      })) 
-      : [];
-  
-      setPosition(current_positions);
+      const results = await contract.getPositions(address);
+      console.log(results);
+      setPosition(results);
     } catch (error) {
       console.error('Error fetching portfolio:', error);
     }
@@ -83,18 +73,11 @@ const TradePage = () => {
 
   const handleTransactions = async (address) => {
       try {
-          const response = await axios.get(`${host}/wallets/${address}/transactions`);
-          const transactionData = response.data && response.data.length > 0 
-              ? response.data.map(item => ({
-                  transaction_id: parseInt(item.transaction_id),
-                  action: item.action,
-                  symbol: item.symbol,
-                  quantity: parseFloat(item.quantity),
-                  average_price: parseFloat(item.average_price),
-                  last_updated: item.last_updated,
-              })) 
-              : [];
-          setTransaction(transactionData);
+        console.log("Fetching transaction history...");
+        const results = await contract.getTransactions(address);
+        console.log(results);
+    
+        setTransaction(results);
       } catch (error) {
           console.error('Error fetching transactions:', error);
       }
@@ -161,9 +144,10 @@ const TradePage = () => {
   };
 
 
-  const handleDeposit = async (amount) => {
+  const handleDeposit = async (symbol, quantity, averagePrice, leverage, totalValue, action, amount) => {
     try {
-      const result = await contract.open_order(info.wallet.account, amount);
+      action = "Open "+action;
+      const result = await contract.open_order(info.wallet.account, symbol, quantity, averagePrice, leverage, totalValue, action, amount);
   
       console.log("Deposit Result:", result);
       alert("Order open completed successfully!");
@@ -178,9 +162,10 @@ const TradePage = () => {
     }
   };
   
-  const handleWithdrawal = async (amount) => {
+  const handleWithdrawal = async (position, amount) => {
       try {
-          const result = await contract.close_order(info.wallet.account, amount);
+          const action = "Close "+ position.action.split(" ")[1];
+          const result = await contract.close_order(info.wallet.account, position.id, amount, action);
       
           console.log("Withdrawal Result:", result);
 
@@ -205,7 +190,7 @@ const TradePage = () => {
     try {
       let is_buy = action === "Buy";
 
-      await handleDeposit(amount);
+      await handleDeposit(symbol, size, price, leverage, size*price, action);
   
       const data = {
         wallet: info.walletAddress,
@@ -241,21 +226,12 @@ const TradePage = () => {
       console.log(position);
       alert(`Closing position for ${position.symbol}`);
   
-      const res = await axios.post(`${host}/close`, {
-        portfolio_id: position.portfolio_id,
-        wallet: position.address,
-        symbol: position.symbol,
-        size: position.quantity,
-        sector: position.sector
-      });
-  
-      if (res.data.status === "Success") {
-        await handleWithdrawal(res.data.amount);
-        alert("Order closed successfully!");
-      } else {
-        alert("Order closure failed. Please try again.");
-      }
+      const response = await axios.get(`${host}/price/${position.symbol+"-Crypto"}`);
+      const current_price = parseFloat(response.data.price);
+      
+      await handleWithdrawal(position, position.quantity*current_price);
       await handlePositions(info.walletAddress);
+
     } catch (error) {
       console.error("Error closing position:", error);
       alert("An error occurred while closing the order.");

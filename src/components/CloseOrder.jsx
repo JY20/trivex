@@ -62,22 +62,26 @@ const CloseOrder = ({ positions, transactions, handleCloseOrder }) => {
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
-                    <TableCell><strong>Portfolio ID</strong></TableCell>
-                    <TableCell><strong>Sector</strong></TableCell>
                     <TableCell><strong>Symbol</strong></TableCell>
-                    <TableCell align="right"><strong>Quantity</strong></TableCell>
-                    <TableCell align="right"><strong>Average Price</strong></TableCell>
-                    <TableCell align="center"><strong>Action</strong></TableCell>
+                    <TableCell><strong>Quantity</strong></TableCell>
+                    <TableCell><strong>Average Price</strong></TableCell>
+                    <TableCell><strong>Leverage</strong></TableCell>
+                    <TableCell><strong>Total Value</strong></TableCell>
+                    <TableCell><strong>Action</strong></TableCell>
+                    <TableCell><strong>Date-Time</strong></TableCell>
+                    <TableCell align="center"><strong>Close</strong></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {positions.map((position, index) => (
                     <TableRow key={index}>
-                      <TableCell>{position.portfolio_id}</TableCell>
-                      <TableCell>{position.sector}</TableCell>
                       <TableCell>{position.symbol}</TableCell>
-                      <TableCell align="right">{position.quantity}</TableCell>
-                      <TableCell align="right">{position.average_price}</TableCell>
+                      <TableCell>{position.quantity}</TableCell>
+                      <TableCell>{position.average_price}</TableCell>
+                      <TableCell>{position.leverage}</TableCell>
+                      <TableCell>{position.total_value}</TableCell>
+                      <TableCell>{position.action}</TableCell>
+                      <TableCell>{position.datetime.toLocaleString()}</TableCell>
                       <TableCell align="center">
                         <Button
                           variant="contained"
@@ -107,25 +111,25 @@ const CloseOrder = ({ positions, transactions, handleCloseOrder }) => {
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
-                    <TableCell><strong>Transaction ID</strong></TableCell>
-                    <TableCell align="right"><strong>Action</strong></TableCell>
-                    <TableCell align="right"><strong>Symbol</strong></TableCell>
-                    <TableCell align="right"><strong>Quantity</strong></TableCell>
-                    <TableCell align="right"><strong>Average Price</strong></TableCell>
-                    <TableCell align="right"><strong>Timestamp</strong></TableCell>
+                    <TableCell><strong>Symbol</strong></TableCell>
+                    <TableCell><strong>Quantity</strong></TableCell>
+                    <TableCell><strong>Average Price</strong></TableCell>
+                    <TableCell><strong>Leverage</strong></TableCell>
+                    <TableCell><strong>Total Value</strong></TableCell>
+                    <TableCell><strong>Action</strong></TableCell>
+                    <TableCell><strong>Date-Time</strong></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {transactions.map((item, index) => (
                     <TableRow key={index}>
-                      <TableCell>{item.transaction_id}</TableCell>
-                      <TableCell align="right">{item.action}</TableCell>
-                      <TableCell align="right">{item.symbol}</TableCell>
-                      <TableCell align="right">{item.quantity}</TableCell>
-                      <TableCell align="right">${item.average_price}</TableCell>
-                      <TableCell align="right">
-                        {new Date(item.last_updated).toLocaleString()}
-                      </TableCell>
+                      <TableCell>{item.symbol}</TableCell>
+                      <TableCell>{item.quantity}</TableCell>
+                      <TableCell>{item.average_price}</TableCell>
+                      <TableCell>{item.leverage}</TableCell>
+                      <TableCell>{item.total_value}</TableCell>
+                      <TableCell>{item.action}</TableCell>
+                      <TableCell>{item.datetime.toLocaleString()}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
