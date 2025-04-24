@@ -1,0 +1,14 @@
+use starknet::ContractAddress;
+use trivex_contract::utils::{Amount, UserAddress, TokenAddress};
+
+#[derive(Copy, Serde, Drop, starknet::Store)]
+pub struct Position {
+    pub id: u128,
+    pub symbol: felt252,
+    pub quantity: u256,
+    pub average_price: u256,
+    pub leverage: u128,
+    pub total_value: u256,
+    pub action: felt252,
+    pub datetime: u64
+}

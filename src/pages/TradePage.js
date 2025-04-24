@@ -4,9 +4,9 @@ import { Box, Grid, Stack } from '@mui/material';
 import OpenOrder from '../components/OpenOrder'; 
 import CloseOrder from '../components/CloseOrder'
 import {AppContext} from '../components/AppProvider';
-import { Connected, routeTrigger} from '../components/Alert';
+import { Connected} from '../components/Alert';
 import TradingViewWidget from "../components/TradingViewWidget";
-import { Contract, Provider, cairo, CallData} from "starknet";
+import { AppContract } from '../components/AppContract';
 
 const TradePage = () => {
   const [sector, setSector] = useState('');
@@ -18,6 +18,7 @@ const TradePage = () => {
   const [symbolList, setSymbolList] = useState([]);
   const [symbolLeverages, setSymbolLeverages] = useState({});
   const [position, setPosition] = useState([]);
+  const [positionDB, setPositionDB] = useState([]);
   const [transaction, setTransaction] = useState([]);  
   const [price, setPrice] = useState(0); 
   const [tradingSymbol, setTradingSymbol] = useState('BTCUSDC');
@@ -26,16 +27,7 @@ const TradePage = () => {
   const host = "https://trivex-trade-faekh0awhkdphxhq.canadacentral-01.azurewebsites.net";
   const info = useContext(AppContext);
 
-  const hash_provider = new Provider({ network: "sepolia" });
-  const classHash = "0x008e2b7d5289f1ca14683bc643f42687dd1ef949e8a35be4c429aa825a097604"; 
-  const contractAddress = "0x005262cd7aee4715e4a00c41384a5f5ad151ff16da7523f41b93836bed922ced"; 
-  const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
-
-
-  const getABI = async (classHash) => {
-    const contractClass = await hash_provider.getClassByHash(classHash);
-    return contractClass.abi;
-  };  
+  const contract =  new AppContract();
 
   const handleSymbols = async (selectedSector) => {
     try {
@@ -60,11 +52,8 @@ const TradePage = () => {
   
   const handleBalance = async () => {
     try {
-        const abi = await getABI(classHash);
-        const contract = new Contract(abi, contractAddress, hash_provider);
-        const balance = await contract.call("get_balance", [usdcTokenAddress, info.walletAddress]);
-        const convertedBalance = (Number(balance) / 1000000).toFixed(2);
-        setBalance(Number(convertedBalance));
+        const result = await contract.getWalletBalance(info.walletAddress);
+        setBalance(result);
     } catch (error) {
         console.error("Error fetching wallet balance:", error);
         setBalance(0);
@@ -74,20 +63,9 @@ const TradePage = () => {
   const handlePositions = async (address) => {
     try {
       console.log("Fetching portfolio...");
-      const response = await axios.get(`${host}/wallets/${address}/portfolio`);
-      console.log(response.data);
-      const current_positions = response.data && response.data.length > 0 
-      ? response.data.map(item => ({
-          portfolio_id: item.portfolio_id,
-          address: item.address,
-          symbol: item.symbol,
-          quantity: parseFloat(item.quantity),
-          average_price: parseFloat(item.average_price),
-          sector: item.sector
-      })) 
-      : [];
-  
-      setPosition(current_positions);
+      const results = await contract.getPositions(address);
+      console.log(results);
+      setPosition(results);
     } catch (error) {
       console.error('Error fetching portfolio:', error);
     }
@@ -95,18 +73,10 @@ const TradePage = () => {
 
   const handleTransactions = async (address) => {
       try {
-          const response = await axios.get(`${host}/wallets/${address}/transactions`);
-          const transactionData = response.data && response.data.length > 0 
-              ? response.data.map(item => ({
-                  transaction_id: parseInt(item.transaction_id),
-                  action: item.action,
-                  symbol: item.symbol,
-                  quantity: parseFloat(item.quantity),
-                  average_price: parseFloat(item.average_price),
-                  last_updated: item.last_updated,
-              })) 
-              : [];
-          setTransaction(transactionData);
+        console.log("Fetching transaction history...");
+        const results = await contract.getTransactions(address);
+        console.log(results);
+        setTransaction(results);
       } catch (error) {
           console.error('Error fetching transactions:', error);
       }
@@ -127,11 +97,11 @@ const TradePage = () => {
     }
   };
   
-  const updateUserInfo = (address) => {
+  const updateUserInfo = async (address) => {
     try {
-      handlePositions(address);
-      handleTransactions(address);
-      fetchFee(address, symbol, size);
+      await handlePositions(address);
+      await handleTransactions(address);
+      await handleBalance(info.walletAddress);
     } catch (error) {
       console.error("Error updating user info:", error);
     }
@@ -171,78 +141,12 @@ const TradePage = () => {
     handleSymbols(selectedSector); 
     updateUserInfo(info.walletAddress)
   };
-  
-  /* global BigInt */
 
-  const handleDeposit = async (amount) => {
-    try {
-      const provider = info.wallet.account;
-      const contractClass = await hash_provider.getClassByHash(classHash);
-      const abi = contractClass.abi;
-      const contract = new Contract(abi, contractAddress, provider);
-      const weiAmount = amount * 1000000;
-  
-      const deposit = contract.populate("deposit", [BigInt(weiAmount), usdcTokenAddress]);
-  
-      const result = await provider.execute([
-        {
-          contractAddress: usdcTokenAddress,
-          entrypoint: "approve",
-          calldata: CallData.compile({
-            spender: contractAddress,
-            amount: cairo.uint256(weiAmount),
-          }),
-        },
-        {
-          contractAddress: contractAddress,
-          entrypoint: "deposit",
-          calldata: deposit.calldata,
-        },
-      ]);
-  
-      console.log("Deposit Result:", result);
-      alert("Order open completed successfully!");
-    } catch (error) {
-      console.error("An error occurred during the deposit process:", error);
-      if (error.message.includes("User abort")) {
-        alert("Transaction aborted by user.");
-      } else {
-        alert("An unexpected error occurred. Please try again.");
-      }
-      throw error;
-    }
-  };
-  
-  const handleWithdrawal = async (amount) => {
-      try {
-          const provider = info.wallet.account;
-      
-          const contractClass = await hash_provider.getClassByHash(classHash);
-          const abi = contractClass.abi;
-          const contract = new Contract(abi, contractAddress, provider);
-      
-          const weiAmount = amount * 1000000;
-      
-          const withdrawal = contract.populate("withdraw", [BigInt(weiAmount), usdcTokenAddress]);
-      
-          const result = await provider.execute([{
-              contractAddress: contractAddress,
-              entrypoint: "withdraw",
-              calldata: withdrawal.calldata,
-          }]);
-      
-          console.log("Withdrawal Result:", result);
-
-          alert("Close order completed successfully!");
-      } catch (error) {
-          console.error("An error occurred during the withdrawal process:", error);
-      
-          if (error.message.includes("User abort")) {
-              alert("Transaction aborted by user.");
-          } else {
-              alert("An unexpected error occurred. Please try again.");
-          }
-      }
+  const refreshData = async () => {
+    handlePrice(symbol+"-"+sector);
+    fetchFee(info.walletAddress, symbol+"-"+sector, size);
+    updateUserInfo(info.walletAddress);
+    info.setRouteTrigger(true);
   };
 
   const handleOpenOrder = async (action) => {
@@ -252,71 +156,60 @@ const TradePage = () => {
     }
   
     try {
-      let is_buy = action === "Buy";
-
-      await handleDeposit(amount);
+      const totalValue = size * price;
+      const orderAction = "Open " + action;
   
-      const data = {
-        wallet: info.walletAddress,
-        is_buy,
+      const result = await contract.open_order(
+        info.wallet.account,
         symbol,
-        amount,
-        sector,
-        leverage
-      };
-
-      console.log(data);
-    
-      const res = await axios.post(`${host}/open`, data);
-    
-      const result = res.data.status;
-    
-      if (result === "Success") {
-        alert(`${action} order placed successfully at $${price.toFixed(2)}!`);
-      } else {
-        alert("An error occurred while placing the order.");
-      }
+        size,
+        price,
+        leverage,
+        totalValue,
+        orderAction,
+        amount
+      );
   
-      updateUserInfo(info.walletAddress);
-      return res.data;
-    } catch (e) {
-      console.error("Error during trade:", e);
-      alert("An error occurred while processing the trade.");
+      console.log("Contract Open Order Result:", result);
+      await updateUserInfo(info.walletAddress);
+    } catch (error) {
+      console.error("Error during trade:", error);
+      if (error.message.includes("User abort")) {
+        alert("Transaction aborted by user.");
+      } else {
+        alert("An unexpected error occurred. Please try again.");
+      }
     }
   };
-
+  
   const handleCloseOrder = async (position) => {
     try {
       console.log(position);
       alert(`Closing position for ${position.symbol}`);
   
-      const res = await axios.post(`${host}/close`, {
-        portfolio_id: position.portfolio_id,
-        wallet: position.address,
-        symbol: position.symbol,
-        size: position.quantity,
-        sector: position.sector
-      });
+      let response = await axios.get(`${host}/price/${position.symbol + "-Crypto"}`);
+      const current_price = parseFloat(response.data.price);
+      const amount = position.quantity * current_price;
+      const action = "Close " + position.action.split(" ")[1];
   
-      if (res.data.status === "Success") {
-        await handleWithdrawal(res.data.amount);
-        alert("Order closed successfully!");
-      } else {
-        alert("Order closure failed. Please try again.");
-      }
-      await handlePositions(info.walletAddress);
+      const result = await contract.close_order(
+        info.wallet.account,
+        position.id,
+        amount,
+        action
+      );
+  
+      console.log("Contract Close Order Result:", result);
+
+      await updateUserInfo(info.walletAddress);
     } catch (error) {
       console.error("Error closing position:", error);
-      alert("An error occurred while closing the order.");
+      if (error.message.includes("User abort")) {
+        alert("Transaction aborted by user.");
+      } else {
+        alert("An unexpected error occurred. Please try again.");
+      }
     }
-  };
-
-  const refreshData = async () => {
-    handlePrice(symbol+"-"+sector);
-    fetchFee(info.walletAddress, symbol+"-"+sector, size);
-    updateUserInfo(info.walletAddress);
-    handleBalance(info.walletAddress);
-    info.setRouteTrigger(true);
   };
 
   useEffect(() => {
@@ -332,7 +225,7 @@ const TradePage = () => {
             <Grid item xs={8}>
               <Stack spacing={2} sx={{ height: "100%" }}>
                 <TradingViewWidget symbol={tradingSymbol} />
-                <CloseOrder positions={position} transactions={transaction} handleCloseOrder={handleCloseOrder} />
+                <CloseOrder positions={position} transactions={transaction} handleCloseOrder={handleCloseOrder} refreshData={refreshData}/>
               </Stack>
             </Grid>
             <Grid item xs={4}>
