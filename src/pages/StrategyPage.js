@@ -37,9 +37,10 @@ const StrategyPage = () => {
   const info = useContext(AppContext);
   const contract =  new AppContract();
 
-  const handleRun = async (amount) => {
+  const handleRun = async (strategy) => {
       try {
-          const result = await contract.run_strategy(info.wallet.account, amount);
+          const amount = await contract.getStrategyPrice(strategy);
+          const result = await contract.run_strategy(info.wallet.account, strategy, amount);
       
           console.log("Run Strategy Result:", result);
           alert("Run strategy completed successfully!");
@@ -61,8 +62,7 @@ const StrategyPage = () => {
     }
 
     setLoading(true);
-    
-    await handleRun(1);
+    await handleRun(strategy);
 
     switch (strategy) {
       case 'averageRebalance':

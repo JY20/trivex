@@ -12,3 +12,10 @@ pub struct Position {
     pub action: felt252,
     pub datetime: u64
 }
+
+#[derive(Copy, Serde, Drop, starknet::Store)]
+pub struct order_book_entry {
+    pub symbol: felt252,
+    pub leverage: u128,
+    pub amount: Amount
+}

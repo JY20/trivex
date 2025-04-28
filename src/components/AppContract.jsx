@@ -2,8 +2,8 @@ import { Contract, Provider, cairo, CallData, shortString } from 'starknet';
 
 const hash_provider = new Provider({ network: 'sepolia' });
 
-const classHash = '0x01595c6c07621622315fb9b2ed7a52146f40f563ba56ccc20a772bbaeb24a623';
-const contractAddress = '0x000401516156633d9d1225296b07374af73790fb020903c69b7d4787fc50e7bb';
+const classHash = '0x00464f2ddef3ea45129244440b3c21789f38d56b680f0a4d01526a09b0ae3fe8';
+const contractAddress = '0x05083aa7aba0aa78514ac84d70a7c969360a6095189d2fdfaafcb689b4734d38';
 const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
 const strkTokenAddress = '0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d';
 
@@ -199,15 +199,12 @@ export class AppContract {
         return transactions;
     }
 
-    async run_strategy(account, amount) {
+    async run_strategy(account, strategy, amount) {
         const provider = account;
-        const contractClass = await hash_provider.getClassByHash(classHash);
-        const abi = contractClass.abi;
+        const abi = await this.getABI(classHash);
         const contract = new Contract(abi, contractAddress, provider);
-
         const weiAmount = amount * 1e18;
-    
-        const run_strategy = contract.populate("run_strategy", [BigInt(weiAmount), strkTokenAddress]);
+        const run_strategy = contract.populate("run_strategy", [strategy, BigInt(weiAmount), strkTokenAddress]);
 
         const result = await provider.execute([
         {
@@ -261,5 +258,13 @@ export class AppContract {
         const feeRaw = await contract.call('get_fee', [amountUint]);
         const fee = (Number(feeRaw) / 1000000);
         return fee;
+    }
+
+    async getStrategyPrice(strategy) {
+        const abi = await this.getABI(classHash);
+        const contract = new Contract(abi, contractAddress, hash_provider);
+        const resultRaw = await contract.call('get_strategy_price', [strategy]);
+        const result = Number(resultRaw);
+        return result;
     }
 }
