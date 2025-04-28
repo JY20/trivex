@@ -7,6 +7,8 @@ import {AppContext} from '../components/AppProvider';
 import { Connected} from '../components/Alert';
 import TradingViewWidget from "../components/TradingViewWidget";
 import { AppContract } from '../components/AppContract';
+import tokensCsv from '../assets/tokens.csv';
+import Papa from 'papaparse';
 
 const TradePage = () => {
   const [sector, setSector] = useState('');
@@ -18,7 +20,6 @@ const TradePage = () => {
   const [symbolList, setSymbolList] = useState([]);
   const [symbolLeverages, setSymbolLeverages] = useState({});
   const [position, setPosition] = useState([]);
-  const [positionDB, setPositionDB] = useState([]);
   const [transaction, setTransaction] = useState([]);  
   const [price, setPrice] = useState(0); 
   const [tradingSymbol, setTradingSymbol] = useState('BTCUSDC');
@@ -31,20 +32,34 @@ const TradePage = () => {
 
   const handleSymbols = async (selectedSector) => {
     try {
-      console.log(`Fetching symbols for sector: ${selectedSector}...`);
-      const response = await axios.get(`${host}/symbols/${selectedSector}`);
-
-      const symbols = Object.keys(response.data); 
-      const symbolLeverages = response.data; 
-
-      setSymbolList(symbols);
-      setSymbolLeverages(symbolLeverages);
-
-      if (symbols.length > 0) {
-        setSymbol(symbols[0]); 
-      }
+      Papa.parse(tokensCsv, {
+        download: true,
+        header: false,
+        complete: (results) => {
+          var cryptoList = {};
+          results.data.slice(1).forEach(parts => {
+            if (parts.length > 2) {
+              const key = parts[1].split("-")[0];
+              const value = parseInt(parts[2].replace("x", ""), 10);
+              cryptoList[key] = value;
+            }
+          });
+  
+          setSymbolLeverages(cryptoList);
+          setSymbolList(Object.keys(cryptoList));
+  
+          if (Object.keys(cryptoList).length > 0) {
+            setSymbol(Object.keys(cryptoList)[0]);
+          }
+        },
+        error: (error) => {
+          console.error('Error fetching symbols:', error);
+          setSymbolList([]);
+          setSymbolLeverages({});
+        }
+      });
     } catch (error) {
-      console.error('Error fetching symbols:', error);
+      console.error('Unexpected error:', error);
       setSymbolList([]);
       setSymbolLeverages({});
     }
@@ -64,7 +79,6 @@ const TradePage = () => {
     try {
       console.log("Fetching portfolio...");
       const results = await contract.getPositions(address);
-      console.log(results);
       setPosition(results);
     } catch (error) {
       console.error('Error fetching portfolio:', error);
@@ -75,7 +89,6 @@ const TradePage = () => {
       try {
         console.log("Fetching transaction history...");
         const results = await contract.getTransactions(address);
-        console.log(results);
         setTransaction(results);
       } catch (error) {
           console.error('Error fetching transactions:', error);
@@ -85,9 +98,7 @@ const TradePage = () => {
   const fetchFee = async (address, symbol, size) => {
     try {
       console.log(`Fetching fee for ${address} for order ${symbol} with size ${size}`);
-      const response = await axios.get(`${host}/fee/${address}/${symbol}/${size}`);
-      console.log(response.data.fee);
-      const estimate_fee = parseFloat(response.data.fee);
+      const estimate_fee = await contract.getFee(amount);
       setFee(estimate_fee);
       if (isNaN(estimate_fee)) {
         alert("Failed to fetch the estimate fee. Please try again.");
@@ -102,6 +113,8 @@ const TradePage = () => {
       await handlePositions(address);
       await handleTransactions(address);
       await handleBalance(info.walletAddress);
+      // await contract.get_internal_order_book();
+      // await contract.getUsers();
     } catch (error) {
       console.error("Error updating user info:", error);
     }
@@ -111,7 +124,6 @@ const TradePage = () => {
     try {
       console.log(`Fetching ${symbol}`);
       const response = await axios.get(`${host}/price/${symbol}`);
-
       const current_price = parseFloat(response.data.price);
       setPrice(current_price);
       if (isNaN(current_price)) {
@@ -133,7 +145,6 @@ const TradePage = () => {
     setTradingSymbol(e+"USDC");
     handlePrice(e+"-"+sector);
   };
-
 
   const handleSectorChange = (e) => {
     const selectedSector = e.target.value;

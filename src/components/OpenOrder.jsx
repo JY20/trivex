@@ -47,7 +47,6 @@ const OpenOrder = ({
       {loading && <Loading />}
 
       <Box sx={{ margin: '0 auto', background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
-        {/* 刷新按钮 */}
         <Box sx={{ display: 'flex', justifyContent: 'left', alignItems: 'center', marginBottom: '10px' }}>
           <Typography variant="h7">Refresh</Typography>
           <IconButton
@@ -59,7 +58,6 @@ const OpenOrder = ({
           </IconButton>
         </Box>
 
-        {/* Sector选择框 */}
         <TextField
           select
           label="Sector"
@@ -75,7 +73,6 @@ const OpenOrder = ({
           <MenuItem value="sp500">SP500 Stocks</MenuItem> */}
         </TextField>
 
-        {/* Symbol搜索框 */}
         <Autocomplete
           options={symbolList}
           getOptionLabel={(option) => String(option)}
@@ -120,7 +117,6 @@ const OpenOrder = ({
           disabled={loading}
         />
 
-        {/* 百分比按钮 */}
         <Typography variant="body1" sx={{ marginBottom: '10px', color: 'black' }}>
           Select Percentage of Balance:
         </Typography>
@@ -148,7 +144,6 @@ const OpenOrder = ({
           disabled={loading}
         />
 
-        {/* Estimate 框 */}
         <Box
           sx={{
             backgroundColor: '#D7CCE8', // Lighter shade
@@ -164,15 +159,15 @@ const OpenOrder = ({
           </Box>
           <Box display="flex" justifyContent="space-between">
             <Typography variant="body1">Size:</Typography>
-            <Typography variant="body1">{size.toFixed(2) || 0}</Typography>
+            <Typography variant="body1">{size.toFixed(6) || 0}</Typography>
           </Box>
           <Box display="flex" justifyContent="space-between">
             <Typography variant="body1">Total:</Typography>
-            <Typography variant="body1">${(price*size).toFixed(2)}</Typography>
+            <Typography variant="body1">${(price*size).toFixed(6)}</Typography>
           </Box>
           <Box display="flex" justifyContent="space-between">
             <Typography variant="body1">Fee:</Typography>
-            <Typography variant="body1">${fee.toFixed(2)}</Typography>
+            <Typography variant="body1">${fee.toFixed(6)}</Typography>
           </Box>
         </Box>
 
@@ -180,7 +175,6 @@ const OpenOrder = ({
           Balance: {available} USD
         </Typography>
 
-        {/* 交易按钮 */}
         <Button
           variant="contained"
           fullWidth

@@ -11,18 +11,18 @@ const StakePage = () => {
 
     const stakeData = {
         title: 'Trading Pool',
-        apy: 7,
     };
 
     // State for pop-ups and balance
     const [isStakePopupOpen, setStakePopupOpen] = useState(false);
     const [isUnstakePopupOpen, setUnstakePopupOpen] = useState(false);
     const [walletBalance, setWalletBalance] = useState(0);
-    const [poolBalance, setPoolBalance] = useState(0); // Balance in the staking pool
+    const [poolBalance, setPoolBalance] = useState(0);
+    const [totalPoolBalance, setTotalPoolBalance] = useState(0);
+    const [apy, setApy] = useState(0);
 
     const contract =  new AppContract();
 
-    // Fetch wallet balance (USDC balance)
     const getBalance = async () => {
         try {
             return await contract.getWalletBalance(info.walletAddress);
@@ -32,7 +32,6 @@ const StakePage = () => {
         }
     };
     
-    // Fetch pool balance (staked amount)
     const fetchPoolBalance = async () => {
         try {
             const result = await contract.getStakedBalance(info.walletAddress);
@@ -43,7 +42,26 @@ const StakePage = () => {
         }
     };
 
-    // Handle Stake pop-up
+    const fetchTotalPool = async () => {
+        try {
+            const result = await contract.getTotalStaked();
+            setTotalPoolBalance(result);
+        } catch (err) {
+            console.error('Error fetching staked balance:', err);
+            setTotalPoolBalance(0);
+        }
+    };
+
+    const fetchApy = async () => {
+        try {
+            const result = await contract.getApy();
+            setApy(result);
+        } catch (err) {
+            console.error('Error fetching staked balance:', err);
+            setApy(0);
+        }
+    };
+
     const handleStakePopUp = async () => {
         try {
             const value = await getBalance();
@@ -56,7 +74,6 @@ const StakePage = () => {
         }
     };
 
-    // Handle Unstake pop-up
     const handleUnstakePopUp = async () => {
         if (info.walletAddress) {
             await fetchPoolBalance(info.walletAddress);
@@ -64,7 +81,6 @@ const StakePage = () => {
         setUnstakePopupOpen(true);
     };
 
-    // Handle Stake action
     const handleStake = async (amount) => {
         try {
             const result = await contract.stake(info.wallet.account, amount);
@@ -81,7 +97,6 @@ const StakePage = () => {
         }
     };
 
-    // Handle Unstake action
     const handleUnstake = async (amount) => {
         try {
             const result = await contract.unstake(info.wallet.account, amount);
@@ -98,6 +113,8 @@ const StakePage = () => {
 
     const refreshData = async () => {
         fetchPoolBalance();
+        fetchApy();
+        fetchTotalPool();
     };
 
     useEffect(() => {
@@ -106,7 +123,6 @@ const StakePage = () => {
         }
     }, [info, refreshData]);
 
-    // Render
     if (info.walletAddress != null) {
         return (
             <Box
@@ -136,33 +152,40 @@ const StakePage = () => {
                                     </Typography>
                                     <Typography variant="body1" sx={{ color: '#7E57C2' }}>
                                         APY: <span style={{ color: '#7E57C2', fontWeight: 'bold' }}>
-                                            {stakeData.apy}%
+                                            {apy}%
                                         </span>
                                     </Typography>
+                                    <Typography variant="body1" sx={{ color: '#7E57C2', mt: 1 }}>
+                                        Total Staked Balance: <span style={{ fontWeight: 'bold' }}>
+                                            {totalPoolBalance} USD
+                                        </span>
+                                    </Typography>
+                                </Box>
+                                <Box>
+                                    <Box sx={{ display: 'flex', gap: 2 ,  marginBottom: '20px'}}>
+                                        <Button
+                                            variant="contained"
+                                            onClick={handleStakePopUp}
+                                            sx={{
+                                                backgroundColor: '#7E57C2',
+                                            }}
+                                        >
+                                            Stake
+                                        </Button>
+                                        <Button
+                                            variant="outlined"
+                                            color="secondary"
+                                            sx={{ flex: 1 }}
+                                            onClick={handleUnstakePopUp}
+                                        >
+                                            Unstake
+                                        </Button>
+                                    </Box>
                                     <Typography variant="body1" sx={{ color: '#7E57C2', mt: 1 }}>
                                         Staked Balance: <span style={{ fontWeight: 'bold' }}>
                                             {poolBalance} USD
                                         </span>
                                     </Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', gap: 2 }}>
-                                    <Button
-                                        variant="contained"
-                                        onClick={handleStakePopUp}
-                                        sx={{
-                                            backgroundColor: '#7E57C2',
-                                        }}
-                                    >
-                                        Stake
-                                    </Button>
-                                    <Button
-                                        variant="outlined"
-                                        color="secondary"
-                                        sx={{ flex: 1 }}
-                                        onClick={handleUnstakePopUp}
-                                    >
-                                        Unstake
-                                    </Button>
                                 </Box>
                             </Box>
                         </Paper>

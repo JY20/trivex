@@ -13,7 +13,7 @@
     "cors": "^2.8.5",
     "cra-template": "1.2.0",
     "get-starknet": "^3.3.3",
-    "papaparse": "^5.4.1",
+    "papaparse": "^5.5.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.14.2",
