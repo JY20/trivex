@@ -2,8 +2,8 @@ import { Contract, Provider, cairo, CallData, shortString } from 'starknet';
 
 const hash_provider = new Provider({ network: 'sepolia' });
 
-const classHash = '0x0042dc8bf4946d20a561e3197c712c15ded3e6df272ae32157b09e776701cf30';
-const contractAddress = '0x005d2c86690ecdcc99761a9bda3043337e3552b8000a15ad0fdfb7b7ca009051';
+const classHash = '0x00464f2ddef3ea45129244440b3c21789f38d56b680f0a4d01526a09b0ae3fe8';
+const contractAddress = '0x05083aa7aba0aa78514ac84d70a7c969360a6095189d2fdfaafcb689b4734d38';
 const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
 const strkTokenAddress = '0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d';
 
@@ -77,6 +77,22 @@ export class AppContract {
         ]);
 
         return result;
+    }
+
+    async getTotalStaked() {
+        const abi = await this.getABI(classHash);
+        const contract = new Contract(abi, contractAddress, hash_provider);
+        const amount = await contract.call('get_total_staked', []);
+        const staked = (Number(amount) / 1000000).toFixed(2);
+        return staked;
+    }
+
+    async getApy() {
+        const abi = await this.getABI(classHash);
+        const contract = new Contract(abi, contractAddress, hash_provider);
+        const amount = await contract.call('get_apy', []);
+        const apy = Number(amount);
+        return apy;
     }
 
     async open_order(account, symbol, quantity, averagePrice, leverage, totalValue, action) {
@@ -183,15 +199,12 @@ export class AppContract {
         return transactions;
     }
 
-    async run_strategy(account, amount) {
+    async run_strategy(account, strategy, amount) {
         const provider = account;
-        const contractClass = await hash_provider.getClassByHash(classHash);
-        const abi = contractClass.abi;
+        const abi = await this.getABI(classHash);
         const contract = new Contract(abi, contractAddress, provider);
-
         const weiAmount = amount * 1e18;
-    
-        const run_strategy = contract.populate("run_strategy", [BigInt(weiAmount), strkTokenAddress]);
+        const run_strategy = contract.populate("run_strategy", [strategy, BigInt(weiAmount), strkTokenAddress]);
 
         const result = await provider.execute([
         {
@@ -220,5 +233,38 @@ export class AppContract {
             const contractAddressHex = "0x" + position.toString(16).padStart(64, "0");
             console.log(contractAddressHex);
         });
+    }
+
+    async get_internal_order_book() {
+        const abi = await this.getABI(classHash);
+        const contract = new Contract(abi, contractAddress, hash_provider);
+        const entriesRaw = await contract.call('get_internal_order_book', []);
+        const entries = entriesRaw.map(item => ({
+            symbol: shortString.decodeShortString(item.symbol),
+            leverage: Number(item.leverage),      
+            amount: Number(item.amount)/1000000, 
+        }));
+
+        console.log(entries);
+    }
+
+    async getFee(amount) {
+        const abi = await this.getABI(classHash);
+        const contract = new Contract(abi, contractAddress, hash_provider);
+        if(isNaN(amount)){
+            amount = 0;
+        }
+        const amountUint = BigInt((amount * 1000000).toFixed(0));
+        const feeRaw = await contract.call('get_fee', [amountUint]);
+        const fee = (Number(feeRaw) / 1000000);
+        return fee;
+    }
+
+    async getStrategyPrice(strategy) {
+        const abi = await this.getABI(classHash);
+        const contract = new Contract(abi, contractAddress, hash_provider);
+        const resultRaw = await contract.call('get_strategy_price', [strategy]);
+        const result = Number(resultRaw);
+        return result;
     }
 }
