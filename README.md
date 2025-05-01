@@ -1,6 +1,6 @@
 # Trivex Web
 
-Frontend of **Trivex**, a next-generation decentralized trading platform built on Starknet Layer 3.
+Repository for **Trivex**, a next-generation decentralized strategy analysis and trading platform built on Starknet Layer 3.
 
 ## 🌐 What is Trivex?
 
@@ -19,7 +19,7 @@ Trivex is designed to onboard both crypto-native users and traditional traders s
 
 ---
 
-## Quickstart
+## Quickstart for Trivex Frontend
 
 ### 1. Clone the Repository
 
@@ -42,16 +42,20 @@ npm run start
 
 ## Trivex Smart Contracts
 
+Contains all the smart contracts used by Trivex created with Cairo on Starknet
+
 ```bash
-cd trivex_web
 cd trivex_contract 
+cd src
 ```
 
 ## Trivex Titan Bot
 
+Contains the code for titan bot, a bot used to hedge out the orders from users to external broker
+
 ```bash
-cd trivex_web
-cd trivex titan
+cd titan
+py titan.py 
 ```
 
 ## 🌐 Community & Support
