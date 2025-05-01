@@ -40,6 +40,20 @@ npm install
 npm run start
 ```
 
+## Trivex Smart Contracts
+
+```bash
+cd trivex_web
+cd trivex_contract 
+```
+
+## Trivex Titan Bot
+
+```bash
+cd trivex_web
+cd trivex titan
+```
+
 ## 🌐 Community & Support
 
 - Website: [https://official-trivex.xyz](https://official-trivex.xyz)
