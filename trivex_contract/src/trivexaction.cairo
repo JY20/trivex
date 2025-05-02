@@ -27,9 +27,13 @@ mod TrivexAction {
         internal_order_book_len: u256,
         external_used_balance: u256,
         external_available_balance: u256,
+        external_order_book: LegacyMap<(felt252, u128), Amount>,
+        external_order_book_keys: LegacyMap<u256, (felt252, u128)>,
+        external_order_book_len: u256,
         lender_interest_rate: u256,
         strategy_price: LegacyMap<felt252, u256>,
-        strategy_creator: LegacyMap<felt252, UserAddress>
+        strategy_creator: LegacyMap<felt252, UserAddress>,
+        owner: UserAddress
     }
 
     #[constructor]
@@ -52,6 +56,9 @@ mod TrivexAction {
         let key4 = 'coVariance';
         self.strategy_price.write(key4, 1_u256);
         self.strategy_creator.write(key4, creator);
+
+        let owner = contract_address_const::<0x012B099F50C3CbCc82ccF7Ee557c9d60255c35C359eA6615435B761Ec3336EC8>();
+        self.owner.write(owner);
     }
 
     #[abi(embed_v0)]
@@ -152,7 +159,6 @@ mod TrivexAction {
                 //removing it from positions
                 let count = self.user_position_counts.read(caller);
                 let mut i = id;
-                let temp = self.positions.read((caller, i));
                 while i + 1 <= count {
                     let next_pos = self.positions.read((caller, i + 1));
                     self.positions.write((caller, i), next_pos);
@@ -176,11 +182,11 @@ mod TrivexAction {
                 self.user_transaction_counts.write(caller, count_transactions + 1);
 
                 //updating the internal order book
-                let current_order_book = self.internal_order_book.read((temp.symbol, temp.leverage));
+                let current_order_book = self.internal_order_book.read((position.symbol, position.leverage));
                 if action == 'Close Buy' {
-                    self.internal_order_book.write((temp.symbol, temp.leverage), current_order_book - amount);
+                    self.internal_order_book.write((position.symbol, position.leverage), current_order_book - amount);
                 } else if action == 'Close Sell' {
-                    self.internal_order_book.write((temp.symbol, temp.leverage), current_order_book + amount);
+                    self.internal_order_book.write((position.symbol, position.leverage), current_order_book + amount);
                 } 
             }
         }
@@ -337,6 +343,63 @@ mod TrivexAction {
 
         fn get_apy(self: @ContractState) -> Amount {
             self.lender_interest_rate.read()
+        }
+
+        fn set_used_balance(ref self: ContractState, value: u256) {
+            let caller = get_caller_address();
+            let owner = self.owner.read();
+            assert(caller == owner, 'NOT_OWNER');
+            self.external_used_balance.write(value);
+        }
+
+        fn set_available_balance(ref self: ContractState, value: u256) {
+            let caller = get_caller_address();
+            let owner = self.owner.read();
+            assert(caller == owner, 'NOT_OWNER');
+            self.external_available_balance.write(value);
+        }
+
+        fn update_external_order_book(ref self: ContractState, symbol: felt252, leverage: u128, total_value: u256, action: felt252) {
+            let current_order_book = self.external_order_book.read((symbol, leverage));
+            if action == 'Open Buy' {
+                self.external_order_book.write((symbol, leverage), current_order_book + total_value);
+            } else if action == 'Open Sell' {
+                self.external_order_book.write((symbol, leverage), current_order_book - total_value);
+            } 
+
+            if current_order_book == 0 {
+                let idx = self.external_order_book_len.read();
+                self.external_order_book_keys.write(idx, (symbol, leverage));
+                self.external_order_book_len.write(idx + 1);
+            }
+        }
+
+        fn get_external_order_book(self: @ContractState) -> Array<order_book_entry> {
+            let length = self.external_order_book_len.read();
+
+            let mut entries = ArrayTrait::new();
+            let mut i = 0;
+
+            loop {
+                if i == length {
+                    break;
+                }
+
+                let key = self.external_order_book_keys.read(i);
+                let (symbol, leverage) = key;
+                let amount = self.external_order_book.read(key);
+
+                let entry = order_book_entry {
+                    symbol: symbol,
+                    leverage: leverage,
+                    amount: amount
+                };
+
+                entries.append(entry);
+                i = i + 1;
+            };
+
+            entries
         }
     }
 }

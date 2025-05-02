@@ -95,9 +95,9 @@ const TradePage = () => {
       }
   };
 
-  const fetchFee = async (address, symbol, size) => {
+  const fetchFee = async (address, symbol, amount) => {
     try {
-      console.log(`Fetching fee for ${address} for order ${symbol} with size ${size}`);
+      console.log(`Fetching fee for ${address} for order ${symbol} with size ${amount}`);
       const estimate_fee = await contract.getFee(amount);
       setFee(estimate_fee);
       if (isNaN(estimate_fee)) {
@@ -137,7 +137,7 @@ const TradePage = () => {
   const amountChange = async (value) => {
     setAmount(value);
     setSize(value/price);
-    fetchFee(info.walletAddress, symbol+"-"+sector, size);
+    await fetchFee(info.walletAddress, symbol+"-"+sector, value);
   };
 
   const symbolChange = (e) => {
@@ -165,9 +165,10 @@ const TradePage = () => {
       alert('Please fill in all fields before proceeding.');
       return;
     }
+    await fetchFee(info.walletAddress, symbol+"-"+sector, size);
   
     try {
-      const totalValue = size * price;
+      const totalValue = size * price + fee;
       const orderAction = "Open " + action;
   
       const result = await contract.open_order(
@@ -200,7 +201,9 @@ const TradePage = () => {
   
       let response = await axios.get(`${host}/price/${position.symbol + "-Crypto"}`);
       const current_price = parseFloat(response.data.price);
-      const amount = position.quantity * current_price;
+      let amount = position.quantity * current_price;
+      const estimate_fee = await contract.getFee(amount);
+      amount = amount - estimate_fee;
       const action = "Close " + position.action.split(" ")[1];
   
       const result = await contract.close_order(
