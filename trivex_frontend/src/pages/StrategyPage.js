@@ -1,4 +1,4 @@
-import React, { useState, useContext} from 'react';
+import React, { useState, useContext, useEffect} from 'react';
 import { Box, Typography, TextField, MenuItem, Button, Switch, List, ListItem, ListItemText} from '@mui/material';
 import axios from 'axios';
 import {AppContext} from '../components/AppProvider';
@@ -25,6 +25,7 @@ const StrategyPage = () => {
   const [endDate, setEndDate] = useState('');
 
   const [loading, setLoading] = useState(false)
+  const [strategyPrice, setStrategyPrice] = useState(0);
 
   const host = "trivex-strategy-etbga3bramfwgfe9.canadacentral-01.azurewebsites.net";
 
@@ -54,6 +55,15 @@ const StrategyPage = () => {
           }
       }
   };
+
+  const handleStrategyPrice = async (strategy) => {
+    try {
+        const amount = await contract.getStrategyPrice(strategy);
+        setStrategyPrice(amount);
+    } catch (error) {
+        alert("An unexpected error occurred. Please try again.");
+    }
+};
 
   const handleStartAlgo = async () => {
     if (!strategy) {
@@ -159,6 +169,11 @@ const StrategyPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (strategy) {
+      handleStrategyPrice(strategy);
+    }
+  }, [strategy]);
 
   if(info.walletAddress != null){
     return (
@@ -347,6 +362,17 @@ const StrategyPage = () => {
               </>
             )}
 
+            <Box
+              sx={{
+                backgroundColor: '#D7CCE8', // Lighter shade
+                padding: '15px',
+                borderRadius: '8px',
+                marginBottom: '10px',
+                color: '#000'
+              }}
+            >
+              <Typography variant="body1">Cost: {strategyPrice} STRK</Typography>
+            </Box>
             <Button
                 variant="contained"
                 sx={{ backgroundColor: '#7E57C2' }}
@@ -358,7 +384,7 @@ const StrategyPage = () => {
           </Box>
 
           {results && (
-              <Box sx={{ maxWidth: '600px', marginTop: '30px',  padding: '20px', backgroundColor: '#f1f1f1', borderRadius: '8px', margin: '20px auto'}}>
+              <Box sx={{ maxWidth: '70%', marginTop: '30px',  padding: '20px', backgroundColor: '#f1f1f1', borderRadius: '8px', margin: '20px auto'}}>
                 <Typography variant="h5" sx={{ marginBottom: '10px' }}>
                   Results
                 </Typography>

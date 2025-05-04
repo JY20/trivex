@@ -19,4 +19,8 @@ pub trait ITrivexAction<TContractState> {
     fn get_total_staked(self: @TContractState) -> Amount;
     fn get_fee(self: @TContractState, amount: Amount) -> Amount;
     fn get_apy(self: @TContractState) -> Amount;
+    fn set_used_balance(ref self: TContractState, value: u256);
+    fn set_available_balance(ref self: TContractState, value: u256);
+    fn update_external_order_book(ref self: TContractState, symbol: felt252, leverage: u128, total_value: u256, action: felt252);
+    fn get_external_order_book(self: @TContractState) -> Array<order_book_entry>;
 }
