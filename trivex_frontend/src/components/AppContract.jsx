@@ -200,32 +200,6 @@ export class AppContract {
         return transactions;
     }
 
-    async run_strategy(account, strategy, amount) {
-        const provider = account;
-        const abi = await this.getABI(classHash);
-        const contract = new Contract(abi, contractAddress, provider);
-        const weiAmount = amount * 1e18;
-        const run_strategy = contract.populate("run_strategy", [strategy, BigInt(weiAmount), strkTokenAddress]);
-
-        const result = await provider.execute([
-        {
-            contractAddress: strkTokenAddress,
-            entrypoint: "approve",
-            calldata: CallData.compile({
-            spender: contractAddress,
-            amount: cairo.uint256(weiAmount),
-            }),
-        },
-        {
-            contractAddress: contractAddress,
-            entrypoint: "run_strategy",
-            calldata: run_strategy.calldata,
-        }
-        ]);
-
-        return result;
-    }
-
     async getUsers() {
         const abi = await this.getABI(classHash);
         const contract = new Contract(abi, contractAddress, hash_provider);
@@ -268,4 +242,45 @@ export class AppContract {
         const result = Number(resultRaw);
         return result;
     }
+
+    async run_strategy(account, strategy, amount) {
+        const provider = account;
+        const abi = await this.getABI(classHash);
+        const contract = new Contract(abi, contractAddress, provider);
+        const weiAmount = amount * 1e18;
+        const run_strategy = contract.populate("run_strategy", [strategy, BigInt(weiAmount), strkTokenAddress]);
+
+        const result = await provider.execute([
+        {
+            contractAddress: strkTokenAddress,
+            entrypoint: "approve",
+            calldata: CallData.compile({
+            spender: contractAddress,
+            amount: cairo.uint256(weiAmount),
+            }),
+        },
+        {
+            contractAddress: contractAddress,
+            entrypoint: "run_strategy",
+            calldata: run_strategy.calldata,
+        }
+        ]);
+
+        return result;
+    }
+    
+    async getUserHistory(walletAddress) {
+        const abi = await this.getABI(classHash);
+        const contract = new Contract(abi, contractAddress, hash_provider);
+        const raw = await contract.call('get_history', [walletAddress]);
+        
+        const history = raw.map(item => ({
+            strategy: shortString.decodeShortString(item.strategy),
+            amount: Number(item.amount)/1e18,
+            datetime: new Date(Number(item.datetime) * 1000)
+        }));
+        
+        console.log(history);
+        return history;
+    };
 }

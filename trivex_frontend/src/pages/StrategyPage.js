@@ -1,112 +1,136 @@
 import React, { useState, useContext, useEffect} from 'react';
-import { Box, Typography, TextField, MenuItem, Button, Switch, List, ListItem, ListItemText} from '@mui/material';
+import { Box, Grid, Stack} from '@mui/material';
 import axios from 'axios';
 import {AppContext} from '../components/AppProvider';
 import { Connected} from '../components/Alert';
 import Loading from '../components/Loading';
 import { AppContract } from '../components/AppContract';
+import Result from '../components/Result';
+import Information from '../components/Information';
+import Selection from '../components/Selection';
+import data from "../assets/data.json";
 
 const StrategyPage = () => {
-  const [strategy, setStrategy] = useState('');
-  const [sector, setSector] = useState('');
-  const [symbol, setSymbol] = useState('');
-
-  const [openSd, setopenSd] = useState(1);
-  const [closeSd, setcloseSd] = useState(0.8);
-  const [isBuy, setIsBuy] = useState(true);
+  const [strategy, setStrategy] = useState(data[0].value);
   const [results, setResults] = useState(null);
 
-  const [list, setList] = useState('');
-  const [email, setEmail] = useState('');
-
-  const [symbol1, setSymbol1] = useState('');
-  const [symbol2, setSymbol2] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-
   const [loading, setLoading] = useState(false)
-  const [strategyPrice, setStrategyPrice] = useState(0);
+  const [strategies, setStrategies] = useState(data);
+  const [selectedInfo, setSelectedInfo] = useState(data[0]);
+  const [history, setHistory] = useState([]);
 
-  const host = "trivex-strategy-etbga3bramfwgfe9.canadacentral-01.azurewebsites.net";
 
-  const strategies = [
-    { label: 'AverageRebalance', value: 'averageRebalance' },
-    { label: 'Momentum', value: 'momentum' },
-    { label: 'StandardDeviation', value: 'standardDeviation' },
-    { label: 'CoVariance', value: 'coVariance' },
-  ];
+  const host = "http://localhost:8080";
+
+  const parameterMap = {
+    newStrategy: ['email', 'address', 'price', 'tag', 'description', 'link', 'parameters'],
+    averageRebalance: ['sector', 'email'],
+    momentum: ['sector', 'email'],
+    standardDeviation: ['sector', 'symbol', 'openSd', 'closeSd', 'isBuy'],
+    coVariance: ['symbol1', 'symbol2', 'startDate', 'endDate'],
+  };
+
+  const [parameters, setParameters] = useState({});
   const info = useContext(AppContext);
   const contract =  new AppContract();
 
+  const handleParamChange = (param, value) => {
+    setParameters((prev) => ({ ...prev, [param]: value }));
+  };
+
   const handleRun = async (strategy) => {
       try {
-          const amount = await contract.getStrategyPrice(strategy);
-          const result = await contract.run_strategy(info.wallet.account, strategy, amount);
-      
-          console.log("Run Strategy Result:", result);
-          alert("Run strategy completed successfully!");
+        const result = await contract.run_strategy(info.wallet.account, strategy, selectedInfo.cost);
+        console.log("Run Strategy Result:", result);
       } catch (error) {
-          console.error("An error occurred during the run strategy process:", error);
+        console.error("An error occurred during the run strategy process:", error);
 
-          if (error.message.includes("User abort")) {
-              alert("Transaction aborted by user.");
-          } else {
-              alert("An unexpected error occurred. Please try again.");
-          }
+        if (error.message.includes("User abort")) {
+            alert("Transaction aborted by user.");
+        } else {
+            alert("An unexpected error occurred. Please try again.");
+        }
       }
   };
 
-  const handleStrategyPrice = async (strategy) => {
-    try {
-        const amount = await contract.getStrategyPrice(strategy);
-        setStrategyPrice(amount);
-    } catch (error) {
-        alert("An unexpected error occurred. Please try again.");
-    }
-};
-
-  const handleStartAlgo = async () => {
-    if (!strategy) {
-      alert('Please select both a strategy.');
-      return;
-    }
-
-    setLoading(true);
-    await handleRun(strategy);
-
-    switch (strategy) {
-      case 'averageRebalance':
-        averageRebalance(list, email);
-        console.log(`Running Average Rebalance strategy in sector: ${sector}`);
-        break;
-  
-      case 'momentum':
-        momentum(list, email);
-        console.log(`Running Momentum strategy in sector: ${sector}`);
-        break;
-  
-      case 'standardDeviation':
-        standardDeviation(symbol, openSd, closeSd, isBuy);
-        console.log(`Running Standard Deviation strategy in sector: ${sector}`);
-        break;
-  
-      case 'coVariance':
-        coVariance(symbol1, symbol2, startDate, endDate);
-        console.log(`Running Co-Variance strategy in sector: ${sector}`);
-        break;
-  
-      default:
-        console.error('Unknown strategy selected.');
-    }
-    
-    setLoading(false);
-    alert(`Algorithm started with strategy: ${strategy} in sector: ${sector}`);
+  const handleSelect = (item) => {
+    setStrategy(item.value);
+    const index = data.findIndex(strategy => strategy.value === item.value);
+    setSelectedInfo(data[index]);
+    console.log(`You selected the strategy: ${item.value} at index: ${index}`);
   };
 
-  const standardDeviation = async (symbol, openSd, closeSd, isBuy) => {
+  const refreshData = async () => {
+    const values = await contract.getUserHistory(info.walletAddress);
+    setHistory(values);
+    info.setRouteTrigger(true);
+  };
+
+  const handleRunStrategy = async () => {
+    if (!strategy) {
+      alert('Please select a strategy.');
+      return;
+    }
+  
+    setLoading(true);
+    await handleRun(strategy);
+  
+    try {
+      let result;
+      switch (strategy) {
+        case 'averageRebalance':
+          result = await averageRebalance(parameters.sector, parameters.email);
+          console.log('Running Average Rebalance strategy');
+          break;
+  
+        case 'momentum':
+          result = await momentum(parameters.sector, parameters.email);
+          console.log('Running Momentum strategy');
+          break;
+  
+        case 'standardDeviation':
+          result = await standardDeviation(
+            parameters.sector,
+            parameters.symbol,
+            parameters.openSd,
+            parameters.closeSd,
+            parameters.isBuy
+          );
+          console.log('Running Standard Deviation strategy');
+          break;
+  
+        case 'coVariance':
+          result = await coVariance(
+            parameters.symbol1,
+            parameters.symbol2,
+            parameters.startDate,
+            parameters.endDate
+          );
+          console.log('Running Co-Variance strategy');
+          break;
+  
+        default:
+          console.error('Unknown strategy selected.');
+          return;
+      }
+  
+      setResults(result);
+      alert(`Strategy Runned: ${strategy}`);
+
+      await refreshData();
+    } catch (error) {
+      console.error('Error running strategy:', error);
+      alert('An error occurred while starting the algorithm. Check console for details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const standardDeviation = async (sector, symbol, openSd, closeSd, isBuy) => {
 
     try {
-      const res = await axios.post(`https://${host}/standardDeviation`, {
+      const res = await axios.post(`${host}/standardDeviation`, {
+        sector,
         symbol,
         openSd,
         closeSd,
@@ -124,7 +148,7 @@ const StrategyPage = () => {
   const coVariance= async (symbol1, symbol2, startDate, endDate) => {
 
     try {
-      const res = await axios.post(`https://${host}/coVariance`, {
+      const res = await axios.post(`${host}/coVariance`, {
         symbol1,
         symbol2,
         start_date: new Date(startDate),
@@ -139,11 +163,11 @@ const StrategyPage = () => {
     }
   };
 
-  const averageRebalance = async (list, email) => {
+  const averageRebalance = async (sector, email) => {
 
     try {
-      const res = await axios.post(`https://${host}/averageRebalance`, {
-        list, 
+      const res = await axios.post(`${host}/averageRebalance`, {
+        sector, 
         email
       });
       
@@ -154,11 +178,11 @@ const StrategyPage = () => {
     }
   };
 
-  const momentum = async (list, email) => {
+  const momentum = async (sector, email) => {
 
     try {
-      const res = await axios.post(`https://${host}/momentum`, {
-        list, 
+      const res = await axios.post(`${host}/momentum`, {
+        sector, 
         email
       });
       
@@ -170,242 +194,26 @@ const StrategyPage = () => {
   };
 
   useEffect(() => {
-    if (strategy) {
-      handleStrategyPrice(strategy);
+    if (info.walletAddress && !info.routeTrigger) {
+        refreshData();
     }
-  }, [strategy]);
+  }, [info, refreshData]);
 
   if(info.walletAddress != null){
     return (
-      <>
-        {loading && <Loading />}
-
-        <Box
-          sx={{
-            fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#D1C4E9',
-            padding: '20px',
-            minHeight: '100vh'
-          }}
-        >
-          <Box
-            sx={{
-              margin: '0 auto',
-              background: '#fff',
-              padding: '30px',
-              borderRadius: '8px',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-              maxWidth: '70%'
-            }}
-          >
-            <TextField
-              select
-              label="Strategy"
-              value={strategy}
-              onChange={(e) => setStrategy(e.target.value)}
-              fullWidth
-              required
-              sx={{ marginBottom: '20px' }}
-            >
-              {strategies.map((strat) => (
-                <MenuItem key={strat.value} value={strat.value}>
-                  {strat.label}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            {(strategy === 'averageRebalance' || strategy === 'momentum')&& (
-              <>
-              <TextField
-                select
-                label="List"
-                value={list}
-                onChange={(e) => setList(e.target.value)}
-                fullWidth
-                required
-                sx={{ marginBottom: '20px' }}
-              >
-                <MenuItem value="crypto">Crypto</MenuItem>
-                <MenuItem value="tsx">TSX</MenuItem>
-                <MenuItem value="sp500">SP500</MenuItem>
-              </TextField>
-
-              <TextField
-                  label="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  fullWidth
-                  required
-                  sx={{ marginBottom: '20px' }}
-                  placeholder="Enter Email"
-              />
-              </>
-            )}
-
-            {strategy === 'standardDeviation' && (
-              <>
-              <TextField
-                select
-                label="Sector"
-                value={sector}
-                onChange={(e) => setSector(e.target.value)}
-                fullWidth
-                required
-                sx={{ marginBottom: '20px' }}
-              >
-                <MenuItem value="crypto">Crypto</MenuItem>
-                <MenuItem value="tsx">TSX Stocks</MenuItem>
-                <MenuItem value="sp500">SP500 Stocks</MenuItem>
-              </TextField>
-
-              <TextField
-                  label="Symbol"
-                  value={symbol}
-                  onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                  fullWidth
-                  required
-                  sx={{ marginBottom: '20px' }}
-                  disabled={!sector || sector !== 'crypto'}
-                  placeholder="Enter symbol"
-              />
-              </>
-            )}
-            {strategy === 'standardDeviation' && sector === 'crypto' && (
-              <>
-                <Typography variant="body1" sx={{marginTop: '10px', marginBottom: '10px', color: 'black' }}>
-                  Parameters:
-                </Typography>
-                <TextField
-                    label="Open Order SD"
-                    value={openSd}
-                    onChange={(e) => setopenSd(e.target.value)}
-                    fullWidth
-                    required
-                    sx={{ marginBottom: '20px' }}
-                />
-                <TextField
-                    label="Close Order SD"
-                    value={closeSd}
-                    onChange={(e) => setcloseSd(e.target.value)}
-                    fullWidth
-                    required
-                    sx={{ marginBottom: '20px' }}
-                />
-                <Box sx={{ marginBottom: '20px' }}>
-                  Is Buy
-                  <Switch
-                    checked={isBuy}
-                    onChange={(e) => setIsBuy(!isBuy)}
-                    color="primary"
-                  />
-                </Box>         
-              </>
-            )}
-            
-            {strategy === 'coVariance' && (
-              <>
-              <TextField
-                select
-                label="Sector"
-                value={sector}
-                onChange={(e) => setSector(e.target.value)}
-                fullWidth
-                required
-                sx={{ marginBottom: '20px' }}
-              >
-                <MenuItem value="crypto">Crypto</MenuItem>
-                <MenuItem value="tsx">TSX Stocks</MenuItem>
-                <MenuItem value="sp500">SP500 Stocks</MenuItem>
-              </TextField>
-
-              <TextField
-                  label="Symbol1"
-                  value={symbol1}
-                  onChange={(e) => setSymbol1(e.target.value.toUpperCase())}
-                  fullWidth
-                  required
-                  sx={{ marginBottom: '20px' }}
-                  disabled={!sector || sector !== 'crypto'}
-                  placeholder="Enter symbol"
-              />
-              <TextField
-                  label="Symbol2"
-                  value={symbol2}
-                  onChange={(e) => setSymbol2(e.target.value.toUpperCase())}
-                  fullWidth
-                  required
-                  sx={{ marginBottom: '20px' }}
-                  disabled={!sector || sector !== 'crypto'}
-                  placeholder="Enter symbol"
-              />
-              
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: '10px', marginBottom: '20px' }}>
-                <TextField
-                  type="date"
-                  label="Start Date"
-                  InputLabelProps={{ shrink: true }}
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  fullWidth
-                  required
-                />
-                <TextField
-                  type="date"
-                  label="End Date"
-                  InputLabelProps={{ shrink: true }}
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  fullWidth
-                  required
-                />
-              </Box>
-              </>
-            )}
-
-            <Box
-              sx={{
-                backgroundColor: '#D7CCE8', // Lighter shade
-                padding: '15px',
-                borderRadius: '8px',
-                marginBottom: '10px',
-                color: '#000'
-              }}
-            >
-              <Typography variant="body1">Cost: {strategyPrice} STRK</Typography>
-            </Box>
-            <Button
-                variant="contained"
-                sx={{ backgroundColor: '#7E57C2' }}
-                fullWidth
-                onClick={handleStartAlgo}
-              >
-                Run
-            </Button>
-          </Box>
-
-          {results && (
-              <Box sx={{ maxWidth: '70%', marginTop: '30px',  padding: '20px', backgroundColor: '#f1f1f1', borderRadius: '8px', margin: '20px auto'}}>
-                <Typography variant="h5" sx={{ marginBottom: '10px' }}>
-                  Results
-                </Typography>
-                {typeof results === "object" ? (
-                <List>
-                  {Object.entries(results).map(([key, value], index) => (
-                    <ListItem key={index}>
-                      <ListItemText
-                        primary={key.toString()}
-                        secondary={value.toString()}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              ) : (
-                <Typography>{results}</Typography>
-              )}
-              </Box>
-          )}  
-        </Box>
-      </>
+      <Box sx={{ fontFamily: "Arial, sans-serif", backgroundColor: "#D1C4E9", padding: "10px" }}>
+        <Grid container spacing={2}>
+          <Grid size={8}>
+            <Stack spacing={2}>
+              <Selection selections={strategies} onSelect={handleSelect} />
+              <Result results={results}  history={history}/>
+            </Stack>
+          </Grid>
+          <Grid size={4}>
+            <Information info={selectedInfo} onRunStrategy={handleRunStrategy} strategy={strategy} parameters={parameters} parameterMap={parameterMap} handleParamChange={handleParamChange} />
+          </Grid>
+        </Grid>
+      </Box>
     );
   }else{
       return <Connected/>
