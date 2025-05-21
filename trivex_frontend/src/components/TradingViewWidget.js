@@ -22,16 +22,20 @@ const TradingViewWidget = ({ symbol = "BTCUSDT"}) => {
         symbol,
         interval: "60",
         timezone: "Etc/UTC",
-        theme: "light",
+        theme: "dark",
         style: "1",
         locale: "en",
         enable_publishing: false,
         allow_symbol_change: false,
         calendar: false,
-        toolbar_bg: "#1e1e1e",
+        toolbar_bg: "#1A0033",
+        hide_top_toolbar: false,
+        hide_legend: false,
         enable_drawing_tools: true,
         hide_side_toolbar: false,
         support_host: "https://www.tradingview.com",
+        backgroundColor: "rgba(28, 25, 38, 0.9)",
+        gridColor: "rgba(126, 87, 194, 0.1)",
       });
 
       container.current.appendChild(script);
@@ -43,10 +47,11 @@ const TradingViewWidget = ({ symbol = "BTCUSDT"}) => {
       sx={{
         height: "100%",
         textAlign: "center",
-        borderRadius: "6px",
+        borderRadius: "16px",
         overflow: "hidden",
-        padding: "10px",
-        backgroundColor: "white",
+        backgroundColor: "rgba(28, 25, 38, 0.5)",
+        border: "1px solid rgba(126, 87, 194, 0.2)",
+        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
       }}
     >
       <div

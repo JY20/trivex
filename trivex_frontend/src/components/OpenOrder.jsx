@@ -2,6 +2,68 @@ import React, { useState, useEffect } from 'react';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Box, Typography, TextField, MenuItem, Button, Slider, Autocomplete, IconButton } from '@mui/material';
 import Loading from './Loading';
+import { styled } from '@mui/material/styles';
+
+// Styled components
+const StyledButton = styled(Button)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #9B6DFF 0%, #6A4BA1 100%)',
+  color: 'white',
+  fontWeight: 'bold',
+  borderRadius: '12px',
+  transition: 'all 0.3s ease',
+  textTransform: 'none',
+  boxShadow: '0 4px 20px rgba(106, 75, 161, 0.25)',
+  '&:hover': { 
+      boxShadow: '0 6px 25px rgba(106, 75, 161, 0.4)',
+      transform: 'translateY(-2px)'
+  }
+}));
+
+const OutlinedButton = styled(Button)(({ theme }) => ({
+  background: 'transparent',
+  color: '#B19EE3',
+  fontWeight: 'bold',
+  borderRadius: '12px',
+  border: '1px solid rgba(126, 87, 194, 0.4)',
+  transition: 'all 0.3s ease',
+  textTransform: 'none',
+  '&:hover': { 
+      background: 'rgba(126, 87, 194, 0.1)',
+      borderColor: '#9B6DFF',
+      color: '#FFFFFF',
+      transform: 'translateY(-2px)'
+  }
+}));
+
+const InfoBox = styled(Box)(({ theme }) => ({
+  background: 'rgba(28, 25, 38, 0.5)',
+  borderRadius: '12px',
+  border: '1px solid rgba(126, 87, 194, 0.2)',
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  color: '#B19EE3'
+}));
+
+const PercentButton = styled(Button)(({ theme }) => ({
+  backgroundColor: 'rgba(126, 87, 194, 0.2)',
+  color: '#B19EE3',
+  borderRadius: '8px',
+  transition: 'all 0.3s ease',
+  minWidth: '40px',
+  '&:hover': {
+    backgroundColor: 'rgba(126, 87, 194, 0.4)',
+    color: '#FFFFFF',
+  }
+}));
+
+const OrderFormContainer = styled(Box)(({ theme }) => ({
+  backgroundColor: 'rgba(28, 25, 38, 0.5)',
+  border: '1px solid rgba(126, 87, 194, 0.2)',
+  borderRadius: '16px',
+  padding: theme.spacing(3),
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+  height: '100%',
+}));
 
 const OpenOrder = ({
   sector,
@@ -46,11 +108,11 @@ const OpenOrder = ({
     <>
       {loading && <Loading />}
 
-      <Box sx={{ margin: '0 auto', background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+      <OrderFormContainer>
         <Box sx={{ display: 'flex', justifyContent: 'left', alignItems: 'center', marginBottom: '10px' }}>
-          <Typography variant="h7">Refresh</Typography>
+          <Typography variant="body2" sx={{ color: '#B19EE3' }}>Refresh</Typography>
           <IconButton
-            sx={{ color: '#7E57C2' }}
+            sx={{ color: '#9B6DFF' }}
             onClick={handleRefreshWithLoading}
             disabled={loading}
           >
@@ -65,7 +127,23 @@ const OpenOrder = ({
           onChange={handleSectorChange}
           fullWidth
           required
-          sx={{ marginBottom: '10px' }}
+          sx={{ 
+            marginBottom: '15px',
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: 'rgba(126, 87, 194, 0.3)',
+              },
+              '&:hover fieldset': {
+                borderColor: '#9B6DFF',
+              },
+            },
+            '& .MuiInputLabel-root': {
+              color: '#B19EE3',
+            },
+            '& .MuiSelect-select': {
+              color: '#FFFFFF',
+            }
+          }}
           disabled={loading}
         >
           <MenuItem value="crypto">Crypto</MenuItem>
@@ -82,26 +160,44 @@ const OpenOrder = ({
           disabled={!sector || loading}
           fullWidth
           freeSolo
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: 'rgba(126, 87, 194, 0.3)',
+              },
+              '&:hover fieldset': {
+                borderColor: '#9B6DFF',
+              },
+            }
+          }}
           renderInput={(params) => (
             <TextField
               {...params}
               label="Symbol"
               placeholder="Search or select a symbol"
               required
-              sx={{ marginBottom: '10px' }}
+              sx={{ 
+                marginBottom: '15px',
+                '& .MuiInputLabel-root': {
+                  color: '#B19EE3',
+                },
+                '& .MuiInputBase-input': {
+                  color: '#FFFFFF',
+                }
+              }}
             />
           )}
         />
 
-        <Typography variant="h6" sx={{ marginBottom: '10px' }}>
+        <Typography variant="h6" sx={{ marginBottom: '15px', color: '#FFFFFF' }}>
           Current Price: {price ? `$${price}` : 'N/A'}
         </Typography>
   
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
-          <Typography variant="body1" sx={{ color: 'black' }}>
+          <Typography variant="body1" sx={{ color: '#B19EE3' }}>
             Select Leverage:
           </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 'bold', minWidth: '30px'}}>
+          <Typography variant="body1" sx={{ fontWeight: 'bold', minWidth: '30px', color: '#9B6DFF' }}>
             {leverage}x
           </Typography>
         </Box>
@@ -113,24 +209,32 @@ const OpenOrder = ({
           onChange={(e) => setLeverage(Number(e.target.value))}
           valueLabelDisplay="auto"
           valueLabelFormat={(value) => `${value}x`}
-          sx={{ marginBottom: '10px' }}
+          sx={{ 
+            marginBottom: '15px',
+            color: '#9B6DFF',
+            '& .MuiSlider-thumb': {
+              backgroundColor: '#9B6DFF',
+            },
+            '& .MuiSlider-track': {
+              background: 'linear-gradient(90deg, #9B6DFF 0%, #6A4BA1 100%)',
+            }
+          }}
           disabled={loading}
         />
 
-        <Typography variant="body1" sx={{ marginBottom: '10px', color: 'black' }}>
+        <Typography variant="body1" sx={{ marginBottom: '10px', color: '#B19EE3' }}>
           Select Percentage of Balance:
         </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
           {[0, 25, 50, 75, 100].map((percentage) => (
-            <Button
+            <PercentButton
               key={percentage}
               variant="outlined"
-              sx={{ backgroundColor: '#6c4f91', color: '#fff' }}
               onClick={() => setAmount((percentage / 100) * available)}
               disabled={loading}
             >
               {percentage}%
-            </Button>
+            </PercentButton>
           ))}
         </Box>
 
@@ -140,60 +244,65 @@ const OpenOrder = ({
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           fullWidth
-          sx={{ marginBottom: '10px' }}
+          sx={{ 
+            marginBottom: '15px',
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: 'rgba(126, 87, 194, 0.3)',
+              },
+              '&:hover fieldset': {
+                borderColor: '#9B6DFF',
+              },
+            },
+            '& .MuiInputLabel-root': {
+              color: '#B19EE3',
+            },
+            '& .MuiInputBase-input': {
+              color: '#FFFFFF',
+            }
+          }}
           disabled={loading}
         />
 
-        <Box
-          sx={{
-            backgroundColor: '#D7CCE8', // Lighter shade
-            padding: '15px',
-            borderRadius: '8px',
-            marginBottom: '10px',
-            color: '#000'
-          }}
-        >
-          <Box display="flex" justifyContent="space-between">
-            <Typography variant="body1">Price:</Typography>
-            <Typography variant="body1">${price}</Typography>
+        <InfoBox>
+          <Box display="flex" justifyContent="space-between" mb={1}>
+            <Typography variant="body2">Price:</Typography>
+            <Typography variant="body2" sx={{ color: '#FFFFFF' }}>${price}</Typography>
+          </Box>
+          <Box display="flex" justifyContent="space-between" mb={1}>
+            <Typography variant="body2">Size:</Typography>
+            <Typography variant="body2" sx={{ color: '#FFFFFF' }}>{size.toFixed(6) || 0}</Typography>
+          </Box>
+          <Box display="flex" justifyContent="space-between" mb={1}>
+            <Typography variant="body2">Total:</Typography>
+            <Typography variant="body2" sx={{ color: '#FFFFFF' }}>${(price*size).toFixed(6)}</Typography>
           </Box>
           <Box display="flex" justifyContent="space-between">
-            <Typography variant="body1">Size:</Typography>
-            <Typography variant="body1">{size.toFixed(6) || 0}</Typography>
+            <Typography variant="body2">Fee:</Typography>
+            <Typography variant="body2" sx={{ color: '#FFFFFF' }}>${fee.toFixed(6)}</Typography>
           </Box>
-          <Box display="flex" justifyContent="space-between">
-            <Typography variant="body1">Total:</Typography>
-            <Typography variant="body1">${(price*size).toFixed(6)}</Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between">
-            <Typography variant="body1">Fee:</Typography>
-            <Typography variant="body1">${fee.toFixed(6)}</Typography>
-          </Box>
-        </Box>
+        </InfoBox>
 
-        <Typography variant="body1" sx={{ marginBottom: '10px', color: 'black' }}>
-          Balance: {available} USD
+        <Typography variant="body1" sx={{ marginBottom: '15px', color: '#B19EE3' }}>
+          Balance: <span style={{ color: '#FFFFFF' }}>{available} USD</span>
         </Typography>
 
-        <Button
-          variant="contained"
+        <StyledButton
           fullWidth
           onClick={() => handleTradeWithLoading('Buy')}
-          sx={{ marginBottom: '10px', backgroundColor: '#7E57C2' }}
+          sx={{ marginBottom: '10px' }}
           disabled={loading}
         >
           Buy
-        </Button>
-        <Button
-          variant="outlined"
-          color="secondary"
+        </StyledButton>
+        <OutlinedButton
           fullWidth
           onClick={() => handleTradeWithLoading('Sell')}
           disabled={loading}
         >
           Sell
-        </Button>
-      </Box>
+        </OutlinedButton>
+      </OrderFormContainer>
     </>
   );
 };

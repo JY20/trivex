@@ -1,15 +1,31 @@
 import React from 'react';
 import { Box, Button, TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Chip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import { styled } from '@mui/material/styles';
+
+// Styled button component to match the TradePage Buy button
+const StyledButton = styled(Button)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #9B6DFF 0%, #6A4BA1 100%)',
+  color: 'white',
+  fontWeight: 'bold',
+  borderRadius: '12px',
+  transition: 'all 0.3s ease',
+  textTransform: 'none',
+  boxShadow: '0 4px 20px rgba(106, 75, 161, 0.25)',
+  '&:hover': { 
+    boxShadow: '0 6px 25px rgba(106, 75, 161, 0.4)',
+    transform: 'translateY(-2px)'
+  }
+}));
 
 const getTagColor = (tag) => {
   switch (tag) {
     case 'Low Frequency':
-      return { bg: '#E0BBE4', color: '#000000' };
+      return { bg: '#9C27B0', color: '#FFFFFF' };
     case 'Calculator':
-      return { bg: '#C5CAE9', color: '#000000' };
+      return { bg: '#673AB7', color: '#FFFFFF' };
     default:
-      return { bg: '#E0E0E0', color: '#000000' };
+      return { bg: '#7E57C2', color: '#FFFFFF' };
   }
 };
 
@@ -18,47 +34,108 @@ const Selection = ({ selections, onSelect }) => {
     <Box
       sx={{
         padding: '20px',
-        borderRadius: '12px',
+        borderRadius: '8px',
         height: '40vh',
-        backgroundColor: '#F3F0FA',
+        backgroundColor: 'rgba(28, 25, 38, 0.5)',
+        border: '1px solid rgba(147, 112, 219, 0.3)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-        <Button
-          variant="contained"
+        <StyledButton
           startIcon={<AddIcon />}
           onClick={() => onSelect({ value: 'newStrategy' })}
-          sx={{
-            backgroundColor: '#7E57C2',
-            textTransform: 'none',
-            '&:hover': {
-              backgroundColor: '#673AB7',
-            },
-          }}
         >
           Create Strategy
-        </Button>
+        </StyledButton>
       </Box>
 
-      <TableContainer component={Paper} sx={{ maxHeight: '30vh', overflowY: 'auto' }}>
+      <TableContainer 
+        component={Paper} 
+        sx={{ 
+          maxHeight: '30vh', 
+          overflowY: 'auto',
+          backgroundColor: 'rgba(28, 25, 38, 0.5)',
+          '& .MuiPaper-root': {
+            backgroundColor: 'transparent',
+          }
+        }}
+      >
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell><strong>#</strong></TableCell>
-              <TableCell><strong>Name</strong></TableCell>
-              <TableCell><strong>Tag</strong></TableCell>
-              <TableCell><strong>Cost (STRK)</strong></TableCell>
-              <TableCell><strong>Creator</strong></TableCell>
-              <TableCell align="center"><strong>Select</strong></TableCell>
+              <TableCell 
+                sx={{ 
+                  backgroundColor: 'rgba(28, 25, 38, 0.8)',
+                  color: '#FFFFFF'
+                }}
+              >
+                <strong>#</strong>
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  backgroundColor: 'rgba(28, 25, 38, 0.8)',
+                  color: '#FFFFFF'
+                }}
+              >
+                <strong>Name</strong>
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  backgroundColor: 'rgba(28, 25, 38, 0.8)',
+                  color: '#FFFFFF'
+                }}
+              >
+                <strong>Tag</strong>
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  backgroundColor: 'rgba(28, 25, 38, 0.8)',
+                  color: '#FFFFFF'
+                }}
+              >
+                <strong>Cost (STRK)</strong>
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  backgroundColor: 'rgba(28, 25, 38, 0.8)',
+                  color: '#FFFFFF'
+                }}
+              >
+                <strong>Creator</strong>
+              </TableCell>
+              <TableCell 
+                align="center"
+                sx={{ 
+                  backgroundColor: 'rgba(28, 25, 38, 0.8)',
+                  color: '#FFFFFF'
+                }}
+              >
+                <strong>Select</strong>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {selections.map((item, index) => {
               const { bg, color } = getTagColor(item.tags);
               return (
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{item.label}</TableCell>
+                <TableRow 
+                  key={index}
+                  sx={{
+                    '&:nth-of-type(odd)': {
+                      backgroundColor: 'rgba(28, 25, 38, 0.3)',
+                    },
+                    '&:nth-of-type(even)': {
+                      backgroundColor: 'rgba(28, 25, 38, 0.5)',
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(147, 112, 219, 0.15)',
+                    },
+                    color: '#FFFFFF'
+                  }}
+                >
+                  <TableCell sx={{ color: '#FFFFFF' }}>{index + 1}</TableCell>
+                  <TableCell sx={{ color: '#FFFFFF' }}>{item.label}</TableCell>
                   <TableCell>
                     <Chip
                       label={item.tags}
@@ -70,22 +147,15 @@ const Selection = ({ selections, onSelect }) => {
                       }}
                     />
                   </TableCell>
-                  <TableCell>{item.cost}</TableCell>
-                  <TableCell>{`${item.creator.slice(0, 2)}...${item.creator.slice(-4)}`}</TableCell>
+                  <TableCell sx={{ color: '#FFFFFF' }}>{item.cost}</TableCell>
+                  <TableCell sx={{ color: '#FFFFFF' }}>{`${item.creator.slice(0, 2)}...${item.creator.slice(-4)}`}</TableCell>
                   <TableCell align="center">
-                    <Button
-                      variant="contained"
+                    <StyledButton
                       onClick={() => onSelect(item)}
-                      sx={{
-                        backgroundColor: '#7E57C2',
-                        textTransform: 'none',
-                        '&:hover': {
-                          backgroundColor: '#673AB7',
-                        },
-                      }}
+                      size="small"
                     >
                       Select
-                    </Button>
+                    </StyledButton>
                   </TableCell>
                 </TableRow>
               );

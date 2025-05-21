@@ -7,6 +7,38 @@ import {
   Typography,
   Box
 } from "@mui/material";
+import { styled } from '@mui/material/styles';
+
+// Styled button component to match the Buy button
+const StyledButton = styled(Button)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #9B6DFF 0%, #6A4BA1 100%)',
+  color: 'white',
+  fontWeight: 'bold',
+  borderRadius: '12px',
+  transition: 'all 0.3s ease',
+  textTransform: 'none',
+  boxShadow: '0 4px 20px rgba(106, 75, 161, 0.25)',
+  '&:hover': { 
+    boxShadow: '0 6px 25px rgba(106, 75, 161, 0.4)',
+    transform: 'translateY(-2px)'
+  }
+}));
+
+const OutlinedButton = styled(Button)(({ theme }) => ({
+  background: 'transparent',
+  color: '#B19EE3',
+  fontWeight: 'bold',
+  borderRadius: '12px',
+  border: '1px solid rgba(126, 87, 194, 0.4)',
+  transition: 'all 0.3s ease',
+  textTransform: 'none',
+  '&:hover': { 
+    background: 'rgba(126, 87, 194, 0.1)',
+    borderColor: '#9B6DFF',
+    color: '#FFFFFF',
+    transform: 'translateY(-2px)'
+  }
+}));
 
 const StakePopup = ({ open, onClose, balance = 0, handleDeposit }) => {
     const [depositAmount, setDepositAmount] = useState("");
@@ -27,18 +59,34 @@ const StakePopup = ({ open, onClose, balance = 0, handleDeposit }) => {
 
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogContent sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
-            <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+        <Dialog 
+          open={open} 
+          onClose={onClose} 
+          maxWidth="sm" 
+          fullWidth
+          PaperProps={{
+            sx: {
+              backgroundColor: 'rgba(28, 25, 38, 0.95)',
+              backgroundImage: 'linear-gradient(rgba(147, 112, 219, 0.05), rgba(41, 21, 71, 0.1))',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+              border: '1px solid rgba(147, 112, 219, 0.2)',
+              borderRadius: '16px'
+            }
+          }}
+        >
+        <DialogContent sx={{ p: 3 }}>
+            <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, color: '#FFFFFF' }}>
             Stake
             </Typography>
             <Box
             sx={{
                 display: "flex",
                 alignItems: "center",
-                background: "#fff",
+                background: "rgba(28, 25, 38, 0.7)",
                 mb: 3,
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                border: '1px solid rgba(147, 112, 219, 0.3)',
+                borderRadius: '8px',
             }}
             >
             <TextField
@@ -47,7 +95,24 @@ const StakePopup = ({ open, onClose, balance = 0, handleDeposit }) => {
                 value={depositAmount}
                 onChange={(e) => setDepositAmount(e.target.value)}
                 type="number"
-                sx={{ flex: 1, "& .MuiOutlinedInput-root": { border: "none" } }}
+                fullWidth
+                sx={{ 
+                  '& .MuiOutlinedInput-root': { 
+                    border: 'none',
+                    '& fieldset': {
+                      borderColor: 'transparent',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'transparent',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'transparent',
+                    },
+                  },
+                  '& .MuiInputBase-input': {
+                    color: '#FFFFFF',
+                  }
+                }}
                 InputProps={{
                 style: {
                     fontSize: "1.5rem",
@@ -65,10 +130,20 @@ const StakePopup = ({ open, onClose, balance = 0, handleDeposit }) => {
                 gap: 1,
             }}
             >
-            <Typography variant="body2" color="textSecondary">
+            <Typography variant="body2" sx={{ color: '#B19EE3' }}>
                 Balance: {balance} USD
             </Typography>
-            <Button onClick={handleMax} size="small" sx={{ textTransform: "none" }}>
+            <Button 
+              onClick={handleMax} 
+              size="small" 
+              sx={{ 
+                textTransform: "none", 
+                color: '#9B6DFF',
+                '&:hover': {
+                  backgroundColor: 'rgba(155, 109, 255, 0.1)',
+                }
+              }}
+            >
                 Max
             </Button>
             </Box>
@@ -80,28 +155,18 @@ const StakePopup = ({ open, onClose, balance = 0, handleDeposit }) => {
                 gap: 2,
             }}
             >
-            <Button
+            <OutlinedButton
                 onClick={onClose}
                 fullWidth
-                variant="outlined"
-                color="secondary"
-                sx={{ borderRadius: "12px", textTransform: "none" }}
             >
                 Cancel
-            </Button>
-            <Button
+            </OutlinedButton>
+            <StyledButton
                 onClick={handleConfirmDeposit}
                 fullWidth
-                variant="contained"
-                sx={{
-                    backgroundColor: "#7E57C2",
-                    color: "#fff",
-                    borderRadius: "12px",
-                    textTransform: "none",
-                }}
             >
                 Deposit
-            </Button>
+            </StyledButton>
             </Box>
         </DialogContent>
         </Dialog>

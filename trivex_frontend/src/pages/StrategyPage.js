@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect} from 'react';
-import { Box, Grid, Stack} from '@mui/material';
+import { Box, Grid, Stack, styled } from '@mui/material';
 import axios from 'axios';
 import {AppContext} from '../components/AppProvider';
 import { Connected} from '../components/Alert';
@@ -10,6 +10,14 @@ import Information from '../components/Information';
 import Selection from '../components/Selection';
 import data from "../assets/data.json";
 import TradingViewWidget from "../components/TradingViewWidget";
+
+// Styled component for the page background
+const PageContainer = styled(Box)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #2A0F55 0%, #1A0033 100%)',
+  padding: theme.spacing(3),
+  minHeight: 'calc(100vh - 140px)',
+  width: '100%',
+}));
 
 const StrategyPage = () => {
   const [strategy, setStrategy] = useState(data[0].value);
@@ -202,19 +210,21 @@ const StrategyPage = () => {
 
   if(info.walletAddress != null){
     return (
-       <Box sx={{ fontFamily: "Arial, sans-serif", backgroundColor: "#D1C4E9", padding: "10px"}}>
-          <Grid container spacing={2}>
-            <Grid item xs={8}>
-              <Stack spacing={2} sx={{ height: "100%" }}>
+      <PageContainer>
+        <Box sx={{ width: '100%', px: 2 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={8}>
+              <Stack spacing={3} sx={{ height: "100%" }}>
                 <Selection selections={strategies} onSelect={handleSelect} />
-                <Result results={results}  history={history}/>
+                <Result results={results} history={history}/>
               </Stack>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={12} md={4}>
               <Information info={selectedInfo} onRunStrategy={handleRunStrategy} strategy={strategy} parameters={parameters} parameterMap={parameterMap} handleParamChange={handleParamChange} />
             </Grid>
           </Grid>
         </Box>
+      </PageContainer>
     );
   }else{
       return <Connected/>

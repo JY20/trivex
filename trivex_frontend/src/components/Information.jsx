@@ -1,6 +1,22 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button, Rating, TextField, MenuItem, Switch } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import ParamCreator from './paramCreator';
+
+// Styled button component to match the TradePage Buy button
+const StyledButton = styled(Button)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #9B6DFF 0%, #6A4BA1 100%)',
+  color: 'white',
+  fontWeight: 'bold',
+  borderRadius: '12px',
+  transition: 'all 0.3s ease',
+  textTransform: 'none',
+  boxShadow: '0 4px 20px rgba(106, 75, 161, 0.25)',
+  '&:hover': { 
+    boxShadow: '0 6px 25px rgba(106, 75, 161, 0.4)',
+    transform: 'translateY(-2px)'
+  }
+}));
 
 const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, handleParamChange }) => {
     const [params, setParams] = useState([{ parameter: '', type: '' }]);
@@ -10,14 +26,39 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
   const { label, cost, creator, rating, description } = info;
   const paramsForStrategy = parameterMap[strategy] || [];
 
+  const textFieldSx = {
+    marginBottom: '20px',
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: 'rgba(147, 112, 219, 0.3)',
+      },
+      '&:hover fieldset': {
+        borderColor: 'rgba(147, 112, 219, 0.5)',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#9C27B0',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      color: '#BB86FC',
+    },
+    '& .MuiInputBase-input': {
+      color: '#FFFFFF',
+    },
+    '& .MuiSelect-icon': {
+      color: '#BB86FC',
+    },
+  };
+
   return (
     <Box
       sx={{
         maxWidth: '100%',
         padding: '20px',
-        backgroundColor: '#fafafa',
+        backgroundColor: 'rgba(28, 25, 38, 0.5)',
         borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        border: '1px solid rgba(147, 112, 219, 0.3)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
         height: '80vh',
         overflow: 'auto'
       }}
@@ -25,15 +66,19 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
 
     {strategy !== 'newStrategy' && (
         <>
-          <Typography variant="h4" sx={{ marginBottom: '10px' }}>{label}</Typography>
+          <Typography variant="h4" sx={{ marginBottom: '10px', color: '#FFFFFF' }}>{label}</Typography>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="body1">Cost: {cost} STRK</Typography>
-            <Rating value={rating} precision={0.5} readOnly />
-        </Box>
-          <Typography variant="body1" sx={{ marginBottom: '10px'}}>Creator: {`${creator.slice(0, 2)}...${creator.slice(-4)}`}</Typography>
-          <Typography variant="h7" sx={{ marginBottom: '10px', fontWeight: 'bold'}}>Description:</Typography>
-          <Typography variant="body2" sx={{ marginBottom: '10px' }}>{description}</Typography>
-          <Typography variant="h7" sx={{ marginBottom: '10px', fontWeight: 'bold'}}>Parameters:</Typography>
+            <Typography variant="body1" sx={{ color: '#FFFFFF' }}>Cost: {cost} STRK</Typography>
+            <Rating value={rating} precision={0.5} readOnly sx={{ 
+              '& .MuiRating-iconFilled': {
+                color: '#BB86FC',
+              }
+            }}/>
+          </Box>
+          <Typography variant="body1" sx={{ marginBottom: '10px', color: '#FFFFFF' }}>Creator: {`${creator.slice(0, 2)}...${creator.slice(-4)}`}</Typography>
+          <Typography variant="h7" sx={{ marginBottom: '10px', fontWeight: 'bold', color: '#BB86FC' }}>Description:</Typography>
+          <Typography variant="body2" sx={{ marginBottom: '10px', color: '#FFFFFF' }}>{description}</Typography>
+          <Typography variant="h7" sx={{ marginBottom: '10px', fontWeight: 'bold', color: '#BB86FC' }}>Parameters:</Typography>
         </>
       )}
 
@@ -44,7 +89,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('email', e.target.value)}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
+          sx={textFieldSx}
           placeholder="Enter Email"
         />
       )}
@@ -57,11 +102,11 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('sector', e.target.value)}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
+          sx={textFieldSx}
         >
-          <MenuItem value="crypto">Crypto</MenuItem>
-          <MenuItem value="tsx">TSX Stocks</MenuItem>
-          <MenuItem value="sp500">SP500 Stocks</MenuItem>
+          <MenuItem value="crypto" sx={{ color: '#1A0033' }}>Crypto</MenuItem>
+          <MenuItem value="tsx" sx={{ color: '#1A0033' }}>TSX Stocks</MenuItem>
+          <MenuItem value="sp500" sx={{ color: '#1A0033' }}>SP500 Stocks</MenuItem>
         </TextField>
       )}
 
@@ -72,7 +117,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('symbol', e.target.value.toUpperCase())}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
+          sx={textFieldSx}
           disabled={!parameters.sector}
           placeholder="Enter symbol"
         />
@@ -85,7 +130,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('openSd', e.target.value)}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
+          sx={textFieldSx}
         />
       )}
 
@@ -96,17 +141,17 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('closeSd', e.target.value)}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
+          sx={textFieldSx}
         />
       )}
 
       {paramsForStrategy.includes('isBuy') && (
-        <Box sx={{ marginBottom: '20px' }}>
+        <Box sx={{ marginBottom: '20px', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: 2 }}>
           Is Buy
           <Switch
             checked={parameters.isBuy || false}
             onChange={(e) => handleParamChange('isBuy', e.target.checked)}
-            color="primary"
+            color="secondary"
           />
         </Box>
       )}
@@ -118,8 +163,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('symbol1', e.target.value.toUpperCase())}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
-          disabled={!parameters.sector || parameters.sector !== 'crypto'}
+          sx={textFieldSx}
           placeholder="Enter symbol"
         />
       )}
@@ -131,8 +175,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('symbol2', e.target.value.toUpperCase())}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
-          disabled={!parameters.sector || parameters.sector !== 'crypto'}
+          sx={textFieldSx}
           placeholder="Enter symbol"
         />
       )}
@@ -146,7 +189,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('startDate', e.target.value)}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
+          sx={textFieldSx}
         />
       )}
 
@@ -159,7 +202,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('endDate', e.target.value)}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
+          sx={textFieldSx}
         />
       )}
 
@@ -171,7 +214,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('address', e.target.value)}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
+          sx={textFieldSx}
           placeholder="0x..."
         />
       )}
@@ -184,10 +227,10 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
             onChange={(e) => handleParamChange('tag', e.target.value)}
             fullWidth
             required
-            sx={{ marginBottom: '20px' }}
+            sx={textFieldSx}
         >
-            <MenuItem value="Low Frequency">Low Frequency</MenuItem>
-            <MenuItem value="Calculator">Calculator</MenuItem>
+            <MenuItem value="Low Frequency" sx={{ color: '#1A0033' }}>Low Frequency</MenuItem>
+            <MenuItem value="Calculator" sx={{ color: '#1A0033' }}>Calculator</MenuItem>
         </TextField>
         )}
 
@@ -198,7 +241,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('price', e.target.value)}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
+          sx={textFieldSx}
           placeholder="Enter price"
         />
       )}
@@ -212,7 +255,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           multiline
           rows={3}
           required
-          sx={{ marginBottom: '20px' }}
+          sx={textFieldSx}
           placeholder="Describe your strategy"
         />
       )}
@@ -224,7 +267,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           onChange={(e) => handleParamChange('link', e.target.value)}
           fullWidth
           required
-          sx={{ marginBottom: '20px' }}
+          sx={textFieldSx}
           placeholder="https://github.com/..."
         />
       )}
@@ -232,20 +275,12 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
     {paramsForStrategy.includes('parameters') && (
         <ParamCreator params={params} setParams={setParams}/>
     )}
-    <Button
-        variant="contained"
+    <StyledButton
+        fullWidth
         onClick={() => onRunStrategy()}
-        sx={{
-        backgroundColor: '#7E57C2',
-        width: '100%',
-        textTransform: 'none',
-        '&:hover': {
-            backgroundColor: '#673AB7',
-        },
-        }}
     >
         Run Strategy
-    </Button>
+    </StyledButton>
     </Box>
   );
 };
