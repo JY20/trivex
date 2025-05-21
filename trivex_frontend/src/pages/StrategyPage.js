@@ -9,6 +9,7 @@ import Result from '../components/Result';
 import Information from '../components/Information';
 import Selection from '../components/Selection';
 import data from "../assets/data.json";
+import TradingViewWidget from "../components/TradingViewWidget";
 
 const StrategyPage = () => {
   const [strategy, setStrategy] = useState(data[0].value);
@@ -20,7 +21,7 @@ const StrategyPage = () => {
   const [history, setHistory] = useState([]);
 
 
-  const host = "http://localhost:8080";
+  const host = "https://trivex-strategy-etbga3bramfwgfe9.canadacentral-01.azurewebsites.net";
 
   const parameterMap = {
     newStrategy: ['email', 'address', 'price', 'tag', 'description', 'link', 'parameters'],
@@ -201,19 +202,19 @@ const StrategyPage = () => {
 
   if(info.walletAddress != null){
     return (
-      <Box sx={{ fontFamily: "Arial, sans-serif", backgroundColor: "#D1C4E9", padding: "10px" }}>
-        <Grid container spacing={2}>
-          <Grid size={8}>
-            <Stack spacing={2}>
-              <Selection selections={strategies} onSelect={handleSelect} />
-              <Result results={results}  history={history}/>
-            </Stack>
+       <Box sx={{ fontFamily: "Arial, sans-serif", backgroundColor: "#D1C4E9", padding: "10px"}}>
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+              <Stack spacing={2} sx={{ height: "100%" }}>
+                <Selection selections={strategies} onSelect={handleSelect} />
+                <Result results={results}  history={history}/>
+              </Stack>
+            </Grid>
+            <Grid item xs={4}>
+              <Information info={selectedInfo} onRunStrategy={handleRunStrategy} strategy={strategy} parameters={parameters} parameterMap={parameterMap} handleParamChange={handleParamChange} />
+            </Grid>
           </Grid>
-          <Grid size={4}>
-            <Information info={selectedInfo} onRunStrategy={handleRunStrategy} strategy={strategy} parameters={parameters} parameterMap={parameterMap} handleParamChange={handleParamChange} />
-          </Grid>
-        </Grid>
-      </Box>
+        </Box>
     );
   }else{
       return <Connected/>
