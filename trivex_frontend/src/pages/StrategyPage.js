@@ -29,8 +29,7 @@ const StrategyPage = () => {
   const [history, setHistory] = useState([]);
 
 
-  const host = "http://localhost:8080";
-  // "https://trivex-strategy-etbga3bramfwgfe9.canadacentral-01.azurewebsites.net";
+  const host = "https://trivex-strategy-etbga3bramfwgfe9.canadacentral-01.azurewebsites.net";
 
   const parameterMap = {
     newStrategy: ['email', 'address', 'price', 'tag', 'description', 'link', 'parameters'],
@@ -46,7 +45,6 @@ const StrategyPage = () => {
 
   const handleParamChange = (param, value) => {
     if (param === 'parameters') {
-      // For the custom parameters array in newStrategy
       setParameters(prev => ({ ...prev, parameters: value }));
     } else {
       setParameters(prev => ({ ...prev, [param]: value }));
