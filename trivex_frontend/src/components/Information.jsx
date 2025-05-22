@@ -81,6 +81,10 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
           <Typography variant="h7" sx={{ marginBottom: '10px', fontWeight: 'bold', color: '#BB86FC' }}>Parameters:</Typography>
         </>
       )}
+      
+      {strategy === 'newStrategy' && (
+        <Typography variant="h4" sx={{ marginBottom: '20px', color: '#FFFFFF' }}>Create New Strategy</Typography>
+      )}
 
       {paramsForStrategy.includes('email') && (
         <TextField
@@ -279,7 +283,7 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
         fullWidth
         onClick={() => onRunStrategy()}
     >
-        Run Strategy
+        {strategy === 'newStrategy' ? 'Create Strategy' : 'Run Strategy'}
     </StyledButton>
     </Box>
   );

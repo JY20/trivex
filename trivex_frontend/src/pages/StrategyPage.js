@@ -29,7 +29,8 @@ const StrategyPage = () => {
   const [history, setHistory] = useState([]);
 
 
-  const host = "https://trivex-strategy-etbga3bramfwgfe9.canadacentral-01.azurewebsites.net";
+  const host = "http://localhost:8080";
+  // "https://trivex-strategy-etbga3bramfwgfe9.canadacentral-01.azurewebsites.net";
 
   const parameterMap = {
     newStrategy: ['email', 'address', 'price', 'tag', 'description', 'link', 'parameters'],
@@ -48,18 +49,20 @@ const StrategyPage = () => {
   };
 
   const handleRun = async (strategy) => {
-      try {
-        const result = await contract.run_strategy(info.wallet.account, strategy, selectedInfo.cost);
-        console.log("Run Strategy Result:", result);
-      } catch (error) {
-        console.error("An error occurred during the run strategy process:", error);
+    try {
+      const result = await contract.run_strategy(info.wallet.account, strategy, selectedInfo.cost);
+      console.log("Run Strategy Result:", result);
+      return true;
+    } catch (error) {
+      console.error("An error occurred during the run strategy process:", error);
 
-        if (error.message.includes("User abort")) {
-            alert("Transaction aborted by user.");
-        } else {
-            alert("An unexpected error occurred. Please try again.");
-        }
+      if (error.message.includes("User abort")) {
+          alert("Transaction aborted by user.");
+      } else {
+          alert("An unexpected error occurred. Please try again.");
       }
+      return false;
+    }
   };
 
   const handleSelect = (item) => {
@@ -80,10 +83,15 @@ const StrategyPage = () => {
       alert('Please select a strategy.');
       return;
     }
-  
+
     setLoading(true);
-    await handleRun(strategy);
-  
+    
+    const runSuccess = await handleRun(strategy);
+    if (!runSuccess) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       let result;
       switch (strategy) {

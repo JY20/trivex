@@ -1,6 +1,9 @@
 import { Contract, Provider, cairo, CallData, shortString } from 'starknet';
+import { RpcProvider } from 'starknet';
 
-const hash_provider = new Provider({ network: 'sepolia' });
+const hash_provider = new RpcProvider({
+    nodeUrl: 'https://starknet-sepolia.public.blastapi.io/rpc/v0_7',
+});
 
 const classHash = '0x04074c9358508a35eb68e9a785fecffededed939e27705539df6ee5e7efb01f8';
 const contractAddress = '0x074b86ea6740d99816f83b83e30895c88b8e628ff8cbf216cc3310022781228d';
