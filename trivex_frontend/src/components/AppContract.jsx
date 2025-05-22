@@ -1,9 +1,12 @@
 import { Contract, Provider, cairo, CallData, shortString } from 'starknet';
+import { RpcProvider } from 'starknet';
 
-const hash_provider = new Provider({ network: 'sepolia' });
+const hash_provider = new RpcProvider({
+    nodeUrl: 'https://starknet-sepolia.public.blastapi.io/rpc/v0_7',
+});
 
-const classHash = '0x044bdb1b55aa0c3e7f1437434e205bfd697405b805e654a68a3fa3adb82e1eeb';
-const contractAddress = '0x031015bf30be2b3e1241bd44b65d6c21fe32255cca3f68b59b5c8a9a0fca3b9b';
+const classHash = '0x04074c9358508a35eb68e9a785fecffededed939e27705539df6ee5e7efb01f8';
+const contractAddress = '0x074b86ea6740d99816f83b83e30895c88b8e628ff8cbf216cc3310022781228d';
 const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
 const strkTokenAddress = '0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d';
 
@@ -200,32 +203,6 @@ export class AppContract {
         return transactions;
     }
 
-    async run_strategy(account, strategy, amount) {
-        const provider = account;
-        const abi = await this.getABI(classHash);
-        const contract = new Contract(abi, contractAddress, provider);
-        const weiAmount = amount * 1e18;
-        const run_strategy = contract.populate("run_strategy", [strategy, BigInt(weiAmount), strkTokenAddress]);
-
-        const result = await provider.execute([
-        {
-            contractAddress: strkTokenAddress,
-            entrypoint: "approve",
-            calldata: CallData.compile({
-            spender: contractAddress,
-            amount: cairo.uint256(weiAmount),
-            }),
-        },
-        {
-            contractAddress: contractAddress,
-            entrypoint: "run_strategy",
-            calldata: run_strategy.calldata,
-        }
-        ]);
-
-        return result;
-    }
-
     async getUsers() {
         const abi = await this.getABI(classHash);
         const contract = new Contract(abi, contractAddress, hash_provider);
@@ -268,4 +245,45 @@ export class AppContract {
         const result = Number(resultRaw);
         return result;
     }
+
+    async run_strategy(account, strategy, amount) {
+        const provider = account;
+        const abi = await this.getABI(classHash);
+        const contract = new Contract(abi, contractAddress, provider);
+        const weiAmount = amount * 1e18;
+        const run_strategy = contract.populate("run_strategy", [strategy, BigInt(weiAmount), strkTokenAddress]);
+
+        const result = await provider.execute([
+        {
+            contractAddress: strkTokenAddress,
+            entrypoint: "approve",
+            calldata: CallData.compile({
+            spender: contractAddress,
+            amount: cairo.uint256(weiAmount),
+            }),
+        },
+        {
+            contractAddress: contractAddress,
+            entrypoint: "run_strategy",
+            calldata: run_strategy.calldata,
+        }
+        ]);
+
+        return result;
+    }
+    
+    async getUserHistory(walletAddress) {
+        const abi = await this.getABI(classHash);
+        const contract = new Contract(abi, contractAddress, hash_provider);
+        const raw = await contract.call('get_history', [walletAddress]);
+        
+        const history = raw.map(item => ({
+            strategy: shortString.decodeShortString(item.strategy),
+            amount: Number(item.amount)/1e18,
+            datetime: new Date(Number(item.datetime) * 1000)
+        }));
+        
+        console.log(history);
+        return history;
+    };
 }

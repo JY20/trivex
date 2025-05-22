@@ -19,3 +19,10 @@ pub struct order_book_entry {
     pub leverage: u128,
     pub amount: Amount
 }
+
+#[derive(Copy, Serde, Drop, starknet::Store)]
+pub struct history_entry {
+    pub strategy: felt252,       
+    pub amount: Amount, 
+    pub datetime: u64   
+}

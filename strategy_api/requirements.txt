@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+jinja2
+python-multipart
+trycourier==5.0.0
+yfinance==0.2.31
+pandas
+pyodbc
+matplotlib

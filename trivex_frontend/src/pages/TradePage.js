@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext} from 'react';
 import axios from 'axios';
-import { Box, Grid, Stack } from '@mui/material';
+import { Box, Grid, Stack, Container } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import OpenOrder from '../components/OpenOrder'; 
 import CloseOrder from '../components/CloseOrder'
 import {AppContext} from '../components/AppProvider';
@@ -9,6 +10,14 @@ import TradingViewWidget from "../components/TradingViewWidget";
 import { AppContract } from '../components/AppContract';
 import tokensCsv from '../assets/tokens.csv';
 import Papa from 'papaparse';
+
+// Styled component for the page background
+const PageContainer = styled(Box)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #2A0F55 0%, #1A0033 100%)',
+  padding: theme.spacing(3),
+  minHeight: 'calc(100vh - 140px)',
+  width: '100%',
+}));
 
 const TradePage = () => {
   const [sector, setSector] = useState('');
@@ -234,36 +243,43 @@ const TradePage = () => {
 
   if(info.walletAddress != null){
       return (
-        <Box sx={{ fontFamily: "Arial, sans-serif", backgroundColor: "#D1C4E9", padding: "10px"}}>
-          <Grid container spacing={2}>
-            <Grid item xs={8}>
-              <Stack spacing={2} sx={{ height: "100%" }}>
-                <TradingViewWidget symbol={tradingSymbol} />
-                <CloseOrder positions={position} transactions={transaction} handleCloseOrder={handleCloseOrder} refreshData={refreshData}/>
-              </Stack>
+        <PageContainer>
+          <Box sx={{ width: '100%', px: 2 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={8}>
+                <Stack spacing={2} sx={{ height: '100%' }}>
+                  <TradingViewWidget symbol={tradingSymbol} />
+                  <CloseOrder 
+                    positions={position} 
+                    transactions={transaction} 
+                    handleCloseOrder={handleCloseOrder} 
+                    refreshData={refreshData}
+                  />
+                </Stack>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <OpenOrder
+                  sector={sector}
+                  handleSectorChange={handleSectorChange}
+                  symbol={symbol}
+                  handleSymbol={symbolChange}
+                  symbolList={symbolList}
+                  symbolLeverages={symbolLeverages}
+                  leverage={leverage}
+                  setLeverage={setLeverage}
+                  amount={amount}
+                  setAmount={amountChange}
+                  available={balance}
+                  handleTrade={handleOpenOrder}
+                  price={price}
+                  refreshData={refreshData}
+                  fee={fee}
+                  size={size}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={4}>
-              <OpenOrder
-                sector={sector}
-                handleSectorChange={handleSectorChange}
-                symbol={symbol}
-                handleSymbol={symbolChange}
-                symbolList={symbolList}
-                symbolLeverages={symbolLeverages}
-                leverage={leverage}
-                setLeverage={setLeverage}
-                amount={amount}
-                setAmount={amountChange}
-                available={balance}
-                handleTrade={handleOpenOrder}
-                price={price}
-                refreshData={refreshData}
-                fee={fee}
-                size={size}
-              />
-            </Grid>
-          </Grid>
-        </Box>
+          </Box>
+        </PageContainer>
       );
   }else{
       return <Connected/>

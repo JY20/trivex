@@ -1,10 +1,80 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Typography, Button, Paper } from '@mui/material';
+import { Grid, Box, Typography, Button, Paper, Container, Stack } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { Connected } from '../components/Alert';
 import { AppContext } from '../components/AppProvider';
 import StakePopup from '../components/Stake'; // Used as StakePopup
 import UnstakePopup from '../components/Unstake'; // Used as UnstakePopup
 import { AppContract } from '../components/AppContract';
+
+// Styled components for a more modern UI
+const PageContainer = styled(Box)(({ theme }) => ({
+    background: 'linear-gradient(135deg, #2A0F55 0%, #1A0033 100%)',
+    padding: theme.spacing(3),
+    minHeight: 'calc(100vh - 140px)',
+}));
+
+const GlassCard = styled(Paper)(({ theme }) => ({
+    background: 'rgba(28, 25, 38, 0.75)',
+    backdropFilter: 'blur(10px)',
+    borderRadius: '16px',
+    border: '1px solid rgba(126, 87, 194, 0.2)',
+    boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+    padding: theme.spacing(3),
+    height: '100%',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.25)',
+    },
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+    background: 'linear-gradient(135deg, #9B6DFF 0%, #6A4BA1 100%)',
+    color: 'white',
+    fontWeight: 'bold',
+    borderRadius: '12px',
+    padding: '10px 20px',
+    transition: 'all 0.3s ease',
+    textTransform: 'none',
+    boxShadow: '0 4px 20px rgba(106, 75, 161, 0.25)',
+    position: 'relative',
+    overflow: 'hidden',
+    '&:hover': { 
+        boxShadow: '0 6px 25px rgba(106, 75, 161, 0.4)',
+        transform: 'translateY(-2px)'
+    },
+    '&::after': {
+        content: '""',
+        position: 'absolute',
+        top: '-50%',
+        left: '-50%',
+        width: '200%',
+        height: '200%',
+        background: 'linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%)',
+        transform: 'rotate(30deg)',
+        transition: 'transform 0.7s ease',
+    },
+    '&:hover::after': {
+        transform: 'rotate(30deg) translate(50%, 50%)',
+    }
+}));
+
+const OutlinedButton = styled(Button)(({ theme }) => ({
+    background: 'transparent',
+    color: '#B19EE3',
+    fontWeight: 'bold',
+    borderRadius: '12px',
+    padding: '10px 20px',
+    border: '1px solid rgba(126, 87, 194, 0.4)',
+    transition: 'all 0.3s ease',
+    textTransform: 'none',
+    '&:hover': { 
+        background: 'rgba(126, 87, 194, 0.1)',
+        borderColor: '#9B6DFF',
+        color: '#FFFFFF',
+        transform: 'translateY(-2px)'
+    }
+}));
 
 const StakePage = () => {
     const info = useContext(AppContext);
@@ -125,72 +195,108 @@ const StakePage = () => {
 
     if (info.walletAddress != null) {
         return (
-            <Box
-                sx={{
-                    fontFamily: 'Arial, sans-serif',
-                    backgroundColor: '#D1C4E9',
-                    minHeight: '100vh',
-                    width: '100%',
-                }}
-            >
-                <Grid container justifyContent="center" sx={{ mt: 4 }}>
-                    <Grid item xs={12} sm={10} md={8}>
-                        <Paper elevation={3} sx={{ p: 3, backgroundColor: 'white', borderRadius: 2 }}>
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    p: 2,
-                                    border: '1px solid #EDE7F6',
-                                    borderRadius: 1,
-                                }}
-                            >
+            <PageContainer>
+                <Container maxWidth="xl">
+                    <Box sx={{ width: '80%', mx: 'auto' }}>
+                        <GlassCard>
+                            <Box sx={{ p: 2 }}>
+                                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, gap: 3, mb: 3 }}>
                                 <Box>
-                                    <Typography variant="h6" sx={{ color: '#311B92' }}>
+                                        <Typography variant="h5" sx={{ 
+                                            color: '#FFFFFF', 
+                                            fontWeight: 'bold',
+                                            mb: 1
+                                        }}>
                                         {stakeData.title}
                                     </Typography>
-                                    <Typography variant="body1" sx={{ color: '#7E57C2' }}>
-                                        APY: <span style={{ color: '#7E57C2', fontWeight: 'bold' }}>
+                                        <Typography variant="body1" sx={{ 
+                                            color: '#B19EE3', 
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            gap: 1 
+                                        }}>
+                                            APY: 
+                                            <span style={{ 
+                                                color: '#9B6DFF', 
+                                                fontWeight: 'bold',
+                                                fontSize: '1.1rem'
+                                            }}>
                                             {apy}%
                                         </span>
                                     </Typography>
-                                    <Typography variant="body1" sx={{ color: '#7E57C2', mt: 1 }}>
-                                        Total Staked Balance: <span style={{ fontWeight: 'bold' }}>
-                                            {totalPoolBalance} USD
-                                        </span>
-                                    </Typography>
                                 </Box>
-                                <Box>
-                                    <Box sx={{ display: 'flex', gap: 2 ,  marginBottom: '20px'}}>
-                                        <Button
-                                            variant="contained"
-                                            onClick={handleStakePopUp}
-                                            sx={{
-                                                backgroundColor: '#7E57C2',
-                                            }}
-                                        >
+                                    <Box sx={{ display: 'flex', gap: 2 }}>
+                                        <StyledButton onClick={handleStakePopUp}>
                                             Stake
-                                        </Button>
-                                        <Button
-                                            variant="outlined"
-                                            color="secondary"
-                                            sx={{ flex: 1 }}
-                                            onClick={handleUnstakePopUp}
-                                        >
+                                        </StyledButton>
+                                        <OutlinedButton onClick={handleUnstakePopUp}>
                                             Unstake
-                                        </Button>
+                                        </OutlinedButton>
                                     </Box>
-                                    <Typography variant="body1" sx={{ color: '#7E57C2', mt: 1 }}>
-                                        Staked Balance: <span style={{ fontWeight: 'bold' }}>
-                                            {poolBalance} USD
+                                </Box>
+                                
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} md={6}>
+                                        <Box sx={{ 
+                                            p: 3, 
+                                            borderRadius: '12px', 
+                                            background: 'rgba(28, 25, 38, 0.5)',
+                                            border: '1px solid rgba(126, 87, 194, 0.2)',
+                                        }}>
+                                            <Typography variant="body2" sx={{ color: '#B19EE3', mb: 1 }}>
+                                                Total Staked Balance
+                                            </Typography>
+                                            <Typography variant="h6" sx={{ 
+                                                color: '#FFFFFF',
+                                                fontWeight: 'bold',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                            }}>
+                                                {totalPoolBalance} 
+                                                <span style={{ 
+                                                    marginLeft: '8px', 
+                                                    fontSize: '0.8rem', 
+                                                    opacity: 0.7,
+                                                    color: '#B19EE3'
+                                                }}>
+                                                    USD
+                                                </span>
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <Box sx={{ 
+                                            p: 3, 
+                                            borderRadius: '12px', 
+                                            background: 'rgba(28, 25, 38, 0.5)',
+                                            border: '1px solid rgba(126, 87, 194, 0.2)',
+                                        }}>
+                                            <Typography variant="body2" sx={{ color: '#B19EE3', mb: 1 }}>
+                                                Your Staked Balance
+                                            </Typography>
+                                            <Typography variant="h6" sx={{ 
+                                                color: '#FFFFFF',
+                                                fontWeight: 'bold',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                            }}>
+                                                {poolBalance} 
+                                                <span style={{ 
+                                                    marginLeft: '8px', 
+                                                    fontSize: '0.8rem', 
+                                                    opacity: 0.7,
+                                                    color: '#B19EE3'
+                                                }}>
+                                                    USD
                                         </span>
                                     </Typography>
                                 </Box>
+                                    </Grid>
+                                </Grid>
                             </Box>
-                        </Paper>
-                    </Grid>
-                </Grid>
+                        </GlassCard>
+                    </Box>
+                </Container>
                 <StakePopup
                     open={isStakePopupOpen}
                     onClose={() => setStakePopupOpen(false)}
@@ -203,7 +309,7 @@ const StakePage = () => {
                     balance={poolBalance}
                     handleWithdraw={handleUnstake}
                 />
-            </Box>
+            </PageContainer>
         );
     } else {
         return <Connected />;
