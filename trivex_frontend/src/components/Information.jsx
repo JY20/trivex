@@ -277,7 +277,13 @@ const Information = ({ info, onRunStrategy, strategy, parameters, parameterMap, 
       )}
 
     {paramsForStrategy.includes('parameters') && (
-        <ParamCreator params={params} setParams={setParams}/>
+        <ParamCreator 
+          params={params} 
+          setParams={(newParams) => {
+            setParams(newParams);
+            handleParamChange('parameters', newParams);
+          }}
+        />
     )}
     <StyledButton
         fullWidth

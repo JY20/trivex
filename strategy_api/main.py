@@ -10,6 +10,7 @@ from strategy.standardDeviation import standardDeviation
 from strategy.coVariance import coVariance
 from trader.alertTrader import alertTrader
 from fastapi.middleware.cors import CORSMiddleware
+from components.alert import alert
 
 dateCurrent = datetime.now().strftime("%Y_%m_%d")
 logging.basicConfig(filename="./logs/"+str(dateCurrent)+"_strategyAPI.log", level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -34,6 +35,15 @@ class arRequest(BaseModel):
     sector: str
     email: str
 
+class nsRequest(BaseModel):
+    email: str
+    address: str
+    price: float
+    tag: str
+    description: str
+    link: str
+    parameters: str
+
 origins = ["*"]
 
 app.add_middleware(
@@ -53,6 +63,7 @@ def get_crypto_list():
     except Exception as e:
         logger.error(f"Error reading crypto list: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to retrieve crypto list.")
+
 
 def get_symbols_from_file(filepath: str, col_index: int):
     try:
@@ -149,6 +160,32 @@ async def executeM(request: arRequest):
         logger.error(f"Error executing strategy M: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to execute strategy M.")
 
-if __name__ == '__main__':
-    uvicorn.run('main:app', host='0.0.0.0', port=8000)
+@app.post("/newStrategy")
+async def executeNS(request: nsRequest):
+    try:
+        a = alert(logger)
+        a.setEmail("trivex.xyz@gmail.com")
 
+        subject = f"New Strategy Submission: {request.tag}"
+        body = f"""
+        Email: {request.email}
+        Address: {request.address}
+        Price: {request.price}
+        Tag: {request.tag}
+        Description: {request.description}
+        Link: {request.link}
+        Parameters: {request.parameters}
+        """
+
+        a.send_email(subject, body)
+        a.setEmail(request.email)
+        a.send_email(subject, body)
+
+        result = f"Email with results sent to: {request.email}"
+        return result
+    except Exception as e:
+        logger.error(f"Error executing strategy M: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to execute strategy M.")
+
+if __name__ == '__main__':
+    uvicorn.run('main:app', host='0.0.0.0', port=8080)

@@ -45,7 +45,12 @@ const StrategyPage = () => {
   const contract =  new AppContract();
 
   const handleParamChange = (param, value) => {
-    setParameters((prev) => ({ ...prev, [param]: value }));
+    if (param === 'parameters') {
+      // For the custom parameters array in newStrategy
+      setParameters(prev => ({ ...prev, parameters: value }));
+    } else {
+      setParameters(prev => ({ ...prev, [param]: value }));
+    }
   };
 
   const handleRun = async (strategy) => {
@@ -85,6 +90,46 @@ const StrategyPage = () => {
     }
 
     setLoading(true);
+    
+    if (strategy === 'newStrategy') {
+      try {
+        const requiredParams = parameterMap['newStrategy'];
+        const missingParams = requiredParams.filter(param => !parameters[param]);
+        if (missingParams.length > 0) {
+          alert(`Please fill in all required fields: ${missingParams.join(', ')}`);
+          setLoading(false);
+          return;
+        }
+        
+        const formattedParams = Array.isArray(parameters.parameters) 
+          ? JSON.stringify(parameters.parameters)
+          : "[]";
+        
+        const newStrategyBody = {
+          email: parameters.email,
+          address: parameters.address,
+          price: parseFloat(parameters.price),
+          tag: parameters.tag,
+          description: parameters.description,
+          link: parameters.link,
+          parameters: formattedParams
+        }
+        console.log(newStrategyBody);
+        const res = await axios.post(`${host}/newStrategy`, newStrategyBody);
+        
+        setResults(res.data);
+        alert(`Strategy submitted successfully! Confirmation email sent to: ${parameters.email}`);
+        
+        setParameters({});
+        await refreshData();
+      } catch (error) {
+        console.error('Error creating strategy:', error);
+        alert('Error creating strategy. Please check console for details.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     
     const runSuccess = await handleRun(strategy);
     if (!runSuccess) {
