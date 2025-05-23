@@ -122,6 +122,7 @@ git clone https://github.com/your-org/trivex_web.git
 cd trivex_web
 
 # Install dependencies
+npm install react-scripts --save
 npm install
 
 # Start the development server
