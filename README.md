@@ -14,7 +14,7 @@ By offering a broader asset selection than typical DeFi platforms and continuous
 
 The Trivex platform consists of several key components, each with specific responsibilities:
 
-### 📱 `trivex_frontend`
+### 📱 `trivex_web`
 
 The web application that users interact with, built with React.
 - User interface for trading, portfolio management, and strategy execution
