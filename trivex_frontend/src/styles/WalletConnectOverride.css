@@ -1,0 +1,170 @@
+/* Wallet Connect Dialog Override Styles */
+
+/* Target the wallet connect dialog */
+.wallet-connect-dialog {
+  background-color: rgba(28, 25, 38, 0.95) !important;
+  border: 1px solid rgba(126, 87, 194, 0.3) !important;
+  border-radius: 16px !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.25) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Target the wallet options */
+.wallet-option {
+  background-color: rgba(41, 21, 71, 0.75) !important;
+  border: 1px solid rgba(126, 87, 194, 0.3) !important;
+  border-radius: 12px !important;
+  color: #FFFFFF !important;
+  transition: all 0.3s ease !important;
+}
+
+.wallet-option:hover {
+  background-color: rgba(155, 109, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(106, 75, 161, 0.2) !important;
+}
+
+/* Target text elements */
+.wallet-connect-dialog h1,
+.wallet-connect-dialog h2,
+.wallet-connect-dialog h3,
+.wallet-connect-dialog p,
+.wallet-connect-dialog span {
+  color: #FFFFFF !important;
+}
+
+/* Target secondary text */
+.wallet-connect-dialog .secondary-text {
+  color: #B19EE3 !important;
+}
+
+/* Override any white backgrounds */
+div[role="dialog"] {
+  background-color: rgba(28, 25, 38, 0.95) !important;
+  color: #FFFFFF !important;
+}
+
+/* Target the specific wallet connect modal from get-starknet */
+.starknet-connect-modal {
+  background-color: rgba(28, 25, 38, 0.95) !important;
+  color: #FFFFFF !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(126, 87, 194, 0.3) !important;
+}
+
+/* Target all modal content from get-starknet */
+.starknet-connect-modal * {
+  color: #FFFFFF !important;
+  background-color: transparent !important;
+}
+
+/* Target the wallet buttons */
+.starknet-connect-modal button {
+  background-color: rgba(41, 21, 71, 0.75) !important;
+  border: 1px solid rgba(126, 87, 194, 0.3) !important;
+  border-radius: 12px !important;
+  color: #FFFFFF !important;
+  transition: all 0.3s ease !important;
+}
+
+.starknet-connect-modal button:hover {
+  background-color: rgba(155, 109, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Target the modal backdrop */
+.MuiBackdrop-root {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+/* Specifically target the wallet connect dialog */
+[data-rk] {
+  --rk-colors-bg-1: rgba(28, 25, 38, 0.95) !important;
+  --rk-colors-bg-2: rgba(41, 21, 71, 0.75) !important;
+  --rk-colors-bg-3: rgba(41, 21, 71, 0.85) !important;
+  --rk-colors-text-1: #FFFFFF !important;
+  --rk-colors-text-2: #B19EE3 !important;
+  --rk-colors-text-3: #9B6DFF !important;
+  --rk-colors-border-1: rgba(126, 87, 194, 0.3) !important;
+  --rk-radii-actionButton: 12px !important;
+  --rk-radii-connectButton: 12px !important;
+  --rk-radii-menuButton: 12px !important;
+  --rk-radii-modal: 16px !important;
+  --rk-shadows-connectButton: 0 4px 12px rgba(106, 75, 161, 0.2) !important;
+}
+
+/* Additional styles for wallet connect dialog */
+
+/* Target the modal container */
+.MuiModal-root {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Target the dialog paper */
+.MuiPaper-root[role="dialog"] {
+  background-color: rgba(28, 25, 38, 0.95) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(126, 87, 194, 0.3) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.25) !important;
+}
+
+/* Target all divs inside the dialog */
+.MuiPaper-root[role="dialog"] div {
+  background-color: transparent !important;
+}
+
+/* Target all wallet option buttons */
+.MuiPaper-root[role="dialog"] button {
+  background-color: rgba(41, 21, 71, 0.75) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(126, 87, 194, 0.3) !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+}
+
+.MuiPaper-root[role="dialog"] button:hover {
+  background-color: rgba(155, 109, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Target all text elements */
+.MuiPaper-root[role="dialog"] p,
+.MuiPaper-root[role="dialog"] h1,
+.MuiPaper-root[role="dialog"] h2,
+.MuiPaper-root[role="dialog"] h3,
+.MuiPaper-root[role="dialog"] h4,
+.MuiPaper-root[role="dialog"] h5,
+.MuiPaper-root[role="dialog"] h6,
+.MuiPaper-root[role="dialog"] span {
+  color: #FFFFFF !important;
+}
+
+/* Target specific get-starknet dialog elements */
+[data-testid="starknet-windowlayer"] {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+[data-testid="starknet-window"] {
+  background-color: rgba(28, 25, 38, 0.95) !important;
+  border: 1px solid rgba(126, 87, 194, 0.3) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.25) !important;
+}
+
+[data-testid="starknet-window"] * {
+  color: #FFFFFF !important;
+}
+
+[data-testid="starknet-window"] button {
+  background-color: rgba(41, 21, 71, 0.75) !important;
+  border: 1px solid rgba(126, 87, 194, 0.3) !important;
+  border-radius: 12px !important;
+}
+
+[data-testid="starknet-window"] button:hover {
+  background-color: rgba(155, 109, 255, 0.2) !important;
+} 

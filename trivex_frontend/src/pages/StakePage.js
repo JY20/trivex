@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Typography, Button, Paper, Container, Stack } from '@mui/material';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { Grid, Box, Typography, Button, Paper, Container, Stack, IconButton, Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { Connected } from '../components/Alert';
 import { AppContext } from '../components/AppProvider';
 import StakePopup from '../components/Stake'; // Used as StakePopup
@@ -76,6 +77,18 @@ const OutlinedButton = styled(Button)(({ theme }) => ({
     }
 }));
 
+const RefreshIconButton = styled(IconButton)(({ theme }) => ({
+    color: '#9B6DFF',
+    background: 'rgba(155, 109, 255, 0.1)',
+    borderRadius: '50%',
+    padding: '8px',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+        background: 'rgba(155, 109, 255, 0.2)',
+        transform: 'rotate(180deg)',
+    }
+}));
+
 const StakePage = () => {
     const info = useContext(AppContext);
 
@@ -90,19 +103,20 @@ const StakePage = () => {
     const [poolBalance, setPoolBalance] = useState(0);
     const [totalPoolBalance, setTotalPoolBalance] = useState(0);
     const [apy, setApy] = useState(0);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const contract =  new AppContract();
 
-    const getBalance = async () => {
+    const getBalance = useCallback(async () => {
         try {
             return await contract.getWalletBalance(info.walletAddress);
         } catch (error) {
             console.error('Error fetching balance:', error);
             throw error;
         }
-    };
+    }, [contract, info.walletAddress]);
     
-    const fetchPoolBalance = async () => {
+    const fetchPoolBalance = useCallback(async () => {
         try {
             const result = await contract.getStakedBalance(info.walletAddress);
             setPoolBalance(result);
@@ -110,9 +124,9 @@ const StakePage = () => {
             console.error('Error fetching staked balance:', err);
             setPoolBalance(0);
         }
-    };
+    }, [contract, info.walletAddress]);
 
-    const fetchTotalPool = async () => {
+    const fetchTotalPool = useCallback(async () => {
         try {
             const result = await contract.getTotalStaked();
             setTotalPoolBalance(result);
@@ -120,9 +134,9 @@ const StakePage = () => {
             console.error('Error fetching staked balance:', err);
             setTotalPoolBalance(0);
         }
-    };
+    }, [contract]);
 
-    const fetchApy = async () => {
+    const fetchApy = useCallback(async () => {
         try {
             const result = await contract.getApy();
             setApy(result);
@@ -130,7 +144,7 @@ const StakePage = () => {
             console.error('Error fetching staked balance:', err);
             setApy(0);
         }
-    };
+    }, [contract]);
 
     const handleStakePopUp = async () => {
         try {
@@ -156,6 +170,8 @@ const StakePage = () => {
             const result = await contract.stake(info.wallet.account, amount);
             console.log("Stake Result:", result);
             alert("Stake completed successfully!");
+            setStakePopupOpen(false);
+            await refreshData();
         } catch (error) {
             console.error("An error occurred during the stake process:", error);
             if (error.message.includes("User abort")) {
@@ -173,25 +189,42 @@ const StakePage = () => {
             console.log('Unstake Result:', result);
             alert('Unstake completed successfully!');
             setUnstakePopupOpen(false);
-            
-            await fetchPoolBalance();
+            await refreshData();
         } catch (err) {
             console.error('An error occurred during unstaking:', err);
             alert(err.message.includes('User abort') ? 'Transaction aborted.' : 'Unexpected error.');
         }
     };
 
-    const refreshData = async () => {
-        fetchPoolBalance();
-        fetchApy();
-        fetchTotalPool();
-    };
+    const refreshData = useCallback(async () => {
+        if (!info.walletAddress) return;
+        
+        setIsRefreshing(true);
+        try {
+            await Promise.all([
+                fetchPoolBalance(),
+                fetchApy(),
+                fetchTotalPool()
+            ]);
+        } catch (error) {
+            console.error("Error refreshing data:", error);
+        } finally {
+            setIsRefreshing(false);
+            info.setRouteTrigger(true);
+        }
+    }, [info.walletAddress, fetchPoolBalance, fetchApy, fetchTotalPool]);
 
     useEffect(() => {
         if (info.walletAddress && !info.routeTrigger) {
             refreshData();
         }
-    }, [info, refreshData]);
+    }, [info.walletAddress, info.routeTrigger, refreshData]);
+
+    useEffect(() => {
+        if (!isStakePopupOpen && !isUnstakePopupOpen && info.walletAddress && !info.routeTrigger) {
+            refreshData();
+        }
+    }, [isStakePopupOpen, isUnstakePopupOpen, info.walletAddress, refreshData]);
 
     if (info.walletAddress != null) {
         return (
@@ -201,14 +234,14 @@ const StakePage = () => {
                         <GlassCard>
                             <Box sx={{ p: 2 }}>
                                 <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, gap: 3, mb: 3 }}>
-                                <Box>
+                                    <Box>
                                         <Typography variant="h5" sx={{ 
                                             color: '#FFFFFF', 
                                             fontWeight: 'bold',
                                             mb: 1
                                         }}>
-                                        {stakeData.title}
-                                    </Typography>
+                                            {stakeData.title}
+                                        </Typography>
                                         <Typography variant="body1" sx={{ 
                                             color: '#B19EE3', 
                                             display: 'flex', 
@@ -221,11 +254,21 @@ const StakePage = () => {
                                                 fontWeight: 'bold',
                                                 fontSize: '1.1rem'
                                             }}>
-                                            {apy}%
-                                        </span>
-                                    </Typography>
-                                </Box>
-                                    <Box sx={{ display: 'flex', gap: 2 }}>
+                                                {apy}%
+                                            </span>
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                        <Tooltip title="Refresh data">
+                                            <RefreshIconButton 
+                                                onClick={refreshData}
+                                                sx={{ 
+                                                    color: '#9B6DFF'
+                                                }}
+                                            >
+                                                <RefreshIcon />
+                                            </RefreshIconButton>
+                                        </Tooltip>
                                         <StyledButton onClick={handleStakePopUp}>
                                             Stake
                                         </StyledButton>
@@ -288,9 +331,9 @@ const StakePage = () => {
                                                     color: '#B19EE3'
                                                 }}>
                                                     USD
-                                        </span>
-                                    </Typography>
-                                </Box>
+                                                </span>
+                                            </Typography>
+                                        </Box>
                                     </Grid>
                                 </Grid>
                             </Box>
