@@ -1,6 +1,6 @@
 # Trivex: Next-Generation DeFi Trading Platform
 
-![Trivex](trivex_web/src/assets/trivex1.png)
+![Trivex](trivex_web/src/assets/Trivex1.png)
 
 ## Overview
 
