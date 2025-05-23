@@ -21,6 +21,7 @@ import { connect, disconnect } from "get-starknet";
 import { encode } from "starknet";
 import { AppContext } from './AppProvider';
 import MenuIcon from '@mui/icons-material/Menu';
+import WalletConnectButton from './WalletConnectButton';
 
 // Styled components with enhanced web3 styling
 const StyledToolbar = styled(Toolbar)({
@@ -80,7 +81,7 @@ const NavLink = styled(Typography)(({ theme }) => ({
 
 const StyledButton = styled(Button)(({ theme }) => ({
     background: 'linear-gradient(135deg, #9B6DFF 0%, #6A4BA1 100%)',
-    color: 'white',
+    color: '#FFFFFF',
     fontWeight: 'bold',
     borderRadius: '12px',
     padding: '10px 20px',
@@ -89,9 +90,11 @@ const StyledButton = styled(Button)(({ theme }) => ({
     boxShadow: '0 4px 20px rgba(106, 75, 161, 0.25)',
     position: 'relative',
     overflow: 'hidden',
+    border: '1px solid rgba(155, 109, 255, 0.5)',
     '&:hover': { 
         boxShadow: '0 6px 25px rgba(106, 75, 161, 0.4)',
-        transform: 'translateY(-2px)'
+        transform: 'translateY(-2px)',
+        background: 'linear-gradient(135deg, #8A5CF7 0%, #5A3A91 100%)',
     },
     '&::after': {
         content: '""',
@@ -168,10 +171,7 @@ const theme = createTheme({
 
 const Navbar = () => {
     const info = useContext(AppContext);
-    const [connected, setConnected] = useState('Connect');
     const [openDrawer, setOpenDrawer] = useState(false);
-    const [walletName, setWalletName] = useState("");
-    const [wallet, setWallet] = useState("");
     const [scrolled, setScrolled] = useState(false);
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const location = useLocation();
@@ -190,39 +190,6 @@ const Navbar = () => {
             window.removeEventListener('scroll', handleScroll);
         };
     }, [scrolled]);
-
-    const handleDisconnect = async () => {
-        await disconnect({ clearLastWallet: true });
-        setWallet("");
-        info.setWalletAddress(null);
-        setWalletName("");
-        setConnected('Connect');
-    };
-
-    const handleConnect = async () => {
-        try {
-            const getWallet = await connect();
-            await getWallet?.enable({ starknetVersion: "v5" });
-            setWallet(getWallet);
-            const addr = encode.addHexPrefix(encode.removeHexPrefix(getWallet?.selectedAddress ?? "0x").padStart(64, "0"));
-            info.setWalletAddress(addr);
-            const profile = addr.substring(0, 2) + "..." + addr.substring(addr.length - 4);
-            setConnected(profile);
-            setWalletName(getWallet?.name || "");
-            info.setWallet(getWallet);
-            info.setRouteTrigger(false);
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
-    const handleConnectButton = async () => {
-        if (info.walletAddress == null) {
-            handleConnect();
-        } else {
-            handleDisconnect();
-        }
-    };
 
     const handleRouteClick = () => {
         info.setRouteTrigger(false);
@@ -365,11 +332,7 @@ const Navbar = () => {
                             </NetworkBadge>
                             
                             {!isMobile && (
-                                <StyledButton
-                                    onClick={handleConnectButton}
-                                >
-                                    {connected}
-                                </StyledButton>
+                                <WalletConnectButton />
                             )}
                             
                             <IconButton
@@ -490,15 +453,10 @@ const Navbar = () => {
                         
                         <Box sx={{ flexGrow: 1 }} />
                         
-                        <StyledButton
-                            onClick={() => {
-                                handleConnectButton();
-                                setOpenDrawer(false);
-                            }}
-                            sx={{ width: '100%' }}
-                        >
-                            {connected}
-                        </StyledButton>
+                        <WalletConnectButton 
+                            fullWidth 
+                            onClick={() => setOpenDrawer(false)}
+                        />
                     </Box>
                 </Drawer>
             </AppBar>
