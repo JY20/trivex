@@ -18,9 +18,19 @@ const StyledButton = styled(Button)(({ theme }) => ({
   }
 }));
 
+const newStrategyItem = {
+  "label": "Create New Strategy",
+  "value": "newStrategy",
+  "tags": "Custom",
+  "cost": 0,
+  "creator": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "rating": 0,
+  "description": "Create your own custom strategy by providing parameters and implementation details."
+}
+
 const getTagColor = (tag) => {
   switch (tag) {
-    case 'Low Frequency':
+    case 'Mid Frequency':
       return { bg: '#9C27B0', color: '#FFFFFF' };
     case 'Calculator':
       return { bg: '#673AB7', color: '#FFFFFF' };
@@ -44,7 +54,7 @@ const Selection = ({ selections, onSelect }) => {
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
         <StyledButton
           startIcon={<AddIcon />}
-          onClick={() => onSelect({ value: 'newStrategy' })}
+          onClick={() => onSelect(newStrategyItem)}
         >
           Create Strategy
         </StyledButton>

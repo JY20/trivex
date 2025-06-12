@@ -5,8 +5,8 @@ const hash_provider = new RpcProvider({
     nodeUrl: 'https://starknet-sepolia.public.blastapi.io/rpc/v0_7',
 });
 
-const classHash = '0x04074c9358508a35eb68e9a785fecffededed939e27705539df6ee5e7efb01f8';
-const contractAddress = '0x074b86ea6740d99816f83b83e30895c88b8e628ff8cbf216cc3310022781228d';
+const classHash = '0x007fe76700f3cf1cbe20df4447ef69b7d3c74fcf35df60e5c6134cb43f202567';
+const contractAddress = '0x066ec78f1ec3aafd617a49890d7007d0d7961139bea637beb2413b6a606efbbd';
 const usdcTokenAddress = '0x53b40a647cedfca6ca84f542a0fe36736031905a9639a7f19a3c1e66bfd5080';
 const strkTokenAddress = '0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d';
 
@@ -176,7 +176,7 @@ export class AppContract {
             quantity: Number(item.quantity)/1000000,
             average_price: Number(item.average_price)/1000000, 
             leverage: Number(item.leverage),      
-            total_value: Number(item.total_value)/1000000, 
+            total_value: Number((Number(item.total_value)/1000000/1000000).toFixed(7)), 
             action: shortString.decodeShortString(item.action),
             datetime: new Date(Number(item.datetime) * 1000)
         }));

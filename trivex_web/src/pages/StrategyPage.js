@@ -71,7 +71,11 @@ const StrategyPage = () => {
   const handleSelect = (item) => {
     setStrategy(item.value);
     const index = data.findIndex(strategy => strategy.value === item.value);
-    setSelectedInfo(data[index]);
+    if(index == -1){
+      setSelectedInfo(item);
+    }else {
+      setSelectedInfo(data[index]);
+    }
     console.log(`You selected the strategy: ${item.value} at index: ${index}`);
   };
 
