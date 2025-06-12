@@ -1,17 +1,8 @@
 [
     {
-      "label": "Create New Strategy",
-      "value": "newStrategy",
-      "tags": "Custom",
-      "cost": 0,
-      "creator": "0x0000000000000000000000000000000000000000000000000000000000000000",
-      "rating": 0,
-      "description": "Create your own custom strategy by providing parameters and implementation details."
-    },
-    {
       "label": "Average Rebalance",
       "value": "averageRebalance",
-      "tags": "Low Frequency",
+      "tags": "Mid Frequency",
       "cost": 1, 
       "creator": "0x012B099F50C3CbCc82ccF7Ee557c9d60255c35C359eA6615435B761Ec3336EC8",
       "rating": 4.5, 
@@ -20,7 +11,7 @@
     {
       "label": "Momentum",
       "value": "momentum",
-      "tags": "Low Frequency",
+      "tags": "Mid Frequency",
       "cost": 2,
       "creator": "0x012B099F50C3CbCc82ccF7Ee557c9d60255c35C359eA6615435B761Ec3336EC8",
       "rating": 4, 

@@ -108,7 +108,7 @@ mod TrivexAction {
                     quantity: quantity,
                     average_price: average_price,
                     leverage: leverage,
-                    total_value: total_value,
+                    total_value: average_price*quantity,
                     action: action,
                     datetime: get_block_timestamp()
                 };
@@ -298,6 +298,9 @@ mod TrivexAction {
 
             if success {
                 self.staked.write((token_address, caller), current_staked - amount);
+
+                let current_total_staked = self.total_staked.read();
+                self.total_staked.write(current_total_staked - amount);
             }
         }
 
